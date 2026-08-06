@@ -1,0 +1,55 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16
+    container_name: boardflow-db
+    environment:
+      POSTGRES_DB: boardflow
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - boardflow_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5450:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Backend + Frontend (Vite en modo middleware, un solo puerto)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: boardflow-app
+    environment:
+      NODE_ENV: development
+      PORT: 5007
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/boardflow
+      JWT_SECRET: ${JWT_SECRET:-boardflow-dev-jwt-secret}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-30d}
+      APP_URL: ${APP_URL:-http://localhost:5007}
+      MAIL_HOST: ${MAIL_HOST:-smtp.example.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-no-responder}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-BoardFlow}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-no-reply@example.com}
+    ports:
+      - "5007:5007"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    # Genera el client de Prisma y sincroniza el schema contra la DB en cada arranque,
+    # asi "docker compose up" siempre deja la base al dia sin pasos manuales extra.
+    command: sh -c "npx prisma generate && npx prisma db push --skip-generate && npm run dev"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  boardflow_postgres_data:

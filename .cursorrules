@@ -1,0 +1,8 @@
+# Golden Rule of the Project
+
+Everything must look professional and adapt perfectly across all platforms:
+- **Mobile Devices**
+- **Tablets**
+- **PC / Desktop**
+
+All UI components must be implemented with a "Responsive Superiority" mindset, ensuring they don't just "work" but look premium and high-end at any viewport size.

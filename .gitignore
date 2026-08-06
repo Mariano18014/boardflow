@@ -1,0 +1,53 @@
+node_modules
+dist
+.DS_Store
+server/public
+vite.config.ts.*
+*.tar.gz
+ollama_data
+
+# Referencia del template base viejo — no se sube al repo de BoardFlow
+legacy/
+
+# Scripts de despliegue de otra app (Viaticos) — no pertenecen a BoardFlow
+.project/deploy/
+
+# Estado/artefactos locales de herramientas de agente (no es codigo del proyecto)
+.agent/
+
+# Secrets / local env
+.env
+.env.*.local
+
+# Playwright
+playwright-report/
+test-results/
+
+# Local database dumps (do not commit)
+viaticos_sistema.sql
+backup_viaticos.sql
+*.crt
+*.pem
+
+# Local runtime data
+uploads/
+volumenes/
+attached_assets/
+
+# Runtime noise / local artifacts
+*.log
+logs*.txt
+logs/
+tmp/
+.tmp/
+.cache/
+.npm-cache-local/
+coverage/
+.nyc_output/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+Thumbs.db
+
+# Local duplicate/temporary build recipes
+Dockerfile (1)

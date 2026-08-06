@@ -1,0 +1,373 @@
+// BoardFlow — Modelo de datos (Prisma)
+// Ver docs de referencia: BoardFlow.txt (seccion "Mapeo de Entidades y Datos")
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// 1. Identidad y Tenancy
+// ============================================================
+
+enum UserStatus {
+  ACTIVE
+  PENDING_VERIFICATION
+  SUSPENDED
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String     @map("password_hash")
+  fullName     String     @map("full_name")
+  avatarUrl    String?    @map("avatar_url")
+  status       UserStatus @default(PENDING_VERIFICATION)
+  lastLoginAt  DateTime?  @map("last_login_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  deletedAt    DateTime?  @map("deleted_at")
+
+  ownedOrganizations Organization[]     @relation("OrganizationOwner")
+  memberships        Membership[]       @relation("MembershipUser")
+  sentInvites        Membership[]       @relation("MembershipInvitedBy")
+  createdProjects    Project[]          @relation("ProjectCreatedBy")
+  createdTasks       Task[]             @relation("TaskCreatedBy")
+  taskAssignments    TaskAssignee[]
+  comments           Comment[]
+  invitationsSent    Invitation[]       @relation("InvitationInvitedBy")
+  activityLogs       ActivityLog[]      @relation("ActivityLogActor")
+  refreshTokens      RefreshToken[]
+
+  @@map("users")
+}
+
+enum PlanType {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+model Organization {
+  id        String    @id @default(uuid())
+  name      String
+  slug      String    @unique
+  logoUrl   String?   @map("logo_url")
+  planType  PlanType  @default(FREE) @map("plan_type")
+  ownerId   String    @map("owner_id")
+  settings  Json      @default("{}")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  owner        User          @relation("OrganizationOwner", fields: [ownerId], references: [id])
+  memberships  Membership[]
+  roles        Role[]
+  projects     Project[]
+  invitations  Invitation[]
+  activityLogs ActivityLog[]
+
+  @@map("organizations")
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+}
+
+model Membership {
+  id             String           @id @default(uuid())
+  userId         String           @map("user_id")
+  organizationId String           @map("organization_id")
+  roleId         String           @map("role_id")
+  status         MembershipStatus @default(INVITED)
+  invitedBy      String?          @map("invited_by")
+  joinedAt       DateTime?        @map("joined_at")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  user         User         @relation("MembershipUser", fields: [userId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
+  role         Role         @relation(fields: [roleId], references: [id])
+  inviter      User?        @relation("MembershipInvitedBy", fields: [invitedBy], references: [id])
+
+  @@unique([userId, organizationId])
+  @@map("memberships")
+}
+
+// ============================================================
+// 2. Roles y Permisos (dinamicos, por organizacion)
+// ============================================================
+
+model Role {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  name           String
+  isSystem       Boolean  @default(false) @map("is_system")
+  description    String?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization    Organization     @relation(fields: [organizationId], references: [id])
+  memberships     Membership[]
+  invitations     Invitation[]
+  rolePermissions RolePermission[]
+
+  @@unique([organizationId, name])
+  @@map("roles")
+}
+
+model Permission {
+  id       String @id @default(uuid())
+  resource String
+  action   String
+  key      String @unique
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String @id @default(uuid())
+  roleId       String @map("role_id")
+  permissionId String @map("permission_id")
+
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// ============================================================
+// 3. Estructura del trabajo
+// ============================================================
+
+model Project {
+  id             String    @id @default(uuid())
+  organizationId String    @map("organization_id")
+  name           String
+  key            String
+  description    String?
+  isArchived     Boolean   @default(false) @map("is_archived")
+  createdBy      String    @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  creator      User         @relation("ProjectCreatedBy", fields: [createdBy], references: [id])
+  boards       Board[]
+  sprints      Sprint[]
+  tasks        Task[]
+  labels       Label[]
+
+  @@unique([organizationId, key])
+  @@map("projects")
+}
+
+model Board {
+  id         String   @id @default(uuid())
+  projectId  String   @map("project_id")
+  name       String
+  position   Int
+  isArchived Boolean  @default(false) @map("is_archived")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  project Project  @relation(fields: [projectId], references: [id])
+  columns Column[]
+  tasks   Task[]
+
+  @@map("boards")
+}
+
+model Column {
+  id        String   @id @default(uuid())
+  boardId   String   @map("board_id")
+  name      String
+  position  Int
+  wipLimit  Int?     @map("wip_limit")
+  color     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  board Board  @relation(fields: [boardId], references: [id])
+  tasks Task[]
+
+  @@map("columns")
+}
+
+enum SprintStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+}
+
+model Sprint {
+  id        String       @id @default(uuid())
+  projectId String       @map("project_id")
+  name      String
+  goal      String?
+  startDate DateTime     @map("start_date")
+  endDate   DateTime     @map("end_date")
+  status    SprintStatus @default(PLANNED)
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  project Project @relation(fields: [projectId], references: [id])
+  tasks   Task[]
+
+  @@map("sprints")
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Task {
+  id               String       @id @default(uuid())
+  columnId         String?      @map("column_id")
+  boardId          String?      @map("board_id")
+  projectId        String       @map("project_id")
+  sprintId         String?      @map("sprint_id")
+  title            String
+  description      String?
+  position         Int
+  priority         TaskPriority @default(MEDIUM)
+  dueDate          DateTime?    @map("due_date")
+  estimatedPoints  Int?         @map("estimated_points")
+  createdBy        String       @map("created_by")
+  isArchived       Boolean      @default(false) @map("is_archived")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+  deletedAt        DateTime?    @map("deleted_at")
+
+  column    Column?        @relation(fields: [columnId], references: [id])
+  board     Board?         @relation(fields: [boardId], references: [id])
+  project   Project        @relation(fields: [projectId], references: [id])
+  sprint    Sprint?        @relation(fields: [sprintId], references: [id])
+  creator   User           @relation("TaskCreatedBy", fields: [createdBy], references: [id])
+  assignees TaskAssignee[]
+  labels    TaskLabel[]
+  comments  Comment[]
+
+  @@map("tasks")
+}
+
+model TaskAssignee {
+  id         String   @id @default(uuid())
+  taskId     String   @map("task_id")
+  userId     String   @map("user_id")
+  assignedAt DateTime @default(now()) @map("assigned_at")
+
+  task Task @relation(fields: [taskId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([taskId, userId])
+  @@map("task_assignees")
+}
+
+model Label {
+  id        String @id @default(uuid())
+  projectId String @map("project_id")
+  name      String
+  color     String
+
+  project Project     @relation(fields: [projectId], references: [id])
+  tasks   TaskLabel[]
+
+  @@map("labels")
+}
+
+model TaskLabel {
+  taskId  String @map("task_id")
+  labelId String @map("label_id")
+
+  task  Task  @relation(fields: [taskId], references: [id])
+  label Label @relation(fields: [labelId], references: [id])
+
+  @@id([taskId, labelId])
+  @@map("task_labels")
+}
+
+model Comment {
+  id        String    @id @default(uuid())
+  taskId    String    @map("task_id")
+  authorId  String    @map("author_id")
+  content   String
+  editedAt  DateTime? @map("edited_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  task   Task @relation(fields: [taskId], references: [id])
+  author User @relation(fields: [authorId], references: [id])
+
+  @@map("comments")
+}
+
+// ============================================================
+// 4. Soporte / Auditoria
+// ============================================================
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+model Invitation {
+  id             String           @id @default(uuid())
+  organizationId String           @map("organization_id")
+  email          String
+  roleId         String           @map("role_id")
+  token          String           @unique
+  status         InvitationStatus @default(PENDING)
+  invitedBy      String           @map("invited_by")
+  expiresAt      DateTime         @map("expires_at")
+  createdAt      DateTime         @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  role         Role         @relation(fields: [roleId], references: [id])
+  inviter      User         @relation("InvitationInvitedBy", fields: [invitedBy], references: [id])
+
+  @@map("invitations")
+}
+
+model ActivityLog {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  actorId        String   @map("actor_id")
+  action         String
+  entityType     String   @map("entity_type")
+  entityId       String   @map("entity_id")
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  actor        User         @relation("ActivityLogActor", fields: [actorId], references: [id])
+
+  @@map("activity_logs")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  tokenHash String    @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("refresh_tokens")
+}

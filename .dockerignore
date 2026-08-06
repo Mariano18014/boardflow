@@ -1,0 +1,35 @@
+# Reduce Docker build context size (local + CI)
+
+# VCS
+.git
+.github
+
+# Node
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Builds / artifacts
+dist
+client/dist
+playwright-report
+test-results
+coverage
+*.log
+
+# Large local assets/backups
+*.sql
+*.dump
+*.tar.gz
+attached_assets
+
+# Referencia del template viejo, no se usa en runtime
+legacy
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local env
+.env

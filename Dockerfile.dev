@@ -1,0 +1,15 @@
+# Imagen de desarrollo — node:20 (no alpine) porque bcrypt y otras dependencias nativas
+# fallan al compilar/ejecutar contra musl libc en algunos entornos.
+FROM node:20
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install --legacy-peer-deps
+
+COPY . .
+
+EXPOSE 5007
+
+CMD ["npm", "run", "dev"]
