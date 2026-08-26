@@ -6,6 +6,7 @@ import {
   findMembershipById as findMembershipRecordById,
   findMembershipForUser,
   findMembershipsByOrganizationId,
+  suspendMembership as saveSuspendedMembership,
   updateMembershipRole as saveMembershipRole,
 } from "../db/repositories/membership.repository";
 import { findPendingInvitationsByOrganizationId } from "../db/repositories/invitation.repository";
@@ -23,6 +24,11 @@ export type ChangeMemberRoleInput = {
   organizationId: string;
   membershipId: string;
   newRoleId: string;
+};
+
+export type RemoveMemberInput = {
+  organizationId: string;
+  membershipId: string;
 };
 
 export async function getOrganizationMembers(
@@ -103,19 +109,28 @@ export async function changeMemberRole(input: ChangeMemberRoleInput, requesterId
   const targetMembership = await findMembershipById(input.membershipId, input.organizationId);
   await checkNotChangingOwnRole(targetMembership, requesterId);
   await checkRoleBelongsToOrganization(input.newRoleId, input.organizationId);
-  await checkNotRemovingLastOwner(targetMembership, input.newRoleId);
+  await checkRoleChangeDoesNotRemoveLastOwner(targetMembership, input.newRoleId);
   const updatedMembership = await updateMembershipRole(targetMembership, input.newRoleId);
   return updatedMembership;
 }
 
+export async function removeMemberFromOrganization(input: RemoveMemberInput, requesterId: string) {
+  await checkRequesterHasPermission(input.organizationId, requesterId);
+  const targetMembership = await findMembershipById(input.membershipId, input.organizationId);
+  await checkNotRemovingSelf(targetMembership, requesterId);
+  await checkNotRemovingLastOwner(targetMembership);
+  const suspendedMembership = await suspendMembership(targetMembership);
+  return suspendedMembership;
+}
+
 // TODO(Epica 2 / HU-13-HU-14): reemplazar esta validación simplificada por el
-// chequeo real contra la matriz de permisos granular (ej. "members:update-role")
-// una vez que existan roles custom y permisos asignables por rol.
+// chequeo real contra la matriz de permisos granular (ej. "members:update-role",
+// "members:remove") una vez que existan roles custom y permisos asignables por rol.
 async function checkRequesterHasPermission(organizationId: string, requesterId: string) {
   const membership = await findMembershipForUser(organizationId, requesterId);
   const role = membership ? await findRoleById(membership.roleId) : null;
   if (!role || role.name !== OWNER_ROLE_NAME) {
-    throw new ForbiddenError("No tenés permiso para cambiar el rol de miembros de esta organización.");
+    throw new ForbiddenError("No tenés permiso para gestionar los miembros de esta organización.");
   }
 }
 
@@ -143,7 +158,7 @@ async function checkRoleBelongsToOrganization(roleId: string, organizationId: st
   }
 }
 
-async function checkNotRemovingLastOwner(membership: MembershipWithRole, newRoleId: string) {
+async function checkRoleChangeDoesNotRemoveLastOwner(membership: MembershipWithRole, newRoleId: string) {
   const isTargetCurrentlyOwner = membership.role.name === OWNER_ROLE_NAME;
   if (!isTargetCurrentlyOwner) {
     return;
@@ -153,11 +168,29 @@ async function checkNotRemovingLastOwner(membership: MembershipWithRole, newRole
   if (isStayingOwner) {
     return;
   }
+  await checkTargetIsNotTheLastActiveOwner(membership);
+}
+
+async function checkNotRemovingSelf(membership: MembershipWithRole, requesterId: string) {
+  if (membership.userId === requesterId) {
+    throw new ForbiddenError(
+      "No podés removerte a vos mismo de la organización. Pedile a otro owner que lo haga.",
+    );
+  }
+}
+
+async function checkNotRemovingLastOwner(membership: MembershipWithRole) {
+  const isTargetCurrentlyOwner = membership.role.name === OWNER_ROLE_NAME;
+  if (!isTargetCurrentlyOwner) {
+    return;
+  }
+  await checkTargetIsNotTheLastActiveOwner(membership);
+}
+
+async function checkTargetIsNotTheLastActiveOwner(membership: MembershipWithRole) {
   const activeOwnerCount = await countActiveOwners(membership.organizationId);
   if (activeOwnerCount <= 1) {
-    throw new ConflictError(
-      "No podés quitar el rol de owner: la organización debe tener al menos un owner activo.",
-    );
+    throw new ConflictError("La organización debe tener al menos un owner activo.");
   }
 }
 
@@ -170,4 +203,8 @@ async function updateMembershipRole(
   newRoleId: string,
 ): Promise<MembershipWithRole> {
   return saveMembershipRole(membership.id, newRoleId);
+}
+
+async function suspendMembership(membership: MembershipWithRole): Promise<MembershipWithRole> {
+  return saveSuspendedMembership(membership.id);
 }

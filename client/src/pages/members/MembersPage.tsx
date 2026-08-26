@@ -43,7 +43,7 @@ export default function MembersPage() {
               <MembersTable
                 members={members}
                 organizationId={organization.id}
-                canManageRoles={canInviteMembers}
+                canManageMembers={canInviteMembers}
               />
             )}
           </CardContent>

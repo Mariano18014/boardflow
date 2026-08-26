@@ -4,16 +4,19 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { getInitials } from "@/lib/utils";
 import type { OrganizationMember } from "./list-organization-members.api";
 import { MemberRoleSelect } from "./MemberRoleSelect";
+import { RemoveMemberButton } from "./RemoveMemberButton";
 
 type MemberRowProps = {
   member: OrganizationMember;
   organizationId: string;
-  canManageRoles: boolean;
+  canManageMembers: boolean;
 };
 
-export function MemberRow({ member, organizationId, canManageRoles }: MemberRowProps) {
+export function MemberRow({ member, organizationId, canManageMembers }: MemberRowProps) {
   const displayName = member.fullName ?? member.email;
-  const showRoleSelect = canManageRoles && member.type === "member";
+  const isActiveMember = member.type === "member" && member.status === "ACTIVE";
+  const showRoleSelect = canManageMembers && isActiveMember;
+  const showRemoveButton = canManageMembers && isActiveMember;
 
   return (
     <TableRow>
@@ -43,6 +46,15 @@ export function MemberRow({ member, organizationId, canManageRoles }: MemberRowP
       </TableCell>
       <TableCell>
         <MemberStatusBadge status={member.status} />
+      </TableCell>
+      <TableCell>
+        {showRemoveButton && (
+          <RemoveMemberButton
+            organizationId={organizationId}
+            membershipId={member.id}
+            memberDisplayName={displayName}
+          />
+        )}
       </TableCell>
     </TableRow>
   );

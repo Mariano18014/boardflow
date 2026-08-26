@@ -1,21 +1,12 @@
 import { useState } from "react";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useRoles } from "@/components/modules/organizations/use-roles";
 import { useChangeMemberRole } from "./use-change-member-role";
 
@@ -78,27 +69,14 @@ export function MemberRoleSelect({
         </SelectContent>
       </Select>
 
-      <AlertDialog
+      <ConfirmDialog
         open={pendingRoleId !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            cancelRoleChange();
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cambiar rol</AlertDialogTitle>
-            <AlertDialogDescription>
-              ¿Confirmás cambiar el rol de {memberDisplayName} a "{pendingRole?.name}"?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={cancelRoleChange}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmRoleChange}>Confirmar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title="Cambiar rol"
+        description={`¿Confirmás cambiar el rol de ${memberDisplayName} a "${pendingRole?.name}"?`}
+        confirmLabel="Confirmar"
+        onConfirm={confirmRoleChange}
+        onCancel={cancelRoleChange}
+      />
     </>
   );
 }

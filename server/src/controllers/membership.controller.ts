@@ -7,7 +7,11 @@ import {
   type UpdateMembershipRoleInput,
 } from "@shared/schemas/membership.schema";
 import { ValidationError } from "../lib/errors";
-import { changeMemberRole, getOrganizationMembers } from "../services/membership.service";
+import {
+  changeMemberRole,
+  getOrganizationMembers,
+  removeMemberFromOrganization,
+} from "../services/membership.service";
 
 export async function listOrganizationMembersController(
   req: Request,
@@ -37,6 +41,31 @@ export async function changeMemberRoleController(req: Request, res: Response, ne
   } catch (error) {
     next(error);
   }
+}
+
+export async function removeMemberController(req: Request, res: Response, next: NextFunction) {
+  try {
+    const organizationId = parseOrganizationIdParam(req.params.organizationId);
+    const membershipId = parseMembershipIdParam(req.params.membershipId);
+    const suspendedMembership = await removeMemberFromOrganization(
+      { organizationId, membershipId },
+      req.userId!,
+    );
+    res.status(200).json({ membership: formatSuspendedMembershipForResponse(suspendedMembership) });
+  } catch (error) {
+    next(error);
+  }
+}
+
+function formatSuspendedMembershipForResponse(
+  membership: Awaited<ReturnType<typeof removeMemberFromOrganization>>,
+) {
+  return {
+    id: membership.id,
+    roleId: membership.roleId,
+    roleName: membership.role.name,
+    status: membership.status,
+  };
 }
 
 function parseOrganizationIdParam(value: unknown): string {

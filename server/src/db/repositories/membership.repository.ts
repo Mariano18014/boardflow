@@ -15,7 +15,7 @@ export async function createMembership(data: CreateMembershipData) {
 
 export async function findOrganizationsByUserId(userId: string) {
   const memberships = await prisma.membership.findMany({
-    where: { userId },
+    where: { userId, status: "ACTIVE" },
     include: { organization: true, role: true },
   });
   return memberships.map((membership) => ({
@@ -26,7 +26,7 @@ export async function findOrganizationsByUserId(userId: string) {
 
 export async function findMembershipForUser(organizationId: string, userId: string) {
   return prisma.membership.findUnique({
-    where: { userId_organizationId: { userId, organizationId } },
+    where: { userId_organizationId: { userId, organizationId }, status: "ACTIVE" },
   });
 }
 
@@ -73,5 +73,13 @@ export async function updateMembershipRole(membershipId: string, roleId: string)
 export async function countActiveMembershipsByRoleName(organizationId: string, roleName: string) {
   return prisma.membership.count({
     where: { organizationId, status: "ACTIVE", role: { name: roleName } },
+  });
+}
+
+export async function suspendMembership(membershipId: string) {
+  return prisma.membership.update({
+    where: { id: membershipId },
+    data: { status: "SUSPENDED" },
+    include: { role: true },
   });
 }

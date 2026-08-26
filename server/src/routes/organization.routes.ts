@@ -8,6 +8,7 @@ import { createInvitationController } from "../controllers/invitation.controller
 import {
   changeMemberRoleController,
   listOrganizationMembersController,
+  removeMemberController,
 } from "../controllers/membership.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
@@ -22,4 +23,9 @@ organizationRoutes.patch(
   "/:organizationId/members/:membershipId",
   authMiddleware,
   changeMemberRoleController,
+);
+organizationRoutes.delete(
+  "/:organizationId/members/:membershipId",
+  authMiddleware,
+  removeMemberController,
 );
