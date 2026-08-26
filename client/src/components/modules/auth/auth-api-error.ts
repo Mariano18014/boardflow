@@ -6,3 +6,9 @@ export class AuthApiError extends Error {
     this.fieldErrors = fieldErrors;
   }
 }
+
+export async function buildAuthApiError(response: Response, fallbackMessage: string): Promise<AuthApiError> {
+  const body = await response.json().catch(() => null);
+  const message = body?.message ?? fallbackMessage;
+  return new AuthApiError(message, body?.fieldErrors);
+}

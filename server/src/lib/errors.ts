@@ -21,3 +21,9 @@ export class ValidationError extends HttpError {
     this.fieldErrors = fieldErrors;
   }
 }
+
+export class UnauthorizedError extends HttpError {
+  constructor(message: string) {
+    super(401, message);
+  }
+}

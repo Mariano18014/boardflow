@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { useLocation } from "wouter";
-import { registerUserSchema, type RegisterUserInput } from "@shared/schemas/user.schema";
+import { loginUserSchema, type LoginUserInput } from "@shared/schemas/user.schema";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,47 +16,36 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { setFieldErrorsOnForm } from "./apply-field-errors";
 import { AuthApiError } from "./auth-api-error";
-import { registerUser } from "./register-user.api";
+import { setSession } from "./auth-session.store";
+import { loginUser } from "./login-user.api";
 
-export function RegisterForm() {
+export function LoginForm() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
-  const form = useForm<RegisterUserInput>({
-    resolver: zodResolver(registerUserSchema),
-    defaultValues: { fullName: "", email: "", password: "" },
+  const form = useForm<LoginUserInput>({
+    resolver: zodResolver(loginUserSchema),
+    defaultValues: { email: "", password: "" },
   });
 
-  const registerMutation = useMutation({
-    mutationFn: registerUser,
-    onSuccess: () => {
-      navigate("/onboarding");
+  const loginMutation = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (response) => {
+      setSession(response);
+      navigate("/dashboard");
     },
     onError: (error) => {
-      applyRegisterErrorToForm(error, form, toast);
+      applyLoginErrorToForm(error, form, toast);
     },
   });
 
-  function onSubmit(input: RegisterUserInput) {
-    registerMutation.mutate(input);
+  function onSubmit(input: LoginUserInput) {
+    loginMutation.mutate(input);
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <FormField
-          control={form.control}
-          name="fullName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nombre completo</FormLabel>
-              <FormControl>
-                <Input placeholder="Tu nombre" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="email"
@@ -77,29 +66,29 @@ export function RegisterForm() {
             <FormItem>
               <FormLabel>Contraseña</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Mínimo 8 caracteres" {...field} />
+                <Input type="password" placeholder="Tu contraseña" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={registerMutation.isPending}>
-          {registerMutation.isPending ? "Creando cuenta..." : "Registrarme"}
+        <Button type="submit" disabled={loginMutation.isPending}>
+          {loginMutation.isPending ? "Ingresando..." : "Iniciar sesión"}
         </Button>
       </form>
     </Form>
   );
 }
 
-function applyRegisterErrorToForm(
+function applyLoginErrorToForm(
   error: unknown,
-  form: UseFormReturn<RegisterUserInput>,
+  form: UseFormReturn<LoginUserInput>,
   toast: ReturnType<typeof useToast>["toast"],
 ) {
   if (!(error instanceof AuthApiError)) {
     toast({
       variant: "destructive",
-      title: "No se pudo registrar",
+      title: "No se pudo iniciar sesión",
       description: "Ocurrió un error inesperado. Probá de nuevo en unos minutos.",
     });
     return;
@@ -112,7 +101,7 @@ function applyRegisterErrorToForm(
 
   toast({
     variant: "destructive",
-    title: "No se pudo registrar",
+    title: "No se pudo iniciar sesión",
     description: error.message,
   });
 }

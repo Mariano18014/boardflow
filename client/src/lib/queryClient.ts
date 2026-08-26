@@ -1,4 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { getSession } from "@/components/modules/auth/auth-session.store";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -7,12 +8,20 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+function buildAuthorizationHeaders(): Record<string, string> {
+  const session = getSession();
+  if (!session) {
+    return {};
+  }
+  return { Authorization: `Bearer ${session.accessToken}` };
+}
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = { ...buildAuthorizationHeaders() };
   if (data) {
     headers["Content-Type"] = "application/json";
   }
@@ -36,6 +45,7 @@ export const getQueryFn: <T>(options: {
     async ({ queryKey }) => {
       const res = await fetch(queryKey.join("/") as string, {
         credentials: "include",
+        headers: buildAuthorizationHeaders(),
       });
 
       if (unauthorizedBehavior === "returnNull" && res.status === 401) {

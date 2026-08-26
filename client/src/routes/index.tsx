@@ -1,4 +1,5 @@
 import { Switch, Route } from "wouter";
+import { ProtectedRoute } from "@/components/modules/auth/ProtectedRoute";
 import LandingPage from "@/pages/landing/LandingPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
@@ -15,7 +16,9 @@ export function AppRoutes() {
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/onboarding" component={OnboardingPage} />
-      <Route path="/dashboard" component={DashboardPage} />
+      <Route path="/dashboard">
+        <ProtectedRoute component={DashboardPage} />
+      </Route>
       <Route component={NotFoundPage} />
     </Switch>
   );

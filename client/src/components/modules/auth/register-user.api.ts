@@ -1,5 +1,5 @@
 import type { RegisterUserInput } from "@shared/schemas/user.schema";
-import { AuthApiError } from "./auth-api-error";
+import { buildAuthApiError } from "./auth-api-error";
 
 type RegisteredUser = {
   id: string;
@@ -17,15 +17,9 @@ export async function registerUser(input: RegisterUserInput): Promise<Registered
   });
 
   if (!response.ok) {
-    throw await buildAuthApiError(response);
+    throw await buildAuthApiError(response, "No se pudo completar el registro.");
   }
 
   const body = await response.json();
   return body.user;
-}
-
-async function buildAuthApiError(response: Response): Promise<AuthApiError> {
-  const body = await response.json().catch(() => null);
-  const message = body?.message ?? "No se pudo completar el registro.";
-  return new AuthApiError(message, body?.fieldErrors);
 }
