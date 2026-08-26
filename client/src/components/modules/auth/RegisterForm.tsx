@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { setFieldErrorsOnForm } from "./apply-field-errors";
 import { AuthApiError } from "./auth-api-error";
+import { setSession } from "./auth-session.store";
 import { registerUser } from "./register-user.api";
 
 export function RegisterForm() {
@@ -29,7 +30,8 @@ export function RegisterForm() {
 
   const registerMutation = useMutation({
     mutationFn: registerUser,
-    onSuccess: () => {
+    onSuccess: (response) => {
+      setSession(response);
       navigate("/onboarding");
     },
     onError: (error) => {

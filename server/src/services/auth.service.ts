@@ -30,7 +30,8 @@ export async function registerUser(input: RegisterUserInput) {
   await validateEmailIsUnique(input.email);
   const hashedPassword = await hashPassword(input.password);
   const user = await createUserInDatabase(input, hashedPassword);
-  return user;
+  const tokens = await generateAuthTokens(user);
+  return { user, ...tokens };
 }
 
 async function validateEmailIsUnique(email: string) {

@@ -1,5 +1,6 @@
 import { Switch, Route } from "wouter";
-import { ProtectedRoute } from "@/components/modules/auth/ProtectedRoute";
+import { RequireNoOrganization } from "@/components/modules/organizations/RequireNoOrganization";
+import { RequireOrganization } from "@/components/modules/organizations/RequireOrganization";
 import LandingPage from "@/pages/landing/LandingPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
@@ -19,9 +20,11 @@ export function AppRoutes() {
       <Route path="/register" component={RegisterPage} />
       <Route path="/forgot-password" component={ForgotPasswordPage} />
       <Route path="/reset-password" component={ResetPasswordPage} />
-      <Route path="/onboarding" component={OnboardingPage} />
+      <Route path="/onboarding">
+        <RequireNoOrganization component={OnboardingPage} />
+      </Route>
       <Route path="/dashboard">
-        <ProtectedRoute component={DashboardPage} />
+        <RequireOrganization component={DashboardPage} />
       </Route>
       <Route component={NotFoundPage} />
     </Switch>

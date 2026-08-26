@@ -27,8 +27,12 @@ const PASSWORD_RESET_REQUESTED_MESSAGE =
 export async function registerController(req: Request, res: Response, next: NextFunction) {
   try {
     const input = parseRegisterRequestBody(req.body);
-    const user = await registerUser(input);
-    res.status(201).json({ user: formatUserForResponse(user) });
+    const { user, accessToken, refreshToken } = await registerUser(input);
+    res.status(201).json({
+      user: formatUserForResponse(user),
+      accessToken,
+      refreshToken,
+    });
   } catch (error) {
     next(error);
   }

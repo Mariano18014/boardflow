@@ -14,7 +14,7 @@ export const organizationSchema = z.object({
   deletedAt: z.date().nullable(),
 });
 
-export const createOrganizationSchema = organizationSchema.pick({ name: true, slug: true });
+export const createOrganizationSchema = organizationSchema.pick({ name: true });
 
 export const updateOrganizationSchema = organizationSchema
   .pick({ name: true, logoUrl: true, settings: true })
