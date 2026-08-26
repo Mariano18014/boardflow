@@ -1,16 +1,30 @@
 import bcrypt from "bcrypt";
 import type { User } from "@prisma/client";
 import type { LoginUserInput, RegisterUserInput } from "@shared/schemas/user.schema";
+import type { ResetPasswordInput } from "@shared/schemas/password-reset-token.schema";
 import { env } from "../config/env";
 import { ConflictError, UnauthorizedError } from "../lib/errors";
 import { parseDurationToMs } from "../lib/duration";
 import { signAccessToken } from "../lib/jwt";
 import { generateRandomToken, hashToken } from "../lib/token";
 import { createRefreshToken } from "../db/repositories/refresh-token.repository";
-import { createUser, findUserByEmail, findUserById } from "../db/repositories/user.repository";
+import {
+  createPasswordResetToken,
+  findPasswordResetTokenByHash,
+  markPasswordResetTokenAsUsed,
+} from "../db/repositories/password-reset-token.repository";
+import {
+  createUser,
+  findUserByEmail,
+  findUserById,
+  updateUserPassword,
+} from "../db/repositories/user.repository";
+import { sendPasswordResetEmail } from "./email.service";
 
 const PASSWORD_SALT_ROUNDS = 10;
 const INVALID_CREDENTIALS_MESSAGE = "Email o contraseña incorrectos.";
+const PASSWORD_RESET_TOKEN_TTL = "1h";
+const INVALID_RESET_TOKEN_MESSAGE = "El enlace de recuperación no es válido o expiró.";
 
 export async function registerUser(input: RegisterUserInput) {
   await validateEmailIsUnique(input.email);
@@ -84,4 +98,55 @@ export async function getCurrentUser(userId: string) {
     throw new UnauthorizedError("Sesión inválida.");
   }
   return user;
+}
+
+export async function requestPasswordReset(email: string) {
+  const user = await findUserByEmail(email);
+  if (!user) {
+    return;
+  }
+  const resetToken = await generatePasswordResetToken(user);
+  await sendPasswordResetEmailToUser(user.email, resetToken);
+}
+
+async function generatePasswordResetToken(user: User) {
+  const token = generateRandomToken();
+  const tokenHash = hashToken(token);
+  const expiresAt = new Date(Date.now() + parseDurationToMs(PASSWORD_RESET_TOKEN_TTL));
+  await createPasswordResetToken({ userId: user.id, tokenHash, expiresAt });
+  return token;
+}
+
+async function sendPasswordResetEmailToUser(email: string, resetToken: string) {
+  const resetUrl = buildPasswordResetUrl(resetToken);
+  await sendPasswordResetEmail(email, resetUrl);
+}
+
+function buildPasswordResetUrl(resetToken: string) {
+  return `${env.APP_URL}/reset-password?token=${resetToken}`;
+}
+
+export async function resetPassword(input: ResetPasswordInput) {
+  const resetToken = await validatePasswordResetToken(input.token);
+  const hashedPassword = await hashPassword(input.password);
+  await updateUserPasswordInDatabase(resetToken.userId, hashedPassword);
+  await invalidatePasswordResetToken(resetToken.id);
+}
+
+async function validatePasswordResetToken(token: string) {
+  const tokenHash = hashToken(token);
+  const resetToken = await findPasswordResetTokenByHash(tokenHash);
+  const isTokenUsable = resetToken && !resetToken.usedAt && resetToken.expiresAt > new Date();
+  if (!isTokenUsable) {
+    throw new UnauthorizedError(INVALID_RESET_TOKEN_MESSAGE);
+  }
+  return resetToken;
+}
+
+async function updateUserPasswordInDatabase(userId: string, hashedPassword: string) {
+  await updateUserPassword(userId, hashedPassword);
+}
+
+async function invalidatePasswordResetToken(tokenId: string) {
+  await markPasswordResetTokenAsUsed(tokenId);
 }

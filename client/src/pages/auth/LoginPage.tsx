@@ -13,6 +13,11 @@ export default function LoginPage() {
         <CardContent className="flex flex-col gap-4">
           <LoginForm />
           <p className="text-center text-sm text-muted-foreground">
+            <Link href="/forgot-password" className="text-primary underline-offset-4 hover:underline">
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </p>
+          <p className="text-center text-sm text-muted-foreground">
             ¿No tenés cuenta?{" "}
             <Link href="/register" className="text-primary underline-offset-4 hover:underline">
               Registrarme

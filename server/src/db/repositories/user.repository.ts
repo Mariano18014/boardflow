@@ -17,3 +17,10 @@ export async function findUserById(id: string) {
 export async function createUser(data: CreateUserData) {
   return prisma.user.create({ data });
 }
+
+export async function updateUserPassword(userId: string, passwordHash: string) {
+  return prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash },
+  });
+}
