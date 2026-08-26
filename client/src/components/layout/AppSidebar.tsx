@@ -12,6 +12,8 @@ export function AppSidebar() {
   const { data: projects } = useProjects(currentOrganization?.id);
   const [, activeParams] = useRoute<{ projectId: string }>("/projects/:projectId");
   const [isMembersActive] = useRoute("/members");
+  const [isSettingsActive] = useRoute("/settings");
+  const isOwner = currentOrganization?.roleName === "owner";
 
   return (
     <aside className="w-60 flex-none border-r border-border bg-surface flex flex-col p-3">
@@ -63,6 +65,20 @@ export function AppSidebar() {
       >
         Miembros
       </Link>
+
+      {isOwner && (
+        <Link
+          href="/settings"
+          className={cn(
+            "rounded-md px-2.5 py-1.5 text-sm font-medium",
+            isSettingsActive
+              ? "bg-accent text-accent-foreground"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          Configuración
+        </Link>
+      )}
 
       {session && (
         <div className="mt-auto flex items-center gap-2 px-2 py-1.5">

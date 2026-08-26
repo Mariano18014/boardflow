@@ -1,23 +1,35 @@
+import type { Organization } from "@prisma/client";
 import type { CreateOrganizationInput } from "@shared/schemas/organization.schema";
 import { slugify } from "../lib/slug.util";
-import { ForbiddenError } from "../lib/errors";
+import { ForbiddenError, NotFoundError, ValidationError } from "../lib/errors";
 import {
   createOrganization as saveOrganizationRecord,
+  findOrganizationById as findOrganizationRecordById,
   findOrganizationBySlug,
+  updateOrganization as updateOrganizationRecord,
 } from "../db/repositories/organization.repository";
 import {
   createMembership,
   findMembershipForUser,
   findOrganizationsByUserId,
 } from "../db/repositories/membership.repository";
-import { createRole, findRolesByOrganizationId } from "../db/repositories/role.repository";
+import {
+  createRole,
+  findRoleById,
+  findRolesByOrganizationId,
+} from "../db/repositories/role.repository";
 import { findAllPermissions } from "../db/repositories/permission.repository";
 import { createRolePermissions } from "../db/repositories/role-permission.repository";
+import { deleteFile, saveFile } from "./file-storage.service";
 
 const OWNER_ROLE_NAME = "owner";
 const OWNER_ROLE_DESCRIPTION = "Rol con acceso total a la organización.";
 const MEMBER_ROLE_NAME = "member";
 const MEMBER_ROLE_DESCRIPTION = "Rol estándar, sin permisos administrativos.";
+
+const ORGANIZATION_LOGOS_SUBFOLDER = "organization-logos";
+const ALLOWED_LOGO_MIME_TYPES = ["image/jpeg", "image/png", "image/svg+xml"];
+const MAX_LOGO_SIZE_BYTES = 2 * 1024 * 1024;
 
 export async function createOrganization(input: CreateOrganizationInput, ownerId: string) {
   const slug = await generateUniqueSlug(input.name);
@@ -110,4 +122,91 @@ async function validateUserIsMember(organizationId: string, userId: string) {
   if (!membership) {
     throw new ForbiddenError("No pertenecés a esta organización.");
   }
+}
+
+export type UpdateOrganizationRequest = {
+  organizationId: string;
+  name?: string;
+  logoFile?: Express.Multer.File;
+};
+
+export async function updateOrganization(input: UpdateOrganizationRequest, requesterId: string) {
+  await checkRequesterHasPermission(input.organizationId, requesterId);
+  const organization = await findOrganizationById(input.organizationId);
+  let logoUrl: string | undefined;
+  if (input.logoFile) {
+    await validateLogoFile(input.logoFile);
+    logoUrl = await saveLogoFileToDisk(input.logoFile);
+    await deleteOldLogoFile(organization.logoUrl);
+  }
+  const updatedOrganization = await saveOrganizationChanges(organization, {
+    name: input.name,
+    logoUrl,
+  });
+  return updatedOrganization;
+}
+
+// TODO(Epica 2 / HU-13-HU-14): reemplazar esta validación simplificada por el
+// chequeo real contra la matriz de permisos granular (ej. "organization:update")
+// una vez que existan roles custom y permisos asignables por rol.
+async function checkRequesterHasPermission(organizationId: string, requesterId: string) {
+  const membership = await findMembershipForUser(organizationId, requesterId);
+  const role = membership ? await findRoleById(membership.roleId) : null;
+  if (!role || role.name !== OWNER_ROLE_NAME) {
+    throw new ForbiddenError("No tenés permiso para editar esta organización.");
+  }
+}
+
+async function findOrganizationById(organizationId: string): Promise<Organization> {
+  const organization = await findOrganizationRecordById(organizationId);
+  if (!organization) {
+    throw new NotFoundError("La organización no existe.");
+  }
+  return organization;
+}
+
+async function validateLogoFile(file: Express.Multer.File) {
+  checkFileType(file);
+  checkFileSize(file);
+}
+
+function checkFileType(file: Express.Multer.File) {
+  if (!ALLOWED_LOGO_MIME_TYPES.includes(file.mimetype)) {
+    throw new ValidationError({ logo: ["El logo debe ser un archivo JPG, PNG o SVG."] });
+  }
+}
+
+function checkFileSize(file: Express.Multer.File) {
+  if (file.size > MAX_LOGO_SIZE_BYTES) {
+    throw new ValidationError({ logo: ["El logo no puede superar los 2MB."] });
+  }
+}
+
+async function saveLogoFileToDisk(file: Express.Multer.File): Promise<string> {
+  return saveFile(ORGANIZATION_LOGOS_SUBFOLDER, {
+    originalName: file.originalname,
+    buffer: file.buffer,
+  });
+}
+
+async function deleteOldLogoFile(currentLogoUrl: string | null) {
+  if (!currentLogoUrl) {
+    return;
+  }
+  await deleteFile(currentLogoUrl);
+}
+
+type OrganizationChanges = {
+  name?: string;
+  logoUrl?: string;
+};
+
+async function saveOrganizationChanges(
+  organization: Organization,
+  changes: OrganizationChanges,
+): Promise<Organization> {
+  // The slug is intentionally NOT recomputed here even though `name` can change.
+  // It's immutable once the organization is created, by design, so existing
+  // links/references to this org (e.g. invitation URLs, bookmarks) never break.
+  return updateOrganizationRecord(organization.id, changes);
 }

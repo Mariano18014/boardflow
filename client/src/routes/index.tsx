@@ -10,6 +10,7 @@ import OnboardingPage from "@/pages/onboarding/OnboardingPage";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import ProjectPage from "@/pages/projects/ProjectPage";
 import MembersPage from "@/pages/members/MembersPage";
+import OrganizationSettingsPage from "@/pages/organizations/OrganizationSettingsPage";
 import InvitationPage from "@/pages/invitations/InvitationPage";
 import NotFoundPage from "@/pages/not-found/NotFoundPage";
 
@@ -35,6 +36,9 @@ export function AppRoutes() {
       </Route>
       <Route path="/members">
         <RequireOrganization component={MembersPage} />
+      </Route>
+      <Route path="/settings">
+        <RequireOrganization component={OrganizationSettingsPage} />
       </Route>
       <Route component={NotFoundPage} />
     </Switch>

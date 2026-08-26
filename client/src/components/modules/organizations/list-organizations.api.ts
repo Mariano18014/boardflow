@@ -5,6 +5,7 @@ export type OrganizationSummary = {
   id: string;
   name: string;
   slug: string;
+  logoUrl: string | null;
   roleName?: string;
 };
 
