@@ -1,0 +1,15 @@
+import { prisma } from "../client";
+
+type CreateUserData = {
+  email: string;
+  passwordHash: string;
+  fullName: string;
+};
+
+export async function findUserByEmail(email: string) {
+  return prisma.user.findUnique({ where: { email } });
+}
+
+export async function createUser(data: CreateUserData) {
+  return prisma.user.create({ data });
+}
