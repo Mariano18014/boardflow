@@ -7,6 +7,7 @@ export type OrganizationMember = {
   fullName: string | null;
   email: string;
   avatarUrl: string | null;
+  roleId: string;
   roleName: string;
   status: string;
   sortDate: string;

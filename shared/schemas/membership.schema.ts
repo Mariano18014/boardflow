@@ -32,6 +32,7 @@ export type OrganizationMemberListItem = {
   fullName: string | null;
   email: string;
   avatarUrl: string | null;
+  roleId: string;
   roleName: string;
   status: MembershipStatus | "PENDING";
   sortDate: Date;

@@ -54,3 +54,24 @@ export async function findMembershipsByOrganizationId(
     skip: pagination.offset,
   });
 }
+
+export async function findMembershipById(membershipId: string, organizationId: string) {
+  return prisma.membership.findFirst({
+    where: { id: membershipId, organizationId },
+    include: { role: true },
+  });
+}
+
+export async function updateMembershipRole(membershipId: string, roleId: string) {
+  return prisma.membership.update({
+    where: { id: membershipId },
+    data: { roleId },
+    include: { role: true },
+  });
+}
+
+export async function countActiveMembershipsByRoleName(organizationId: string, roleName: string) {
+  return prisma.membership.count({
+    where: { organizationId, status: "ACTIVE", role: { name: roleName } },
+  });
+}

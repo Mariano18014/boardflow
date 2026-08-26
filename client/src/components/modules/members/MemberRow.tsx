@@ -3,13 +3,17 @@ import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getInitials } from "@/lib/utils";
 import type { OrganizationMember } from "./list-organization-members.api";
+import { MemberRoleSelect } from "./MemberRoleSelect";
 
 type MemberRowProps = {
   member: OrganizationMember;
+  organizationId: string;
+  canManageRoles: boolean;
 };
 
-export function MemberRow({ member }: MemberRowProps) {
+export function MemberRow({ member, organizationId, canManageRoles }: MemberRowProps) {
   const displayName = member.fullName ?? member.email;
+  const showRoleSelect = canManageRoles && member.type === "member";
 
   return (
     <TableRow>
@@ -25,7 +29,18 @@ export function MemberRow({ member }: MemberRowProps) {
         </div>
       </TableCell>
       <TableCell className="text-sm text-muted-foreground">{member.email}</TableCell>
-      <TableCell className="text-sm">{member.roleName}</TableCell>
+      <TableCell className="text-sm">
+        {showRoleSelect ? (
+          <MemberRoleSelect
+            organizationId={organizationId}
+            membershipId={member.id}
+            currentRoleId={member.roleId}
+            memberDisplayName={displayName}
+          />
+        ) : (
+          member.roleName
+        )}
+      </TableCell>
       <TableCell>
         <MemberStatusBadge status={member.status} />
       </TableCell>

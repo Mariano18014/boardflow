@@ -1,16 +1,29 @@
 import type { Invitation, Membership, Role, User } from "@prisma/client";
 import type { OrganizationMemberListItem } from "@shared/schemas/membership.schema";
-import { ForbiddenError } from "../lib/errors";
+import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from "../lib/errors";
 import {
+  countActiveMembershipsByRoleName,
+  findMembershipById as findMembershipRecordById,
   findMembershipForUser,
   findMembershipsByOrganizationId,
+  updateMembershipRole as saveMembershipRole,
 } from "../db/repositories/membership.repository";
 import { findPendingInvitationsByOrganizationId } from "../db/repositories/invitation.repository";
+import { findRoleById } from "../db/repositories/role.repository";
+
+const OWNER_ROLE_NAME = "owner";
 
 type Pagination = { limit: number; offset: number };
 
 type MembershipWithRelations = Membership & { user: User; role: Role };
+type MembershipWithRole = Membership & { role: Role };
 type InvitationWithRole = Invitation & { role: Role };
+
+export type ChangeMemberRoleInput = {
+  organizationId: string;
+  membershipId: string;
+  newRoleId: string;
+};
 
 export async function getOrganizationMembers(
   organizationId: string,
@@ -58,6 +71,7 @@ function mapMembershipToListItem(membership: MembershipWithRelations): Organizat
     fullName: membership.user.fullName,
     email: membership.user.email,
     avatarUrl: membership.user.avatarUrl,
+    roleId: membership.role.id,
     roleName: membership.role.name,
     status: membership.status,
     sortDate: membership.joinedAt ?? membership.createdAt,
@@ -71,6 +85,7 @@ function mapInvitationToListItem(invitation: InvitationWithRole): OrganizationMe
     fullName: null,
     email: invitation.email,
     avatarUrl: null,
+    roleId: invitation.role.id,
     roleName: invitation.role.name,
     status: "PENDING",
     sortDate: invitation.createdAt,
@@ -81,4 +96,78 @@ function sortMemberListByDateDescending(
   items: OrganizationMemberListItem[],
 ): OrganizationMemberListItem[] {
   return [...items].sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime());
+}
+
+export async function changeMemberRole(input: ChangeMemberRoleInput, requesterId: string) {
+  await checkRequesterHasPermission(input.organizationId, requesterId);
+  const targetMembership = await findMembershipById(input.membershipId, input.organizationId);
+  await checkNotChangingOwnRole(targetMembership, requesterId);
+  await checkRoleBelongsToOrganization(input.newRoleId, input.organizationId);
+  await checkNotRemovingLastOwner(targetMembership, input.newRoleId);
+  const updatedMembership = await updateMembershipRole(targetMembership, input.newRoleId);
+  return updatedMembership;
+}
+
+// TODO(Epica 2 / HU-13-HU-14): reemplazar esta validación simplificada por el
+// chequeo real contra la matriz de permisos granular (ej. "members:update-role")
+// una vez que existan roles custom y permisos asignables por rol.
+async function checkRequesterHasPermission(organizationId: string, requesterId: string) {
+  const membership = await findMembershipForUser(organizationId, requesterId);
+  const role = membership ? await findRoleById(membership.roleId) : null;
+  if (!role || role.name !== OWNER_ROLE_NAME) {
+    throw new ForbiddenError("No tenés permiso para cambiar el rol de miembros de esta organización.");
+  }
+}
+
+async function findMembershipById(
+  membershipId: string,
+  organizationId: string,
+): Promise<MembershipWithRole> {
+  const membership = await findMembershipRecordById(membershipId, organizationId);
+  if (!membership) {
+    throw new NotFoundError("La membership no existe en esta organización.");
+  }
+  return membership;
+}
+
+async function checkNotChangingOwnRole(membership: MembershipWithRole, requesterId: string) {
+  if (membership.userId === requesterId) {
+    throw new ForbiddenError("No podés cambiar tu propio rol. Pedile a otro owner que lo haga.");
+  }
+}
+
+async function checkRoleBelongsToOrganization(roleId: string, organizationId: string) {
+  const role = await findRoleById(roleId);
+  if (!role || role.organizationId !== organizationId) {
+    throw new ValidationError({ roleId: ["El rol seleccionado no pertenece a esta organización."] });
+  }
+}
+
+async function checkNotRemovingLastOwner(membership: MembershipWithRole, newRoleId: string) {
+  const isTargetCurrentlyOwner = membership.role.name === OWNER_ROLE_NAME;
+  if (!isTargetCurrentlyOwner) {
+    return;
+  }
+  const newRole = await findRoleById(newRoleId);
+  const isStayingOwner = newRole?.name === OWNER_ROLE_NAME;
+  if (isStayingOwner) {
+    return;
+  }
+  const activeOwnerCount = await countActiveOwners(membership.organizationId);
+  if (activeOwnerCount <= 1) {
+    throw new ConflictError(
+      "No podés quitar el rol de owner: la organización debe tener al menos un owner activo.",
+    );
+  }
+}
+
+async function countActiveOwners(organizationId: string): Promise<number> {
+  return countActiveMembershipsByRoleName(organizationId, OWNER_ROLE_NAME);
+}
+
+async function updateMembershipRole(
+  membership: MembershipWithRole,
+  newRoleId: string,
+): Promise<MembershipWithRole> {
+  return saveMembershipRole(membership.id, newRoleId);
 }

@@ -4,9 +4,11 @@ import type { OrganizationMember } from "./list-organization-members.api";
 
 type MembersTableProps = {
   members: OrganizationMember[];
+  organizationId: string;
+  canManageRoles: boolean;
 };
 
-export function MembersTable({ members }: MembersTableProps) {
+export function MembersTable({ members, organizationId, canManageRoles }: MembersTableProps) {
   if (members.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -27,7 +29,12 @@ export function MembersTable({ members }: MembersTableProps) {
       </TableHeader>
       <TableBody>
         {members.map((member) => (
-          <MemberRow key={`${member.type}-${member.id}`} member={member} />
+          <MemberRow
+            key={`${member.type}-${member.id}`}
+            member={member}
+            organizationId={organizationId}
+            canManageRoles={canManageRoles}
+          />
         ))}
       </TableBody>
     </Table>

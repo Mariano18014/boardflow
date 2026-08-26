@@ -39,7 +39,13 @@ export default function MembersPage() {
             {isError && (
               <p className="text-sm text-destructive">No se pudo cargar el listado de integrantes.</p>
             )}
-            {members && <MembersTable members={members} />}
+            {members && organization && (
+              <MembersTable
+                members={members}
+                organizationId={organization.id}
+                canManageRoles={canInviteMembers}
+              />
+            )}
           </CardContent>
         </Card>
       </div>
