@@ -5,6 +5,7 @@ export type OrganizationSummary = {
   id: string;
   name: string;
   slug: string;
+  roleName?: string;
 };
 
 export async function listOrganizations(): Promise<OrganizationSummary[]> {

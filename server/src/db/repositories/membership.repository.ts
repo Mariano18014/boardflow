@@ -16,13 +16,26 @@ export async function createMembership(data: CreateMembershipData) {
 export async function findOrganizationsByUserId(userId: string) {
   const memberships = await prisma.membership.findMany({
     where: { userId },
-    include: { organization: true },
+    include: { organization: true, role: true },
   });
-  return memberships.map((membership) => membership.organization);
+  return memberships.map((membership) => ({
+    ...membership.organization,
+    roleName: membership.role.name,
+  }));
 }
 
 export async function findMembershipForUser(organizationId: string, userId: string) {
   return prisma.membership.findUnique({
     where: { userId_organizationId: { userId, organizationId } },
+  });
+}
+
+export async function findActiveMembershipByEmail(organizationId: string, email: string) {
+  return prisma.membership.findFirst({
+    where: {
+      organizationId,
+      status: "ACTIVE",
+      user: { email },
+    },
   });
 }

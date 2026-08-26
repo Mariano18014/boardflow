@@ -11,6 +11,7 @@ export function AppSidebar() {
   const { organization: currentOrganization } = useCurrentOrganization();
   const { data: projects } = useProjects(currentOrganization?.id);
   const [, activeParams] = useRoute<{ projectId: string }>("/projects/:projectId");
+  const [isMembersActive] = useRoute("/members");
 
   return (
     <aside className="w-60 flex-none border-r border-border bg-surface flex flex-col p-3">
@@ -50,6 +51,18 @@ export function AppSidebar() {
           );
         })}
       </nav>
+
+      <Link
+        href="/members"
+        className={cn(
+          "mt-4 rounded-md px-2.5 py-1.5 text-sm font-medium",
+          isMembersActive
+            ? "bg-accent text-accent-foreground"
+            : "text-muted-foreground hover:text-foreground",
+        )}
+      >
+        Miembros
+      </Link>
 
       {session && (
         <div className="mt-auto flex items-center gap-2 px-2 py-1.5">

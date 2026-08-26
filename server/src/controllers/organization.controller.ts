@@ -1,11 +1,15 @@
 import type { NextFunction, Request, Response } from "express";
-import type { Organization } from "@prisma/client";
+import type { Organization, Role } from "@prisma/client";
 import {
   createOrganizationSchema,
   type CreateOrganizationInput,
 } from "@shared/schemas/organization.schema";
 import { ValidationError } from "../lib/errors";
-import { createOrganization, getOrganizationsForUser } from "../services/organization.service";
+import {
+  createOrganization,
+  getOrganizationsForUser,
+  getRolesForOrganization,
+} from "../services/organization.service";
 
 export async function createOrganizationController(req: Request, res: Response, next: NextFunction) {
   try {
@@ -26,6 +30,16 @@ export async function listOrganizationsController(req: Request, res: Response, n
   }
 }
 
+export async function listRolesController(req: Request, res: Response, next: NextFunction) {
+  try {
+    const organizationId = parseOrganizationIdParam(req.params.organizationId);
+    const roles = await getRolesForOrganization(organizationId, req.userId!);
+    res.status(200).json({ roles: roles.map(formatRoleForResponse) });
+  } catch (error) {
+    next(error);
+  }
+}
+
 function parseCreateOrganizationRequestBody(body: unknown): CreateOrganizationInput {
   const result = createOrganizationSchema.safeParse(body);
   if (!result.success) {
@@ -34,10 +48,25 @@ function parseCreateOrganizationRequestBody(body: unknown): CreateOrganizationIn
   return result.data;
 }
 
-function formatOrganizationForResponse(organization: Organization) {
+function parseOrganizationIdParam(value: unknown): string {
+  if (typeof value !== "string" || value.length === 0) {
+    throw new ValidationError({ organizationId: ["organizationId inválido."] });
+  }
+  return value;
+}
+
+function formatOrganizationForResponse(organization: Organization & { roleName?: string }) {
   return {
     id: organization.id,
     name: organization.name,
     slug: organization.slug,
+    ...(organization.roleName ? { roleName: organization.roleName } : {}),
+  };
+}
+
+function formatRoleForResponse(role: Role) {
+  return {
+    id: role.id,
+    name: role.name,
   };
 }
