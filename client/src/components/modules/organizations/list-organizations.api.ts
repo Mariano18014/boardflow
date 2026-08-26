@@ -1,5 +1,5 @@
+import { buildAuthorizationHeaders } from "@/lib/queryClient";
 import { buildOrganizationApiError } from "./organization-api-error";
-import { buildOrganizationRequestHeaders } from "./organization-api-headers";
 
 export type OrganizationSummary = {
   id: string;
@@ -10,7 +10,7 @@ export type OrganizationSummary = {
 export async function listOrganizations(): Promise<OrganizationSummary[]> {
   const response = await fetch("/api/organizations", {
     credentials: "include",
-    headers: buildOrganizationRequestHeaders(),
+    headers: buildAuthorizationHeaders(),
   });
 
   if (!response.ok) {

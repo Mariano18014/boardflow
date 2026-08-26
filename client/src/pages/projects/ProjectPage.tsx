@@ -1,0 +1,29 @@
+import { useParams } from "wouter";
+import { AppShell } from "@/components/layout/AppShell";
+import { useProject } from "@/components/modules/projects/use-project";
+
+export default function ProjectPage() {
+  const { projectId } = useParams<{ projectId: string }>();
+  const { data: project, isLoading, isError } = useProject(projectId);
+
+  return (
+    <AppShell title={project?.name ?? "Proyecto"}>
+      <div className="p-7">
+        {isLoading && <p className="text-sm text-muted-foreground">Cargando proyecto...</p>}
+        {isError && (
+          <p className="text-sm text-muted-foreground">No se pudo cargar este proyecto.</p>
+        )}
+        {project && (
+          <>
+            <div className="text-xs font-mono text-text-3 mb-1">{project.key}</div>
+            <h1 className="font-heading text-xl font-bold mb-1">{project.name}</h1>
+            <p className="text-sm text-muted-foreground">
+              El backlog, los sprints y el tablero de este proyecto todavía no están
+              implementados.
+            </p>
+          </>
+        )}
+      </div>
+    </AppShell>
+  );
+}

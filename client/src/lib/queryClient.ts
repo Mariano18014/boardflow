@@ -8,7 +8,7 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-function buildAuthorizationHeaders(): Record<string, string> {
+export function buildAuthorizationHeaders(): Record<string, string> {
   const session = getSession();
   if (!session) {
     return {};

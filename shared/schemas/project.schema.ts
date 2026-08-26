@@ -13,7 +13,9 @@ export const projectSchema = z.object({
   deletedAt: z.date().nullable(),
 });
 
-export const createProjectSchema = projectSchema.pick({ name: true, key: true, description: true });
+export const createProjectSchema = projectSchema.pick({ name: true }).extend({
+  organizationId: z.string().uuid(),
+});
 
 export const updateProjectSchema = createProjectSchema.partial();
 

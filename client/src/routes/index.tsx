@@ -8,6 +8,7 @@ import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 import OnboardingPage from "@/pages/onboarding/OnboardingPage";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
+import ProjectPage from "@/pages/projects/ProjectPage";
 import NotFoundPage from "@/pages/not-found/NotFoundPage";
 
 // A medida que se implementen los modulos (auth, organizations, projects, boards, backlog, sprints...)
@@ -25,6 +26,9 @@ export function AppRoutes() {
       </Route>
       <Route path="/dashboard">
         <RequireOrganization component={DashboardPage} />
+      </Route>
+      <Route path="/projects/:projectId">
+        <RequireOrganization component={ProjectPage} />
       </Route>
       <Route component={NotFoundPage} />
     </Switch>

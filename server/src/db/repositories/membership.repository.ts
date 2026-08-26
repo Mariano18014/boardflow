@@ -20,3 +20,9 @@ export async function findOrganizationsByUserId(userId: string) {
   });
   return memberships.map((membership) => membership.organization);
 }
+
+export async function findMembershipForUser(organizationId: string, userId: string) {
+  return prisma.membership.findUnique({
+    where: { userId_organizationId: { userId, organizationId } },
+  });
+}

@@ -1,6 +1,6 @@
 import type { CreateOrganizationInput } from "@shared/schemas/organization.schema";
+import { buildAuthorizationHeaders } from "@/lib/queryClient";
 import { buildOrganizationApiError } from "./organization-api-error";
-import { buildOrganizationRequestHeaders } from "./organization-api-headers";
 
 export type CreatedOrganization = {
   id: string;
@@ -11,7 +11,7 @@ export type CreatedOrganization = {
 export async function createOrganization(input: CreateOrganizationInput): Promise<CreatedOrganization> {
   const response = await fetch("/api/organizations", {
     method: "POST",
-    headers: { ...buildOrganizationRequestHeaders(), "Content-Type": "application/json" },
+    headers: { ...buildAuthorizationHeaders(), "Content-Type": "application/json" },
     credentials: "include",
     body: JSON.stringify(input),
   });
