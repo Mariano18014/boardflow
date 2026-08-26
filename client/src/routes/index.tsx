@@ -10,6 +10,7 @@ import OnboardingPage from "@/pages/onboarding/OnboardingPage";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import ProjectPage from "@/pages/projects/ProjectPage";
 import MembersPage from "@/pages/members/MembersPage";
+import InvitationPage from "@/pages/invitations/InvitationPage";
 import NotFoundPage from "@/pages/not-found/NotFoundPage";
 
 // A medida que se implementen los modulos (auth, organizations, projects, boards, backlog, sprints...)
@@ -22,6 +23,7 @@ export function AppRoutes() {
       <Route path="/register" component={RegisterPage} />
       <Route path="/forgot-password" component={ForgotPasswordPage} />
       <Route path="/reset-password" component={ResetPasswordPage} />
+      <Route path="/invitations/:token" component={InvitationPage} />
       <Route path="/onboarding">
         <RequireNoOrganization component={OnboardingPage} />
       </Route>

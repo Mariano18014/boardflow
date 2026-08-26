@@ -14,25 +14,36 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useAcceptInvitationOnAuth } from "@/components/modules/invitations/use-accept-invitation-on-auth";
 import { setFieldErrorsOnForm } from "./apply-field-errors";
 import { AuthApiError } from "./auth-api-error";
 import { setSession } from "./auth-session.store";
 import { registerUser } from "./register-user.api";
 
-export function RegisterForm() {
+type RegisterFormProps = {
+  invitationToken?: string;
+  lockedEmail?: string;
+};
+
+export function RegisterForm({ invitationToken, lockedEmail }: RegisterFormProps) {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { acceptInvitationAfterAuth } = useAcceptInvitationOnAuth();
 
   const form = useForm<RegisterUserInput>({
     resolver: zodResolver(registerUserSchema),
-    defaultValues: { fullName: "", email: "", password: "" },
+    defaultValues: { fullName: "", email: lockedEmail ?? "", password: "" },
   });
 
   const registerMutation = useMutation({
     mutationFn: registerUser,
     onSuccess: (response) => {
       setSession(response);
-      navigate("/onboarding");
+      if (invitationToken) {
+        acceptInvitationAfterAuth(invitationToken);
+      } else {
+        navigate("/onboarding");
+      }
     },
     onError: (error) => {
       applyRegisterErrorToForm(error, form, toast);
@@ -66,7 +77,12 @@ export function RegisterForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="tu@email.com" {...field} />
+                <Input
+                  type="email"
+                  placeholder="tu@email.com"
+                  readOnly={!!lockedEmail}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

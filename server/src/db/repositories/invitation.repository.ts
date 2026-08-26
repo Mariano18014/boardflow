@@ -1,3 +1,4 @@
+import type { InvitationStatus } from "@prisma/client";
 import { prisma } from "../client";
 
 type CreateInvitationData = {
@@ -17,4 +18,15 @@ export async function findPendingInvitationByEmail(organizationId: string, email
   return prisma.invitation.findFirst({
     where: { organizationId, email, status: "PENDING" },
   });
+}
+
+export async function findInvitationByToken(token: string) {
+  return prisma.invitation.findUnique({
+    where: { token },
+    include: { organization: true, role: true },
+  });
+}
+
+export async function updateInvitationStatus(id: string, status: InvitationStatus) {
+  return prisma.invitation.update({ where: { id }, data: { status } });
 }

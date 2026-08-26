@@ -14,25 +14,36 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useAcceptInvitationOnAuth } from "@/components/modules/invitations/use-accept-invitation-on-auth";
 import { setFieldErrorsOnForm } from "./apply-field-errors";
 import { AuthApiError } from "./auth-api-error";
 import { setSession } from "./auth-session.store";
 import { loginUser } from "./login-user.api";
 
-export function LoginForm() {
+type LoginFormProps = {
+  invitationToken?: string;
+  lockedEmail?: string;
+};
+
+export function LoginForm({ invitationToken, lockedEmail }: LoginFormProps) {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { acceptInvitationAfterAuth } = useAcceptInvitationOnAuth();
 
   const form = useForm<LoginUserInput>({
     resolver: zodResolver(loginUserSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: lockedEmail ?? "", password: "" },
   });
 
   const loginMutation = useMutation({
     mutationFn: loginUser,
     onSuccess: (response) => {
       setSession(response);
-      navigate("/dashboard");
+      if (invitationToken) {
+        acceptInvitationAfterAuth(invitationToken);
+      } else {
+        navigate("/dashboard");
+      }
     },
     onError: (error) => {
       applyLoginErrorToForm(error, form, toast);
@@ -53,7 +64,12 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="tu@email.com" {...field} />
+                <Input
+                  type="email"
+                  placeholder="tu@email.com"
+                  readOnly={!!lockedEmail}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

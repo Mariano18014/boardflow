@@ -1,21 +1,34 @@
+import type { Invitation, Organization, Role } from "@prisma/client";
 import type { CreateInvitationInput } from "@shared/schemas/invitation.schema";
 import { env } from "../config/env";
-import { ConflictError, ForbiddenError } from "../lib/errors";
+import { ConflictError, ForbiddenError, NotFoundError } from "../lib/errors";
 import { parseDurationToMs } from "../lib/duration";
 import { generateRandomToken } from "../lib/token";
 import {
+  createMembership,
   findActiveMembershipByEmail,
   findMembershipForUser,
 } from "../db/repositories/membership.repository";
 import { findRoleById } from "../db/repositories/role.repository";
+import { findUserById } from "../db/repositories/user.repository";
 import {
   createInvitation as saveInvitationRecord,
+  findInvitationByToken as findInvitationRecordByToken,
   findPendingInvitationByEmail,
+  updateInvitationStatus,
 } from "../db/repositories/invitation.repository";
 import { sendInvitationEmail as dispatchInvitationEmail } from "./email.service";
 
 const INVITATION_TOKEN_TTL = "7d";
 const OWNER_ROLE_NAME = "owner";
+
+type InvitationWithRelations = Invitation & { organization: Organization; role: Role };
+
+export type InvitationDetails = {
+  organizationName: string;
+  email: string;
+  roleName: string;
+};
 
 export async function inviteMemberToOrganization(
   input: CreateInvitationInput,
@@ -97,4 +110,82 @@ async function sendInvitationEmail(invitation: { email: string; token: string })
 
 function buildInvitationUrl(token: string) {
   return `${env.APP_URL}/invitations/accept?token=${token}`;
+}
+
+export async function getInvitationDetails(token: string): Promise<InvitationDetails> {
+  const invitation = await findInvitationByToken(token);
+  await checkInvitationIsStillValid(invitation);
+  return mapInvitationToPublicDetails(invitation);
+}
+
+export async function acceptInvitation(token: string, authenticatedUserId: string) {
+  const invitation = await findInvitationByToken(token);
+  await checkInvitationIsStillValid(invitation);
+  await checkInvitationEmailMatchesUser(invitation, authenticatedUserId);
+  const membership = await createMembershipFromInvitation(invitation, authenticatedUserId);
+  await markInvitationAsAccepted(invitation);
+  return membership;
+}
+
+async function findInvitationByToken(token: string): Promise<InvitationWithRelations> {
+  const invitation = await findInvitationRecordByToken(token);
+  if (!invitation) {
+    throw new NotFoundError("Invitación no encontrada.");
+  }
+  return invitation;
+}
+
+async function checkInvitationIsStillValid(invitation: Invitation) {
+  if (invitation.status === "ACCEPTED") {
+    throw new ConflictError("Esta invitación ya fue aceptada.");
+  }
+  if (invitation.status === "REVOKED") {
+    throw new ConflictError("Esta invitación fue revocada.");
+  }
+  if (invitation.status === "EXPIRED") {
+    throw new ConflictError("Esta invitación expiró. Pedí una invitación nueva.");
+  }
+  if (checkInvitationIsExpired(invitation)) {
+    await markInvitationAsExpired(invitation);
+    throw new ConflictError("Esta invitación expiró. Pedí una invitación nueva.");
+  }
+}
+
+function checkInvitationIsExpired(invitation: Invitation): boolean {
+  return invitation.expiresAt.getTime() < Date.now();
+}
+
+async function checkInvitationEmailMatchesUser(invitation: Invitation, userId: string) {
+  const user = await findUserById(userId);
+  const invitationEmailMatchesUser =
+    user !== null && user.email.toLowerCase() === invitation.email.toLowerCase();
+  if (!invitationEmailMatchesUser) {
+    throw new ForbiddenError("Esta invitación fue enviada a otro email.");
+  }
+}
+
+async function createMembershipFromInvitation(invitation: Invitation, userId: string) {
+  return createMembership({
+    userId,
+    organizationId: invitation.organizationId,
+    roleId: invitation.roleId,
+    status: "ACTIVE",
+    joinedAt: new Date(),
+  });
+}
+
+async function markInvitationAsAccepted(invitation: Invitation) {
+  await updateInvitationStatus(invitation.id, "ACCEPTED");
+}
+
+async function markInvitationAsExpired(invitation: Invitation) {
+  await updateInvitationStatus(invitation.id, "EXPIRED");
+}
+
+function mapInvitationToPublicDetails(invitation: InvitationWithRelations): InvitationDetails {
+  return {
+    organizationName: invitation.organization.name,
+    email: invitation.email,
+    roleName: invitation.role.name,
+  };
 }
