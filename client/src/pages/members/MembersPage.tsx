@@ -1,16 +1,19 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { InviteMemberForm } from "@/components/modules/invitations/InviteMemberForm";
+import { MembersTable } from "@/components/modules/members/MembersTable";
 import { useCurrentOrganization } from "@/components/modules/organizations/use-current-organization";
+import { useOrganizationMembers } from "@/components/modules/members/use-organization-members";
 
 export default function MembersPage() {
   const { organization } = useCurrentOrganization();
   const canInviteMembers = organization?.roleName === "owner";
+  const { data: members, isLoading, isError } = useOrganizationMembers(organization?.id);
 
   return (
     <AppShell title="Miembros">
-      <div className="p-7 max-w-md">
-        <Card>
+      <div className="p-7 flex flex-col gap-6">
+        <Card className="max-w-md">
           <CardHeader>
             <CardTitle className="font-heading text-lg">Invitar miembro</CardTitle>
             <CardDescription>
@@ -24,6 +27,20 @@ export default function MembersPage() {
               <InviteMemberForm organizationId={organization.id} />
             </CardContent>
           )}
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-heading text-lg">Integrantes</CardTitle>
+            <CardDescription>Quién forma parte de esta organización.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading && <p className="text-sm text-muted-foreground">Cargando integrantes...</p>}
+            {isError && (
+              <p className="text-sm text-destructive">No se pudo cargar el listado de integrantes.</p>
+            )}
+            {members && <MembersTable members={members} />}
+          </CardContent>
         </Card>
       </div>
     </AppShell>

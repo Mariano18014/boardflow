@@ -39,3 +39,18 @@ export async function findActiveMembershipByEmail(organizationId: string, email:
     },
   });
 }
+
+type Pagination = { limit: number; offset: number };
+
+export async function findMembershipsByOrganizationId(
+  organizationId: string,
+  pagination: Pagination,
+) {
+  return prisma.membership.findMany({
+    where: { organizationId },
+    include: { user: true, role: true },
+    orderBy: { joinedAt: "desc" },
+    take: pagination.limit,
+    skip: pagination.offset,
+  });
+}

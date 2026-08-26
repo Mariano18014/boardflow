@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MEMBERSHIP_STATUS } from "../types/enums";
+import { MEMBERSHIP_STATUS, type MembershipStatus } from "../types/enums";
 
 export const membershipSchema = z.object({
   id: z.string().uuid(),
@@ -17,5 +17,22 @@ export const updateMembershipRoleSchema = z.object({
   roleId: z.string().uuid(),
 });
 
+export const listOrganizationMembersQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0),
+});
+
 export type Membership = z.infer<typeof membershipSchema>;
 export type UpdateMembershipRoleInput = z.infer<typeof updateMembershipRoleSchema>;
+export type ListOrganizationMembersQuery = z.infer<typeof listOrganizationMembersQuerySchema>;
+
+export type OrganizationMemberListItem = {
+  type: "member" | "invitation";
+  id: string;
+  fullName: string | null;
+  email: string;
+  avatarUrl: string | null;
+  roleName: string;
+  status: MembershipStatus | "PENDING";
+  sortDate: Date;
+};

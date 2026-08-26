@@ -30,3 +30,11 @@ export async function findInvitationByToken(token: string) {
 export async function updateInvitationStatus(id: string, status: InvitationStatus) {
   return prisma.invitation.update({ where: { id }, data: { status } });
 }
+
+export async function findPendingInvitationsByOrganizationId(organizationId: string) {
+  return prisma.invitation.findMany({
+    where: { organizationId, status: "PENDING" },
+    include: { role: true },
+    orderBy: { createdAt: "desc" },
+  });
+}
