@@ -1,12 +1,7 @@
 import { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { RoleSelectOptions } from "@/components/modules/roles/RoleSelectOptions";
 import { useRoles } from "@/components/modules/roles/use-roles";
 import { useChangeMemberRole } from "./use-change-member-role";
 
@@ -57,16 +52,10 @@ export function MemberRoleSelect({
         onValueChange={requestRoleChange}
         disabled={isPending}
       >
-        <SelectTrigger className="h-8 w-32 text-xs">
+        <SelectTrigger className="h-8 w-40 text-xs">
           <SelectValue placeholder="Rol" />
         </SelectTrigger>
-        <SelectContent>
-          {roles?.map((role) => (
-            <SelectItem key={role.id} value={role.id}>
-              {role.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
+        <RoleSelectOptions roles={roles} />
       </Select>
 
       <ConfirmDialog

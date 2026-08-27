@@ -16,15 +16,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { setFieldErrorsOnForm } from "@/components/modules/auth/apply-field-errors";
+import { RoleSelectOptions } from "@/components/modules/roles/RoleSelectOptions";
 import { useRoles } from "@/components/modules/roles/use-roles";
 import { inviteMember } from "./invite-member.api";
 import { InvitationApiError } from "./invitation-api-error";
@@ -87,13 +82,7 @@ export function InviteMemberForm({ organizationId }: InviteMemberFormProps) {
                     <SelectValue placeholder="Elegí un rol" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
-                  {roles?.map((role) => (
-                    <SelectItem key={role.id} value={role.id}>
-                      {role.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                <RoleSelectOptions roles={roles} />
               </Select>
               <FormMessage />
             </FormItem>
