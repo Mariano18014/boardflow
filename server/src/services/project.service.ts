@@ -143,27 +143,35 @@ export type RestoreProjectInput = {
 
 export async function archiveProject(input: ArchiveProjectInput, requesterId: string) {
   await checkRequesterHasPermission(input.organizationId, requesterId, "projects:delete");
-  const project = await findProjectByIdInOrganization(input.projectId, input.organizationId);
+  const project = await findProjectById(input.projectId, input.organizationId);
   await checkProjectIsNotAlreadyArchived(project);
   return updateProjectArchivedStatus(project, true);
 }
 
 export async function restoreProject(input: RestoreProjectInput, requesterId: string) {
   await checkRequesterHasPermission(input.organizationId, requesterId, "projects:edit");
-  const project = await findProjectByIdInOrganization(input.projectId, input.organizationId);
+  const project = await findProjectById(input.projectId, input.organizationId);
   await checkProjectIsCurrentlyArchived(project);
   return updateProjectArchivedStatus(project, false);
 }
 
-async function findProjectByIdInOrganization(
-  projectId: string,
-  organizationId: string,
-): Promise<Project> {
+// Shared by every module that needs to look up a project scoped to its
+// organization (boards, tasks, ...) so the 404-if-missing check isn't
+// duplicated across services.
+export async function findProjectById(projectId: string, organizationId: string): Promise<Project> {
   const project = await findProjectByIdAndOrganizationId(projectId, organizationId);
   if (!project) {
     throw new NotFoundError("El proyecto no existe en esta organización.");
   }
   return project;
+}
+
+// Shared by every module that creates child records (boards, tasks, ...) under
+// a project, since none of them make sense once the project is archived.
+export async function checkProjectIsNotArchived(project: Project) {
+  if (project.isArchived) {
+    throw new ConflictError("No se pueden agregar tableros ni tareas a un proyecto archivado.");
+  }
 }
 
 async function checkProjectIsNotAlreadyArchived(project: Project) {

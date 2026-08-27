@@ -1,9 +1,13 @@
 import type { Task } from "@prisma/client";
-import type { BacklogTaskItem } from "@shared/schemas/task.schema";
-import { NotFoundError } from "../../lib/errors";
-import { findProjectByIdAndOrganizationId } from "../../db/repositories/project.repository";
+import type { BacklogTaskItem, CreateBacklogTaskInput } from "@shared/schemas/task.schema";
+import { checkProjectIsNotArchived, findProjectById } from "../../services/project.service";
 import { checkRequesterHasPermission } from "../permissions/check-permission";
-import { findTasksWithoutSprint as findBacklogTasksInDatabase } from "./tasks.repository";
+import { calculateNextPosition } from "../../lib/next-position.util";
+import {
+  createTask as saveTaskRecord,
+  findMaxBacklogPositionByProjectId,
+  findTasksWithoutSprint as findBacklogTasksInDatabase,
+} from "./tasks.repository";
 
 type Pagination = {
   limit: number;
@@ -26,12 +30,36 @@ export async function getProjectBacklog(
   return backlogTasks;
 }
 
-async function findProjectById(projectId: string, organizationId: string) {
-  const project = await findProjectByIdAndOrganizationId(projectId, organizationId);
-  if (!project) {
-    throw new NotFoundError("El proyecto no existe en esta organización.");
-  }
-  return project;
+export async function createBacklogTask(
+  input: CreateBacklogTaskInput,
+  requesterId: string,
+): Promise<BacklogTaskItem> {
+  await checkRequesterHasPermission(input.organizationId, requesterId, "tasks:create");
+  const project = await findProjectById(input.projectId, input.organizationId);
+  await checkProjectIsNotArchived(project);
+  const nextPosition = await calculateNextBacklogPosition(input.projectId);
+  const task = await saveTaskInDatabase(input, nextPosition, requesterId);
+  return mapTaskToBacklogItem(task);
+}
+
+async function calculateNextBacklogPosition(projectId: string): Promise<number> {
+  return calculateNextPosition(() => findMaxBacklogPositionByProjectId(projectId));
+}
+
+async function saveTaskInDatabase(
+  input: CreateBacklogTaskInput,
+  position: number,
+  creatorId: string,
+): Promise<Task> {
+  return saveTaskRecord({
+    projectId: input.projectId,
+    title: input.title,
+    description: input.description,
+    priority: input.priority,
+    estimatedPoints: input.estimatedPoints,
+    position,
+    createdBy: creatorId,
+  });
 }
 
 async function findTasksWithoutSprint(

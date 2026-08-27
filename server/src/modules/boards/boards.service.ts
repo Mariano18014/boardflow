@@ -1,16 +1,15 @@
-import type { Board, Project } from "@prisma/client";
+import type { Board } from "@prisma/client";
 import type { CreateBoardInput } from "@shared/schemas/board.schema";
-import { ConflictError, NotFoundError, ValidationError } from "../../lib/errors";
-import { findProjectByIdAndOrganizationId } from "../../db/repositories/project.repository";
+import { ConflictError, ValidationError } from "../../lib/errors";
+import { checkProjectIsNotArchived, findProjectById } from "../../services/project.service";
 import { checkRequesterHasPermission } from "../permissions/check-permission";
+import { calculateNextPosition } from "../../lib/next-position.util";
 import {
   createBoard as saveBoardRecord,
   findActiveBoardsByProjectId,
   findMaxBoardPositionByProjectId,
   updateBoardPositions,
 } from "./boards.repository";
-
-const FIRST_BOARD_POSITION = 0;
 
 export async function createBoard(input: CreateBoardInput, requesterId: string) {
   await checkRequesterHasPermission(input.organizationId, requesterId, "boards:create");
@@ -21,26 +20,8 @@ export async function createBoard(input: CreateBoardInput, requesterId: string) 
   return board;
 }
 
-async function findProjectById(projectId: string, organizationId: string): Promise<Project> {
-  const project = await findProjectByIdAndOrganizationId(projectId, organizationId);
-  if (!project) {
-    throw new NotFoundError("El proyecto no existe en esta organización.");
-  }
-  return project;
-}
-
-async function checkProjectIsNotArchived(project: Project) {
-  if (project.isArchived) {
-    throw new ConflictError("No se pueden crear tableros en un proyecto archivado.");
-  }
-}
-
 async function calculateNextBoardPosition(projectId: string): Promise<number> {
-  const maxPosition = await findMaxBoardPositionByProjectId(projectId);
-  if (maxPosition === null) {
-    return FIRST_BOARD_POSITION;
-  }
-  return maxPosition + 1;
+  return calculateNextPosition(() => findMaxBoardPositionByProjectId(projectId));
 }
 
 async function saveBoardInDatabase(input: CreateBoardInput, position: number) {

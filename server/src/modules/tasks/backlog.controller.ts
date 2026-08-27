@@ -1,11 +1,13 @@
 import type { NextFunction, Request, Response } from "express";
 import {
+  createBacklogTaskBodySchema,
   listBacklogQuerySchema,
   type BacklogTaskItem,
+  type CreateBacklogTaskBody,
   type ListBacklogQuery,
 } from "@shared/schemas/task.schema";
 import { ValidationError } from "../../lib/errors";
-import { getProjectBacklog } from "./backlog.service";
+import { createBacklogTask, getProjectBacklog } from "./backlog.service";
 
 export async function getBacklogController(req: Request, res: Response, next: NextFunction) {
   try {
@@ -29,6 +31,18 @@ export async function getBacklogController(req: Request, res: Response, next: Ne
   }
 }
 
+export async function createBacklogTaskController(req: Request, res: Response, next: NextFunction) {
+  try {
+    const organizationId = parseOrganizationIdParam(req.params.organizationId);
+    const projectId = parseProjectIdParam(req.params.projectId);
+    const body = parseCreateBacklogTaskRequestBody(req.body);
+    const task = await createBacklogTask({ ...body, organizationId, projectId }, req.userId!);
+    res.status(201).json({ task: formatBacklogTaskForResponse(task) });
+  } catch (error) {
+    next(error);
+  }
+}
+
 function parseOrganizationIdParam(value: unknown): string {
   if (typeof value !== "string" || value.length === 0) {
     throw new ValidationError({ organizationId: ["organizationId inválido."] });
@@ -45,6 +59,14 @@ function parseProjectIdParam(value: unknown): string {
 
 function parseListBacklogQuery(query: unknown): ListBacklogQuery {
   const result = listBacklogQuerySchema.safeParse(query);
+  if (!result.success) {
+    throw new ValidationError(result.error.flatten().fieldErrors);
+  }
+  return result.data;
+}
+
+function parseCreateBacklogTaskRequestBody(body: unknown): CreateBacklogTaskBody {
+  const result = createBacklogTaskBodySchema.safeParse(body);
   if (!result.success) {
     throw new ValidationError(result.error.flatten().fieldErrors);
   }

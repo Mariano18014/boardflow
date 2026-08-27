@@ -8,7 +8,7 @@ export const taskSchema = z.object({
   boardId: z.string().uuid().nullable(),
   projectId: z.string().uuid(),
   sprintId: z.string().uuid().nullable(),
-  title: z.string().min(1),
+  title: z.string().min(1).max(200),
   description: z.string().nullable(),
   position: z.number().int(),
   priority: z.enum(TASK_PRIORITY),
@@ -48,11 +48,25 @@ export const moveTaskSchema = z.object({
 
 export const listBacklogQuerySchema = paginationQuerySchema;
 
+export const createBacklogTaskBodySchema = z.object({
+  title: z.string().min(1).max(200),
+  description: z.string().optional(),
+  priority: z.enum(TASK_PRIORITY),
+  estimatedPoints: z.number().int().positive(),
+});
+
+export const createBacklogTaskSchema = createBacklogTaskBodySchema.extend({
+  organizationId: z.string().uuid(),
+  projectId: z.string().uuid(),
+});
+
 export type Task = z.infer<typeof taskSchema>;
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 export type MoveTaskInput = z.infer<typeof moveTaskSchema>;
 export type ListBacklogQuery = z.infer<typeof listBacklogQuerySchema>;
+export type CreateBacklogTaskBody = z.infer<typeof createBacklogTaskBodySchema>;
+export type CreateBacklogTaskInput = z.infer<typeof createBacklogTaskSchema>;
 
 // The shape already includes `assignees` even though HU-22 never populates it
 // (assignment ships in HU-31) so the frontend contract doesn't need to change
