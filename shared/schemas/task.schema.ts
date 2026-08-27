@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { TASK_PRIORITY } from "../types/enums";
+import { TASK_PRIORITY, type TaskPriority } from "../types/enums";
+import { paginationQuerySchema } from "./pagination.schema";
 
 export const taskSchema = z.object({
   id: z.string().uuid(),
@@ -45,7 +46,23 @@ export const moveTaskSchema = z.object({
   position: z.number().int(),
 });
 
+export const listBacklogQuerySchema = paginationQuerySchema;
+
 export type Task = z.infer<typeof taskSchema>;
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 export type MoveTaskInput = z.infer<typeof moveTaskSchema>;
+export type ListBacklogQuery = z.infer<typeof listBacklogQuerySchema>;
+
+// The shape already includes `assignees` even though HU-22 never populates it
+// (assignment ships in HU-31) so the frontend contract doesn't need to change
+// again once assignees exist.
+export type BacklogTaskItem = {
+  id: string;
+  title: string;
+  priority: TaskPriority;
+  estimatedPoints: number | null;
+  position: number;
+  createdAt: Date;
+  assignees: unknown[];
+};

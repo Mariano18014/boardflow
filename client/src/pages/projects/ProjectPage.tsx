@@ -1,4 +1,4 @@
-import { useParams } from "wouter";
+import { Link, useParams } from "wouter";
 import { AppShell } from "@/components/layout/AppShell";
 import { useProject } from "@/components/modules/projects/use-project";
 import { useHasPermission } from "@/components/modules/permissions/use-has-permission";
@@ -29,8 +29,17 @@ export default function ProjectPage() {
                 <CreateBoardDialog organizationId={project.organizationId} projectId={project.id} />
               )}
             </div>
-            <h1 className="font-heading text-xl font-bold mb-4">{project.name}</h1>
+            <h1 className="font-heading text-xl font-bold mb-1">{project.name}</h1>
+            <Link
+              href={`/projects/${project.id}/backlog`}
+              className="text-sm text-primary underline-offset-4 hover:underline"
+            >
+              Ver backlog
+            </Link>
 
+            <h2 className="font-heading text-sm font-semibold uppercase tracking-wide text-text-3 mt-6 mb-2.5">
+              Tableros
+            </h2>
             {boards && boards.length === 0 && (
               <p className="text-sm text-muted-foreground">
                 Todavía no hay tableros en este proyecto.
@@ -46,7 +55,7 @@ export default function ProjectPage() {
             )}
 
             <p className="mt-6 text-sm text-muted-foreground">
-              El backlog y los sprints de este proyecto todavía no están implementados.
+              Los sprints de este proyecto todavía no están implementados.
             </p>
           </>
         )}

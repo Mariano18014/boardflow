@@ -12,6 +12,7 @@ import {
 } from "../controllers/membership.controller";
 import { rolesRoutes } from "../modules/roles/roles.routes";
 import { boardsRoutes } from "../modules/boards/boards.routes";
+import { tasksRoutes } from "../modules/tasks/tasks.routes";
 import { getMyPermissionsController } from "../modules/permissions/permissions.controller";
 import {
   archiveProjectController,
@@ -67,3 +68,4 @@ organizationRoutes.patch(
   authMiddleware,
   restoreProjectController,
 );
+organizationRoutes.use("/:organizationId/projects/:projectId", tasksRoutes);
