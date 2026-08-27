@@ -13,9 +13,12 @@ import {
   findMembershipForUser,
   findOrganizationsByUserId,
 } from "../db/repositories/membership.repository";
-import { createRole, findRoleById } from "../modules/roles/roles.repository";
-import { findAllPermissions } from "../db/repositories/permission.repository";
-import { createRolePermissions } from "../db/repositories/role-permission.repository";
+import {
+  createRole,
+  createRolePermissions,
+  findRoleById,
+} from "../modules/roles/roles.repository";
+import { findAllPermissions } from "../modules/permissions/permissions.repository";
 import { deleteFile, saveFile } from "./file-storage.service";
 
 const OWNER_ROLE_NAME = "owner";

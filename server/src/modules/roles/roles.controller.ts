@@ -1,8 +1,18 @@
 import type { NextFunction, Request, Response } from "express";
-import type { Role } from "@prisma/client";
-import { createRoleSchema, type CreateRoleInput } from "@shared/schemas/role.schema";
+import type { Role, RolePermission } from "@prisma/client";
+import {
+  assignRolePermissionsSchema,
+  createRoleSchema,
+  type AssignRolePermissionsInput,
+  type CreateRoleInput,
+} from "@shared/schemas/role.schema";
 import { ValidationError } from "../../lib/errors";
-import { createRole, getRolesForOrganization } from "./roles.service";
+import {
+  createRole,
+  getRolePermissions,
+  getRolesForOrganization,
+  replaceRolePermissions,
+} from "./roles.service";
 
 export async function listRolesController(req: Request, res: Response, next: NextFunction) {
   try {
@@ -28,9 +38,46 @@ export async function createRoleController(req: Request, res: Response, next: Ne
   }
 }
 
+export async function getRolePermissionsController(req: Request, res: Response, next: NextFunction) {
+  try {
+    const organizationId = parseOrganizationIdParam(req.params.organizationId);
+    const roleId = parseRoleIdParam(req.params.roleId);
+    const permissionIds = await getRolePermissions(organizationId, roleId, req.userId!);
+    res.status(200).json({ permissionIds });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function replaceRolePermissionsController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const organizationId = parseOrganizationIdParam(req.params.organizationId);
+    const roleId = parseRoleIdParam(req.params.roleId);
+    const body = parseReplaceRolePermissionsRequestBody(req.body);
+    const updatedPermissions = await replaceRolePermissions(
+      { organizationId, roleId, permissionIds: body.permissionIds },
+      req.userId!,
+    );
+    res.status(200).json({ permissionIds: updatedPermissions.map(formatPermissionIdFromRolePermission) });
+  } catch (error) {
+    next(error);
+  }
+}
+
 function parseOrganizationIdParam(value: unknown): string {
   if (typeof value !== "string" || value.length === 0) {
     throw new ValidationError({ organizationId: ["organizationId inválido."] });
+  }
+  return value;
+}
+
+function parseRoleIdParam(value: unknown): string {
+  if (typeof value !== "string" || value.length === 0) {
+    throw new ValidationError({ roleId: ["roleId inválido."] });
   }
   return value;
 }
@@ -41,6 +88,18 @@ function parseCreateRoleRequestBody(body: unknown): CreateRoleInput {
     throw new ValidationError(result.error.flatten().fieldErrors);
   }
   return result.data;
+}
+
+function parseReplaceRolePermissionsRequestBody(body: unknown): AssignRolePermissionsInput {
+  const result = assignRolePermissionsSchema.safeParse(body);
+  if (!result.success) {
+    throw new ValidationError(result.error.flatten().fieldErrors);
+  }
+  return result.data;
+}
+
+function formatPermissionIdFromRolePermission(rolePermission: RolePermission): string {
+  return rolePermission.permissionId;
 }
 
 function formatRoleForResponse(role: Role) {
