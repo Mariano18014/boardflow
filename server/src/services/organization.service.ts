@@ -1,24 +1,17 @@
 import type { Organization } from "@prisma/client";
 import type { CreateOrganizationInput } from "@shared/schemas/organization.schema";
 import { slugify } from "../lib/slug.util";
-import { ForbiddenError, NotFoundError, ValidationError } from "../lib/errors";
+import { NotFoundError, ValidationError } from "../lib/errors";
 import {
   createOrganization as saveOrganizationRecord,
   findOrganizationById as findOrganizationRecordById,
   findOrganizationBySlug,
   updateOrganization as updateOrganizationRecord,
 } from "../db/repositories/organization.repository";
-import {
-  createMembership,
-  findMembershipForUser,
-  findOrganizationsByUserId,
-} from "../db/repositories/membership.repository";
-import {
-  createRole,
-  createRolePermissions,
-  findRoleById,
-} from "../modules/roles/roles.repository";
+import { createMembership, findOrganizationsByUserId } from "../db/repositories/membership.repository";
+import { createRole, createRolePermissions } from "../modules/roles/roles.repository";
 import { findAllPermissions } from "../modules/permissions/permissions.repository";
+import { checkRequesterHasPermission } from "../modules/permissions/check-permission";
 import { deleteFile, saveFile } from "./file-storage.service";
 
 const OWNER_ROLE_NAME = "owner";
@@ -118,7 +111,7 @@ export type UpdateOrganizationRequest = {
 };
 
 export async function updateOrganization(input: UpdateOrganizationRequest, requesterId: string) {
-  await checkRequesterHasPermission(input.organizationId, requesterId);
+  await checkRequesterHasPermission(input.organizationId, requesterId, "organizations:edit");
   const organization = await findOrganizationById(input.organizationId);
   let logoUrl: string | undefined;
   if (input.logoFile) {
@@ -131,17 +124,6 @@ export async function updateOrganization(input: UpdateOrganizationRequest, reque
     logoUrl,
   });
   return updatedOrganization;
-}
-
-// TODO(Epica 2 / HU-13-HU-14): reemplazar esta validación simplificada por el
-// chequeo real contra la matriz de permisos granular (ej. "organization:update")
-// una vez que existan roles custom y permisos asignables por rol.
-async function checkRequesterHasPermission(organizationId: string, requesterId: string) {
-  const membership = await findMembershipForUser(organizationId, requesterId);
-  const role = membership ? await findRoleById(membership.roleId) : null;
-  if (!role || role.name !== OWNER_ROLE_NAME) {
-    throw new ForbiddenError("No tenés permiso para editar esta organización.");
-  }
 }
 
 async function findOrganizationById(organizationId: string): Promise<Organization> {

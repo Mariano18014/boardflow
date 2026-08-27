@@ -1,11 +1,11 @@
 import type { Role } from "@prisma/client";
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from "../../lib/errors";
 import { findMembershipForUser } from "../../db/repositories/membership.repository";
+import { checkRequesterHasPermission } from "../permissions/check-permission";
 import { findPermissionsByIds } from "../permissions/permissions.repository";
 import {
   createRole as saveRoleRecord,
   findRoleByIdAndOrganizationId as findRoleRecordByIdAndOrganizationId,
-  findRoleById as findRoleByIdRaw,
   findRoleByName,
   findRolePermissionsByRoleId,
   findRolesByOrganizationId,
@@ -40,25 +40,11 @@ async function checkRequesterBelongsToOrganization(organizationId: string, reque
 }
 
 export async function createRole(input: CreateRoleRequest, requesterId: string) {
-  await checkRequesterHasPermission(input.organizationId, requesterId);
+  await checkRequesterHasPermission(input.organizationId, requesterId, "roles:create");
   await checkRoleNameIsNotReserved(input.name);
   await checkRoleNameIsUnique(input.organizationId, input.name);
   const role = await saveRoleInDatabase(input);
   return role;
-}
-
-// TODO(post-HU-14): esta validación simplificada (solo el rol "owner" puede
-// crear roles o reemplazar los permisos de otro rol) sigue siendo intencional.
-// HU-14 ya sembró el catálogo de permisos y permite asignarlos a un rol, pero
-// reemplazar este chequeo por uno real contra RolePermission (ej. el permiso
-// "roles:create" / "roles:edit" asignado al rol del solicitante) queda
-// explícitamente fuera de alcance de HU-14 — es tarea de una HU posterior.
-async function checkRequesterHasPermission(organizationId: string, requesterId: string) {
-  const membership = await findMembershipForUser(organizationId, requesterId);
-  const role = membership ? await findRoleByIdRaw(membership.roleId) : null;
-  if (!role || role.name !== OWNER_ROLE_NAME) {
-    throw new ForbiddenError("No tenés permiso para gestionar roles en esta organización.");
-  }
 }
 
 async function checkRoleNameIsNotReserved(name: string) {
@@ -91,7 +77,7 @@ export async function getRolePermissions(organizationId: string, roleId: string,
 }
 
 export async function replaceRolePermissions(input: ReplaceRolePermissionsInput, requesterId: string) {
-  await checkRequesterHasPermission(input.organizationId, requesterId);
+  await checkRequesterHasPermission(input.organizationId, requesterId, "roles:edit");
   const role = await findRoleById(input.roleId, input.organizationId);
   await checkRoleIsNotProtectedOwnerRole(role);
   await checkAllPermissionIdsExist(input.permissionIds);

@@ -9,14 +9,20 @@ import { RemoveMemberButton } from "./RemoveMemberButton";
 type MemberRowProps = {
   member: OrganizationMember;
   organizationId: string;
-  canManageMembers: boolean;
+  canEditMemberRole: boolean;
+  canRemoveMembers: boolean;
 };
 
-export function MemberRow({ member, organizationId, canManageMembers }: MemberRowProps) {
+export function MemberRow({
+  member,
+  organizationId,
+  canEditMemberRole,
+  canRemoveMembers,
+}: MemberRowProps) {
   const displayName = member.fullName ?? member.email;
   const isActiveMember = member.type === "member" && member.status === "ACTIVE";
-  const showRoleSelect = canManageMembers && isActiveMember;
-  const showRemoveButton = canManageMembers && isActiveMember;
+  const showRoleSelect = canEditMemberRole && isActiveMember;
+  const showRemoveButton = canRemoveMembers && isActiveMember;
 
   return (
     <TableRow>

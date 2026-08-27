@@ -4,12 +4,8 @@ import { env } from "../config/env";
 import { ConflictError, ForbiddenError, NotFoundError } from "../lib/errors";
 import { parseDurationToMs } from "../lib/duration";
 import { generateRandomToken } from "../lib/token";
-import {
-  createMembership,
-  findActiveMembershipByEmail,
-  findMembershipForUser,
-} from "../db/repositories/membership.repository";
-import { findRoleById } from "../modules/roles/roles.repository";
+import { createMembership, findActiveMembershipByEmail } from "../db/repositories/membership.repository";
+import { checkRequesterHasPermission } from "../modules/permissions/check-permission";
 import { findUserById } from "../db/repositories/user.repository";
 import {
   createInvitation as saveInvitationRecord,
@@ -20,7 +16,6 @@ import {
 import { sendInvitationEmail as dispatchInvitationEmail } from "./email.service";
 
 const INVITATION_TOKEN_TTL = "7d";
-const OWNER_ROLE_NAME = "owner";
 
 type InvitationWithRelations = Invitation & { organization: Organization; role: Role };
 
@@ -35,23 +30,12 @@ export async function inviteMemberToOrganization(
   organizationId: string,
   inviterId: string,
 ) {
-  await checkInviterHasPermission(organizationId, inviterId);
+  await checkRequesterHasPermission(organizationId, inviterId, "members:create");
   await checkEmailIsNotAlreadyMember(organizationId, input.email);
   await checkNoDuplicatePendingInvitation(organizationId, input.email);
   const invitation = await createInvitationRecord(input, organizationId, inviterId);
   await sendInvitationEmail(invitation);
   return invitation;
-}
-
-// TODO(Epica 2 / HU-13-HU-14): reemplazar esta validación simplificada por el
-// chequeo real contra la matriz de permisos granular (ej. "invitations:create")
-// una vez que existan roles custom y permisos asignables por rol.
-async function checkInviterHasPermission(organizationId: string, inviterId: string) {
-  const membership = await findMembershipForUser(organizationId, inviterId);
-  const role = membership ? await findRoleById(membership.roleId) : null;
-  if (!role || role.name !== OWNER_ROLE_NAME) {
-    throw new ForbiddenError("No tenés permiso para invitar miembros a esta organización.");
-  }
 }
 
 async function checkEmailIsNotAlreadyMember(organizationId: string, email: string) {

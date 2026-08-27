@@ -11,6 +11,7 @@ import {
   removeMemberController,
 } from "../controllers/membership.controller";
 import { rolesRoutes } from "../modules/roles/roles.routes";
+import { getMyPermissionsController } from "../modules/permissions/permissions.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { uploadSingleFile } from "../middlewares/upload.middleware";
 
@@ -27,6 +28,11 @@ organizationRoutes.patch(
 organizationRoutes.use("/:organizationId/roles", rolesRoutes);
 organizationRoutes.post("/:organizationId/invitations", authMiddleware, createInvitationController);
 organizationRoutes.get("/:organizationId/members", authMiddleware, listOrganizationMembersController);
+organizationRoutes.get(
+  "/:organizationId/members/me/permissions",
+  authMiddleware,
+  getMyPermissionsController,
+);
 organizationRoutes.patch(
   "/:organizationId/members/:membershipId",
   authMiddleware,

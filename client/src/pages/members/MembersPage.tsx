@@ -4,10 +4,14 @@ import { InviteMemberForm } from "@/components/modules/invitations/InviteMemberF
 import { MembersTable } from "@/components/modules/members/MembersTable";
 import { useCurrentOrganization } from "@/components/modules/organizations/use-current-organization";
 import { useOrganizationMembers } from "@/components/modules/members/use-organization-members";
+import { useHasPermission } from "@/components/modules/permissions/use-has-permission";
 
 export default function MembersPage() {
   const { organization } = useCurrentOrganization();
-  const canInviteMembers = organization?.roleName === "owner";
+  const { hasPermission } = useHasPermission(organization?.id);
+  const canInviteMembers = hasPermission("members:create");
+  const canEditMemberRole = hasPermission("members:edit");
+  const canRemoveMembers = hasPermission("members:delete");
   const { data: members, isLoading, isError } = useOrganizationMembers(organization?.id);
 
   return (
@@ -19,7 +23,7 @@ export default function MembersPage() {
             <CardDescription>
               {canInviteMembers
                 ? "Invitá a alguien por email a esta organización."
-                : "Solo el owner de la organización puede invitar miembros."}
+                : "No tenés permiso para invitar miembros."}
             </CardDescription>
           </CardHeader>
           {canInviteMembers && organization && (
@@ -43,7 +47,8 @@ export default function MembersPage() {
               <MembersTable
                 members={members}
                 organizationId={organization.id}
-                canManageMembers={canInviteMembers}
+                canEditMemberRole={canEditMemberRole}
+                canRemoveMembers={canRemoveMembers}
               />
             )}
           </CardContent>

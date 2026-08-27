@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import type { Permission } from "@prisma/client";
-import { getPermissionCatalog } from "./permissions.service";
+import { ValidationError } from "../../lib/errors";
+import { getMyPermissions, getPermissionCatalog } from "./permissions.service";
 
 export async function listPermissionsController(req: Request, res: Response, next: NextFunction) {
   try {
@@ -9,6 +10,23 @@ export async function listPermissionsController(req: Request, res: Response, nex
   } catch (error) {
     next(error);
   }
+}
+
+export async function getMyPermissionsController(req: Request, res: Response, next: NextFunction) {
+  try {
+    const organizationId = parseOrganizationIdParam(req.params.organizationId);
+    const permissionKeys = await getMyPermissions(organizationId, req.userId!);
+    res.status(200).json({ permissionKeys });
+  } catch (error) {
+    next(error);
+  }
+}
+
+function parseOrganizationIdParam(value: unknown): string {
+  if (typeof value !== "string" || value.length === 0) {
+    throw new ValidationError({ organizationId: ["organizationId inválido."] });
+  }
+  return value;
 }
 
 function formatPermissionForResponse(permission: Permission) {

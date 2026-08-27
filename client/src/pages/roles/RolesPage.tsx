@@ -7,10 +7,13 @@ import { RolesList } from "@/components/modules/roles/RolesList";
 import { useRoles } from "@/components/modules/roles/use-roles";
 import type { RoleSummary } from "@/components/modules/roles/list-roles.api";
 import { useCurrentOrganization } from "@/components/modules/organizations/use-current-organization";
+import { useHasPermission } from "@/components/modules/permissions/use-has-permission";
 
 export default function RolesPage() {
   const { organization } = useCurrentOrganization();
-  const canManageRoles = organization?.roleName === "owner";
+  const { hasPermission } = useHasPermission(organization?.id);
+  const canCreateRoles = hasPermission("roles:create");
+  const canEditRolePermissions = hasPermission("roles:edit");
   const { data: roles, isLoading, isError } = useRoles(organization?.id);
   const [selectedRole, setSelectedRole] = useState<RoleSummary | undefined>(undefined);
 
@@ -23,7 +26,7 @@ export default function RolesPage() {
               <CardTitle className="font-heading text-lg">Roles</CardTitle>
               <CardDescription>Roles disponibles en esta organización.</CardDescription>
             </div>
-            {canManageRoles && organization && (
+            {canCreateRoles && organization && (
               <CreateRoleForm organizationId={organization.id} />
             )}
           </CardHeader>
@@ -56,7 +59,7 @@ export default function RolesPage() {
               <RolePermissionsPanel
                 organizationId={organization.id}
                 role={selectedRole}
-                canEditPermissions={canManageRoles}
+                canEditPermissions={canEditRolePermissions}
               />
             </CardContent>
           )}

@@ -4,10 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { OrganizationLogoUpload } from "@/components/modules/organizations/OrganizationLogoUpload";
 import { OrganizationSettingsForm } from "@/components/modules/organizations/OrganizationSettingsForm";
 import { useCurrentOrganization } from "@/components/modules/organizations/use-current-organization";
+import { useHasPermission } from "@/components/modules/permissions/use-has-permission";
 
 export default function OrganizationSettingsPage() {
   const { organization } = useCurrentOrganization();
-  const canEditOrganization = organization?.roleName === "owner";
+  const { hasPermission } = useHasPermission(organization?.id);
+  const canEditOrganization = hasPermission("organizations:edit");
 
   return (
     <AppShell title="Configuración">
@@ -18,7 +20,7 @@ export default function OrganizationSettingsPage() {
             <CardDescription>
               {canEditOrganization
                 ? "Personalizá el nombre y el logo de tu organización."
-                : "Solo el owner de la organización puede editar estos datos."}
+                : "No tenés permiso para editar estos datos."}
             </CardDescription>
           </CardHeader>
           {canEditOrganization && organization && (

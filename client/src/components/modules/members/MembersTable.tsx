@@ -5,10 +5,16 @@ import type { OrganizationMember } from "./list-organization-members.api";
 type MembersTableProps = {
   members: OrganizationMember[];
   organizationId: string;
-  canManageMembers: boolean;
+  canEditMemberRole: boolean;
+  canRemoveMembers: boolean;
 };
 
-export function MembersTable({ members, organizationId, canManageMembers }: MembersTableProps) {
+export function MembersTable({
+  members,
+  organizationId,
+  canEditMemberRole,
+  canRemoveMembers,
+}: MembersTableProps) {
   if (members.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -34,7 +40,8 @@ export function MembersTable({ members, organizationId, canManageMembers }: Memb
             key={`${member.type}-${member.id}`}
             member={member}
             organizationId={organizationId}
-            canManageMembers={canManageMembers}
+            canEditMemberRole={canEditMemberRole}
+            canRemoveMembers={canRemoveMembers}
           />
         ))}
       </TableBody>

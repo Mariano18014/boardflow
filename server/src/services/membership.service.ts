@@ -11,6 +11,7 @@ import {
 } from "../db/repositories/membership.repository";
 import { findPendingInvitationsByOrganizationId } from "../db/repositories/invitation.repository";
 import { findRoleById } from "../modules/roles/roles.repository";
+import { checkRequesterHasPermission } from "../modules/permissions/check-permission";
 
 const OWNER_ROLE_NAME = "owner";
 
@@ -105,7 +106,7 @@ function sortMemberListByDateDescending(
 }
 
 export async function changeMemberRole(input: ChangeMemberRoleInput, requesterId: string) {
-  await checkRequesterHasPermission(input.organizationId, requesterId);
+  await checkRequesterHasPermission(input.organizationId, requesterId, "members:edit");
   const targetMembership = await findMembershipById(input.membershipId, input.organizationId);
   await checkNotChangingOwnRole(targetMembership, requesterId);
   await checkRoleBelongsToOrganization(input.newRoleId, input.organizationId);
@@ -115,23 +116,12 @@ export async function changeMemberRole(input: ChangeMemberRoleInput, requesterId
 }
 
 export async function removeMemberFromOrganization(input: RemoveMemberInput, requesterId: string) {
-  await checkRequesterHasPermission(input.organizationId, requesterId);
+  await checkRequesterHasPermission(input.organizationId, requesterId, "members:delete");
   const targetMembership = await findMembershipById(input.membershipId, input.organizationId);
   await checkNotRemovingSelf(targetMembership, requesterId);
   await checkNotRemovingLastOwner(targetMembership);
   const suspendedMembership = await suspendMembership(targetMembership);
   return suspendedMembership;
-}
-
-// TODO(Epica 2 / HU-13-HU-14): reemplazar esta validación simplificada por el
-// chequeo real contra la matriz de permisos granular (ej. "members:update-role",
-// "members:remove") una vez que existan roles custom y permisos asignables por rol.
-async function checkRequesterHasPermission(organizationId: string, requesterId: string) {
-  const membership = await findMembershipForUser(organizationId, requesterId);
-  const role = membership ? await findRoleById(membership.roleId) : null;
-  if (!role || role.name !== OWNER_ROLE_NAME) {
-    throw new ForbiddenError("No tenés permiso para gestionar los miembros de esta organización.");
-  }
 }
 
 async function findMembershipById(

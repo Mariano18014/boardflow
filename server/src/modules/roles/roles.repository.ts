@@ -42,6 +42,20 @@ export async function findRolePermissionsByRoleId(roleId: string) {
   return prisma.rolePermission.findMany({ where: { roleId } });
 }
 
+export async function findRolePermissionByKey(roleId: string, permissionKey: string) {
+  return prisma.rolePermission.findFirst({
+    where: { roleId, permission: { key: permissionKey } },
+  });
+}
+
+export async function findRolePermissionKeys(roleId: string): Promise<string[]> {
+  const rolePermissions = await prisma.rolePermission.findMany({
+    where: { roleId },
+    include: { permission: true },
+  });
+  return rolePermissions.map((rolePermission) => rolePermission.permission.key);
+}
+
 export async function replaceRolePermissions(roleId: string, permissionIds: string[]) {
   return prisma.$transaction(async (tx) => {
     await tx.rolePermission.deleteMany({ where: { roleId } });
