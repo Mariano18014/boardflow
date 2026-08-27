@@ -1,8 +1,13 @@
 import type { NextFunction, Request, Response } from "express";
 import type { Board } from "@prisma/client";
-import { createBoardBodySchema, type CreateBoardBody } from "@shared/schemas/board.schema";
+import {
+  createBoardBodySchema,
+  reorderBoardsSchema,
+  type CreateBoardBody,
+  type ReorderBoardsBody,
+} from "@shared/schemas/board.schema";
 import { ValidationError } from "../../lib/errors";
-import { createBoard } from "./boards.service";
+import { createBoard, getBoardsForProject, reorderBoards } from "./boards.service";
 
 export async function createBoardController(req: Request, res: Response, next: NextFunction) {
   try {
@@ -11,6 +16,32 @@ export async function createBoardController(req: Request, res: Response, next: N
     const body = parseCreateBoardRequestBody(req.body);
     const board = await createBoard({ ...body, organizationId, projectId }, req.userId!);
     res.status(201).json({ board: formatBoardForResponse(board) });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function listBoardsController(req: Request, res: Response, next: NextFunction) {
+  try {
+    const organizationId = parseOrganizationIdParam(req.params.organizationId);
+    const projectId = parseProjectIdParam(req.params.projectId);
+    const boards = await getBoardsForProject({ organizationId, projectId }, req.userId!);
+    res.status(200).json({ boards: boards.map(formatBoardForResponse) });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function reorderBoardsController(req: Request, res: Response, next: NextFunction) {
+  try {
+    const organizationId = parseOrganizationIdParam(req.params.organizationId);
+    const projectId = parseProjectIdParam(req.params.projectId);
+    const body = parseReorderBoardsRequestBody(req.body);
+    const boards = await reorderBoards(
+      { organizationId, projectId, boardIds: body.boardIds },
+      req.userId!,
+    );
+    res.status(200).json({ boards: boards.map(formatBoardForResponse) });
   } catch (error) {
     next(error);
   }
@@ -32,6 +63,14 @@ function parseProjectIdParam(value: unknown): string {
 
 function parseCreateBoardRequestBody(body: unknown): CreateBoardBody {
   const result = createBoardBodySchema.safeParse(body);
+  if (!result.success) {
+    throw new ValidationError(result.error.flatten().fieldErrors);
+  }
+  return result.data;
+}
+
+function parseReorderBoardsRequestBody(body: unknown): ReorderBoardsBody {
+  const result = reorderBoardsSchema.safeParse(body);
   if (!result.success) {
     throw new ValidationError(result.error.flatten().fieldErrors);
   }

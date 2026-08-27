@@ -19,7 +19,12 @@ export const createBoardSchema = createBoardBodySchema.extend({
 
 export const updateBoardSchema = boardSchema.pick({ name: true, position: true }).partial();
 
+export const reorderBoardsSchema = z.object({
+  boardIds: z.array(z.string().uuid()).min(1),
+});
+
 export type Board = z.infer<typeof boardSchema>;
 export type CreateBoardBody = z.infer<typeof createBoardBodySchema>;
 export type CreateBoardInput = z.infer<typeof createBoardSchema>;
 export type UpdateBoardInput = z.infer<typeof updateBoardSchema>;
+export type ReorderBoardsBody = z.infer<typeof reorderBoardsSchema>;
