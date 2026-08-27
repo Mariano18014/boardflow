@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { setFieldErrorsOnForm } from "@/components/modules/auth/apply-field-errors";
-import { useRoles } from "@/components/modules/organizations/use-roles";
+import { useRoles } from "@/components/modules/roles/use-roles";
 import { inviteMember } from "./invite-member.api";
 import { InvitationApiError } from "./invitation-api-error";
 

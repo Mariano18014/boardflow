@@ -13,11 +13,7 @@ import {
   findMembershipForUser,
   findOrganizationsByUserId,
 } from "../db/repositories/membership.repository";
-import {
-  createRole,
-  findRoleById,
-  findRolesByOrganizationId,
-} from "../db/repositories/role.repository";
+import { createRole, findRoleById } from "../modules/roles/roles.repository";
 import { findAllPermissions } from "../db/repositories/permission.repository";
 import { createRolePermissions } from "../db/repositories/role-permission.repository";
 import { deleteFile, saveFile } from "./file-storage.service";
@@ -110,18 +106,6 @@ async function createDefaultMemberRole(organizationId: string) {
 
 export async function getOrganizationsForUser(userId: string) {
   return findOrganizationsByUserId(userId);
-}
-
-export async function getRolesForOrganization(organizationId: string, userId: string) {
-  await validateUserIsMember(organizationId, userId);
-  return findRolesByOrganizationId(organizationId);
-}
-
-async function validateUserIsMember(organizationId: string, userId: string) {
-  const membership = await findMembershipForUser(organizationId, userId);
-  if (!membership) {
-    throw new ForbiddenError("No pertenecés a esta organización.");
-  }
 }
 
 export type UpdateOrganizationRequest = {

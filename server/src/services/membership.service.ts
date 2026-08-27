@@ -10,7 +10,7 @@ import {
   updateMembershipRole as saveMembershipRole,
 } from "../db/repositories/membership.repository";
 import { findPendingInvitationsByOrganizationId } from "../db/repositories/invitation.repository";
-import { findRoleById } from "../db/repositories/role.repository";
+import { findRoleById } from "../modules/roles/roles.repository";
 
 const OWNER_ROLE_NAME = "owner";
 

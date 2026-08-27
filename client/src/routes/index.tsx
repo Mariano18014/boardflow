@@ -11,6 +11,7 @@ import DashboardPage from "@/pages/dashboard/DashboardPage";
 import ProjectPage from "@/pages/projects/ProjectPage";
 import MembersPage from "@/pages/members/MembersPage";
 import OrganizationSettingsPage from "@/pages/organizations/OrganizationSettingsPage";
+import RolesPage from "@/pages/roles/RolesPage";
 import InvitationPage from "@/pages/invitations/InvitationPage";
 import NotFoundPage from "@/pages/not-found/NotFoundPage";
 
@@ -39,6 +40,9 @@ export function AppRoutes() {
       </Route>
       <Route path="/settings">
         <RequireOrganization component={OrganizationSettingsPage} />
+      </Route>
+      <Route path="/settings/roles">
+        <RequireOrganization component={RolesPage} />
       </Route>
       <Route component={NotFoundPage} />
     </Switch>

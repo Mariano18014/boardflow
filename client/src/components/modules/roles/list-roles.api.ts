@@ -1,9 +1,11 @@
 import { buildAuthorizationHeaders } from "@/lib/queryClient";
-import { buildOrganizationApiError } from "./organization-api-error";
+import { buildRolesApiError } from "./roles-api-error";
 
 export type RoleSummary = {
   id: string;
   name: string;
+  description: string | null;
+  isSystem: boolean;
 };
 
 export async function listRoles(organizationId: string): Promise<RoleSummary[]> {
@@ -13,7 +15,7 @@ export async function listRoles(organizationId: string): Promise<RoleSummary[]> 
   });
 
   if (!response.ok) {
-    throw await buildOrganizationApiError(response, "No se pudieron cargar los roles.");
+    throw await buildRolesApiError(response, "No se pudieron cargar los roles.");
   }
 
   const body = await response.json();

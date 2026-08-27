@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import type { Organization, Role } from "@prisma/client";
+import type { Organization } from "@prisma/client";
 import {
   createOrganizationSchema,
   updateOrganizationSchema,
@@ -10,7 +10,6 @@ import { ValidationError } from "../lib/errors";
 import {
   createOrganization,
   getOrganizationsForUser,
-  getRolesForOrganization,
   updateOrganization,
 } from "../services/organization.service";
 
@@ -28,16 +27,6 @@ export async function listOrganizationsController(req: Request, res: Response, n
   try {
     const organizations = await getOrganizationsForUser(req.userId!);
     res.status(200).json({ organizations: organizations.map(formatOrganizationForResponse) });
-  } catch (error) {
-    next(error);
-  }
-}
-
-export async function listRolesController(req: Request, res: Response, next: NextFunction) {
-  try {
-    const organizationId = parseOrganizationIdParam(req.params.organizationId);
-    const roles = await getRolesForOrganization(organizationId, req.userId!);
-    res.status(200).json({ roles: roles.map(formatRoleForResponse) });
   } catch (error) {
     next(error);
   }
@@ -87,12 +76,5 @@ function formatOrganizationForResponse(organization: Organization & { roleName?:
     slug: organization.slug,
     logoUrl: organization.logoUrl,
     ...(organization.roleName ? { roleName: organization.roleName } : {}),
-  };
-}
-
-function formatRoleForResponse(role: Role) {
-  return {
-    id: role.id,
-    name: role.name,
   };
 }

@@ -2,7 +2,6 @@ import { Router } from "express";
 import {
   createOrganizationController,
   listOrganizationsController,
-  listRolesController,
   updateOrganizationController,
 } from "../controllers/organization.controller";
 import { createInvitationController } from "../controllers/invitation.controller";
@@ -11,6 +10,7 @@ import {
   listOrganizationMembersController,
   removeMemberController,
 } from "../controllers/membership.controller";
+import { rolesRoutes } from "../modules/roles/roles.routes";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { uploadSingleFile } from "../middlewares/upload.middleware";
 
@@ -24,7 +24,7 @@ organizationRoutes.patch(
   uploadSingleFile("logo"),
   updateOrganizationController,
 );
-organizationRoutes.get("/:organizationId/roles", authMiddleware, listRolesController);
+organizationRoutes.use("/:organizationId/roles", rolesRoutes);
 organizationRoutes.post("/:organizationId/invitations", authMiddleware, createInvitationController);
 organizationRoutes.get("/:organizationId/members", authMiddleware, listOrganizationMembersController);
 organizationRoutes.patch(

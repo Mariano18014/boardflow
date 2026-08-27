@@ -9,7 +9,7 @@ import {
   findActiveMembershipByEmail,
   findMembershipForUser,
 } from "../db/repositories/membership.repository";
-import { findRoleById } from "../db/repositories/role.repository";
+import { findRoleById } from "../modules/roles/roles.repository";
 import { findUserById } from "../db/repositories/user.repository";
 import {
   createInvitation as saveInvitationRecord,

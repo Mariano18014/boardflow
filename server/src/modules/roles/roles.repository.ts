@@ -1,10 +1,10 @@
-import { prisma } from "../client";
+import { prisma } from "../../db/client";
 
 type CreateRoleData = {
   organizationId: string;
   name: string;
   isSystem: boolean;
-  description?: string;
+  description?: string | null;
 };
 
 export async function createRole(data: CreateRoleData) {
@@ -20,4 +20,10 @@ export async function findRolesByOrganizationId(organizationId: string) {
 
 export async function findRoleById(id: string) {
   return prisma.role.findUnique({ where: { id } });
+}
+
+export async function findRoleByName(organizationId: string, name: string) {
+  return prisma.role.findFirst({
+    where: { organizationId, name: { equals: name, mode: "insensitive" } },
+  });
 }

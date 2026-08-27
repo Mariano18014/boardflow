@@ -7,7 +7,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { useRoles } from "@/components/modules/organizations/use-roles";
+import { useRoles } from "@/components/modules/roles/use-roles";
 import { useChangeMemberRole } from "./use-change-member-role";
 
 type MemberRoleSelectProps = {
