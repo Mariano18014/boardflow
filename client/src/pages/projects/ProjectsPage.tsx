@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { CreateProjectDialog } from "@/components/modules/projects/CreateProjectDialog";
 import { ProjectsList } from "@/components/modules/projects/ProjectsList";
+import { ArchivedProjectsSection } from "@/components/modules/projects/ArchivedProjectsSection";
 import { useOrganizationProjects } from "@/components/modules/projects/use-organization-projects";
 import { useCurrentOrganization } from "@/components/modules/organizations/use-current-organization";
 import { useHasPermission } from "@/components/modules/permissions/use-has-permission";
@@ -9,8 +10,12 @@ export default function ProjectsPage() {
   const { organization } = useCurrentOrganization();
   const { hasPermission } = useHasPermission(organization?.id);
   const canCreateProjects = hasPermission("projects:create");
+  const canArchiveProjects = hasPermission("projects:delete");
+  const canRestoreProjects = hasPermission("projects:edit");
   const { data: projects, isLoading, isError } = useOrganizationProjects(organization?.id);
-  const hasProjects = (projects?.length ?? 0) > 0;
+  const activeProjects = projects?.filter((project) => !project.isArchived) ?? [];
+  const archivedProjects = projects?.filter((project) => project.isArchived) ?? [];
+  const hasActiveProjects = activeProjects.length > 0;
 
   return (
     <AppShell title="Proyectos">
@@ -22,7 +27,7 @@ export default function ProjectsPage() {
               Todos los proyectos de esta organización.
             </p>
           </div>
-          {canCreateProjects && organization && hasProjects && (
+          {canCreateProjects && organization && hasActiveProjects && (
             <CreateProjectDialog organizationId={organization.id} />
           )}
         </div>
@@ -31,15 +36,22 @@ export default function ProjectsPage() {
         {isError && (
           <p className="text-sm text-destructive">No se pudo cargar el listado de proyectos.</p>
         )}
-        {projects && (
-          <ProjectsList
-            projects={projects}
-            emptyStateAction={
-              canCreateProjects && organization ? (
-                <CreateProjectDialog organizationId={organization.id} />
-              ) : undefined
-            }
-          />
+        {projects && organization && (
+          <>
+            <ProjectsList
+              projects={activeProjects}
+              organizationId={organization.id}
+              canArchiveProjects={canArchiveProjects}
+              emptyStateAction={
+                canCreateProjects ? <CreateProjectDialog organizationId={organization.id} /> : undefined
+              }
+            />
+            <ArchivedProjectsSection
+              projects={archivedProjects}
+              organizationId={organization.id}
+              canRestoreProjects={canRestoreProjects}
+            />
+          </>
         )}
       </div>
     </AppShell>

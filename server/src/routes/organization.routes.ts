@@ -14,8 +14,10 @@ import { rolesRoutes } from "../modules/roles/roles.routes";
 import { boardsRoutes } from "../modules/boards/boards.routes";
 import { getMyPermissionsController } from "../modules/permissions/permissions.controller";
 import {
+  archiveProjectController,
   createProjectController,
   listOrganizationProjectsController,
+  restoreProjectController,
 } from "../controllers/project.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { uploadSingleFile } from "../middlewares/upload.middleware";
@@ -55,3 +57,13 @@ organizationRoutes.get(
   listOrganizationProjectsController,
 );
 organizationRoutes.use("/:organizationId/projects/:projectId/boards", boardsRoutes);
+organizationRoutes.patch(
+  "/:organizationId/projects/:projectId/archive",
+  authMiddleware,
+  archiveProjectController,
+);
+organizationRoutes.patch(
+  "/:organizationId/projects/:projectId/restore",
+  authMiddleware,
+  restoreProjectController,
+);

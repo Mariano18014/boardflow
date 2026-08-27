@@ -11,6 +11,7 @@ export function AppSidebar() {
   const { organization: currentOrganization } = useCurrentOrganization();
   const { data: projects } = useProjects(currentOrganization?.id);
   const [, activeParams] = useRoute<{ projectId: string }>("/projects/:projectId");
+  const [isDashboardActive] = useRoute("/dashboard");
   const [isProjectsListActive] = useRoute("/projects");
   const [isMembersActive] = useRoute("/members");
   const [isSettingsActive] = useRoute("/settings");
@@ -28,6 +29,18 @@ export function AppSidebar() {
           </span>
         </div>
       )}
+
+      <Link
+        href="/dashboard"
+        className={cn(
+          "rounded-md px-2.5 py-1.5 text-sm font-medium mb-4",
+          isDashboardActive
+            ? "bg-accent text-accent-foreground"
+            : "text-muted-foreground hover:text-foreground",
+        )}
+      >
+        Dashboard
+      </Link>
 
       <Link
         href="/projects"

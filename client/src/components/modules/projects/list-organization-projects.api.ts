@@ -11,11 +11,17 @@ export type OrganizationProject = {
   boardsCount: number;
 };
 
-export async function listOrganizationProjects(organizationId: string): Promise<OrganizationProject[]> {
-  const response = await fetch(`/api/organizations/${organizationId}/projects`, {
-    credentials: "include",
-    headers: buildAuthorizationHeaders(),
-  });
+export async function listOrganizationProjects(
+  organizationId: string,
+  includeArchived: boolean,
+): Promise<OrganizationProject[]> {
+  const response = await fetch(
+    `/api/organizations/${organizationId}/projects?includeArchived=${includeArchived}`,
+    {
+      credentials: "include",
+      headers: buildAuthorizationHeaders(),
+    },
+  );
 
   if (!response.ok) {
     throw await buildProjectApiError(response, "No se pudieron cargar los proyectos.");

@@ -1,13 +1,16 @@
+import type { Project } from "@prisma/client";
 import type { CreateProjectInput, ProjectListItem } from "@shared/schemas/project.schema";
-import { ForbiddenError, NotFoundError } from "../lib/errors";
+import { ConflictError, ForbiddenError, NotFoundError } from "../lib/errors";
 import { findMembershipForUser } from "../db/repositories/membership.repository";
 import { checkRequesterHasPermission } from "../modules/permissions/check-permission";
 import {
   createProject as saveProjectRecord,
   findProjectByKey,
   findProjectById as findProjectRecordById,
+  findProjectByIdAndOrganizationId,
   findProjectsByOrganizationId,
   findProjectsForOrganization,
+  updateProjectArchivedStatus as saveProjectArchivedStatus,
   type ProjectWithBoardsCount,
 } from "../db/repositories/project.repository";
 
@@ -126,4 +129,55 @@ function mapProjectWithBoardsCountToListItem(project: ProjectWithBoardsCount): P
     createdAt: project.createdAt,
     boardsCount: project._count.boards,
   };
+}
+
+export type ArchiveProjectInput = {
+  organizationId: string;
+  projectId: string;
+};
+
+export type RestoreProjectInput = {
+  organizationId: string;
+  projectId: string;
+};
+
+export async function archiveProject(input: ArchiveProjectInput, requesterId: string) {
+  await checkRequesterHasPermission(input.organizationId, requesterId, "projects:delete");
+  const project = await findProjectByIdInOrganization(input.projectId, input.organizationId);
+  await checkProjectIsNotAlreadyArchived(project);
+  return updateProjectArchivedStatus(project, true);
+}
+
+export async function restoreProject(input: RestoreProjectInput, requesterId: string) {
+  await checkRequesterHasPermission(input.organizationId, requesterId, "projects:edit");
+  const project = await findProjectByIdInOrganization(input.projectId, input.organizationId);
+  await checkProjectIsCurrentlyArchived(project);
+  return updateProjectArchivedStatus(project, false);
+}
+
+async function findProjectByIdInOrganization(
+  projectId: string,
+  organizationId: string,
+): Promise<Project> {
+  const project = await findProjectByIdAndOrganizationId(projectId, organizationId);
+  if (!project) {
+    throw new NotFoundError("El proyecto no existe en esta organización.");
+  }
+  return project;
+}
+
+async function checkProjectIsNotAlreadyArchived(project: Project) {
+  if (project.isArchived) {
+    throw new ConflictError("El proyecto ya está archivado.");
+  }
+}
+
+async function checkProjectIsCurrentlyArchived(project: Project) {
+  if (!project.isArchived) {
+    throw new ConflictError("El proyecto no está archivado.");
+  }
+}
+
+async function updateProjectArchivedStatus(project: Project, isArchived: boolean) {
+  return saveProjectArchivedStatus(project.id, isArchived);
 }

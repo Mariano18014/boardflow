@@ -9,10 +9,12 @@ import {
 } from "@shared/schemas/project.schema";
 import { ValidationError } from "../lib/errors";
 import {
+  archiveProject,
   createProject,
   getOrganizationProjects,
   getProjectById,
   getProjectsForOrganization,
+  restoreProject,
 } from "../services/project.service";
 
 export async function createProjectController(req: Request, res: Response, next: NextFunction) {
@@ -72,6 +74,28 @@ export async function listOrganizationProjectsController(
   }
 }
 
+export async function archiveProjectController(req: Request, res: Response, next: NextFunction) {
+  try {
+    const organizationId = parseOrganizationIdParam(req.params.organizationId);
+    const projectId = parseProjectIdParam(req.params.projectId);
+    const project = await archiveProject({ organizationId, projectId }, req.userId!);
+    res.status(200).json({ project: formatProjectForResponse(project) });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function restoreProjectController(req: Request, res: Response, next: NextFunction) {
+  try {
+    const organizationId = parseOrganizationIdParam(req.params.organizationId);
+    const projectId = parseProjectIdParam(req.params.projectId);
+    const project = await restoreProject({ organizationId, projectId }, req.userId!);
+    res.status(200).json({ project: formatProjectForResponse(project) });
+  } catch (error) {
+    next(error);
+  }
+}
+
 function parseCreateProjectRequestBody(body: unknown): CreateProjectBody {
   const result = createProjectBodySchema.safeParse(body);
   if (!result.success) {
@@ -115,6 +139,7 @@ function formatProjectForResponse(project: Project) {
     name: project.name,
     key: project.key,
     description: project.description,
+    isArchived: project.isArchived,
     organizationId: project.organizationId,
   };
 }

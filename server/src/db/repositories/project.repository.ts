@@ -44,6 +44,10 @@ export async function findProjectByIdAndOrganizationId(projectId: string, organi
   });
 }
 
+export async function updateProjectArchivedStatus(id: string, isArchived: boolean) {
+  return prisma.project.update({ where: { id }, data: { isArchived } });
+}
+
 export async function findProjectsForOrganization(
   organizationId: string,
   filters: ProjectListFilters,

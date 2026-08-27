@@ -4,15 +4,22 @@ import { ProjectCard } from "./ProjectCard";
 
 type ProjectsListProps = {
   projects: OrganizationProject[];
+  organizationId: string;
+  canArchiveProjects: boolean;
   emptyStateAction?: ReactNode;
 };
 
-export function ProjectsList({ projects, emptyStateAction }: ProjectsListProps) {
+export function ProjectsList({
+  projects,
+  organizationId,
+  canArchiveProjects,
+  emptyStateAction,
+}: ProjectsListProps) {
   if (projects.length === 0) {
     return (
       <div className="flex flex-col items-start gap-3">
         <p className="text-sm text-muted-foreground">
-          Todavía no hay proyectos en esta organización.
+          Todavía no hay proyectos activos en esta organización.
         </p>
         {emptyStateAction}
       </div>
@@ -22,7 +29,12 @@ export function ProjectsList({ projects, emptyStateAction }: ProjectsListProps) 
   return (
     <div className="grid grid-cols-3 gap-3.5">
       {projects.map((project) => (
-        <ProjectCard key={project.id} project={project} />
+        <ProjectCard
+          key={project.id}
+          project={project}
+          organizationId={organizationId}
+          canArchiveProjects={canArchiveProjects}
+        />
       ))}
     </div>
   );
