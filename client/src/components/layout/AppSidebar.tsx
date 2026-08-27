@@ -11,6 +11,7 @@ export function AppSidebar() {
   const { organization: currentOrganization } = useCurrentOrganization();
   const { data: projects } = useProjects(currentOrganization?.id);
   const [, activeParams] = useRoute<{ projectId: string }>("/projects/:projectId");
+  const [isProjectsListActive] = useRoute("/projects");
   const [isMembersActive] = useRoute("/members");
   const [isSettingsActive] = useRoute("/settings");
   const isOwner = currentOrganization?.roleName === "owner";
@@ -28,9 +29,15 @@ export function AppSidebar() {
         </div>
       )}
 
-      <div className="text-[11px] font-semibold uppercase tracking-wide text-text-3 px-2 mb-1.5">
+      <Link
+        href="/projects"
+        className={cn(
+          "text-[11px] font-semibold uppercase tracking-wide px-2 mb-1.5",
+          isProjectsListActive ? "text-foreground" : "text-text-3 hover:text-foreground",
+        )}
+      >
         Proyectos
-      </div>
+      </Link>
       {projects && projects.length === 0 && (
         <p className="text-xs text-muted-foreground px-2">Todavía no tenés proyectos.</p>
       )}

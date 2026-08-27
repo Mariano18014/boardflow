@@ -1,8 +1,19 @@
 import type { NextFunction, Request, Response } from "express";
 import type { Project } from "@prisma/client";
-import { createProjectBodySchema, type CreateProjectBody } from "@shared/schemas/project.schema";
+import {
+  createProjectBodySchema,
+  listProjectsQuerySchema,
+  type CreateProjectBody,
+  type ListProjectsQuery,
+  type ProjectListItem,
+} from "@shared/schemas/project.schema";
 import { ValidationError } from "../lib/errors";
-import { createProject, getProjectById, getProjectsForOrganization } from "../services/project.service";
+import {
+  createProject,
+  getOrganizationProjects,
+  getProjectById,
+  getProjectsForOrganization,
+} from "../services/project.service";
 
 export async function createProjectController(req: Request, res: Response, next: NextFunction) {
   try {
@@ -30,6 +41,32 @@ export async function getProjectController(req: Request, res: Response, next: Ne
     const projectId = parseProjectIdParam(req.params.projectId);
     const project = await getProjectById(projectId, req.userId!);
     res.status(200).json({ project: formatProjectForResponse(project) });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function listOrganizationProjectsController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const organizationId = parseOrganizationIdParam(req.params.organizationId);
+    const query = parseListProjectsQuery(req.query);
+    const projects = await getOrganizationProjects(
+      {
+        organizationId,
+        includeArchived: query.includeArchived,
+        limit: query.limit,
+        offset: query.offset,
+      },
+      req.userId!,
+    );
+    res.status(200).json({
+      projects: projects.map(formatProjectListItemForResponse),
+      pagination: { limit: query.limit, offset: query.offset },
+    });
   } catch (error) {
     next(error);
   }
@@ -64,6 +101,14 @@ function parseProjectIdParam(value: unknown): string {
   return value;
 }
 
+function parseListProjectsQuery(query: unknown): ListProjectsQuery {
+  const result = listProjectsQuerySchema.safeParse(query);
+  if (!result.success) {
+    throw new ValidationError(result.error.flatten().fieldErrors);
+  }
+  return result.data;
+}
+
 function formatProjectForResponse(project: Project) {
   return {
     id: project.id,
@@ -71,5 +116,17 @@ function formatProjectForResponse(project: Project) {
     key: project.key,
     description: project.description,
     organizationId: project.organizationId,
+  };
+}
+
+function formatProjectListItemForResponse(project: ProjectListItem) {
+  return {
+    id: project.id,
+    name: project.name,
+    key: project.key,
+    description: project.description,
+    isArchived: project.isArchived,
+    createdAt: project.createdAt,
+    boardsCount: project.boardsCount,
   };
 }

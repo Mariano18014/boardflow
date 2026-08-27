@@ -1,4 +1,4 @@
-import type { CreateProjectInput } from "@shared/schemas/project.schema";
+import type { CreateProjectInput, ProjectListItem } from "@shared/schemas/project.schema";
 import { ForbiddenError, NotFoundError } from "../lib/errors";
 import { findMembershipForUser } from "../db/repositories/membership.repository";
 import { checkRequesterHasPermission } from "../modules/permissions/check-permission";
@@ -7,6 +7,8 @@ import {
   findProjectByKey,
   findProjectById as findProjectRecordById,
   findProjectsByOrganizationId,
+  findProjectsForOrganization,
+  type ProjectWithBoardsCount,
 } from "../db/repositories/project.repository";
 
 const MIN_PROJECT_KEY_LENGTH = 2;
@@ -83,4 +85,45 @@ export async function getProjectById(projectId: string, userId: string) {
   }
   await validateUserIsMember(project.organizationId, userId);
   return project;
+}
+
+export type GetProjectsInput = {
+  organizationId: string;
+  includeArchived: boolean;
+  limit: number;
+  offset: number;
+};
+
+export async function getOrganizationProjects(
+  input: GetProjectsInput,
+  requesterId: string,
+): Promise<ProjectListItem[]> {
+  await checkRequesterHasPermission(input.organizationId, requesterId, "projects:view");
+  const projects = await findProjectsByOrganization(input);
+  return projects;
+}
+
+async function findProjectsByOrganization(input: GetProjectsInput): Promise<ProjectListItem[]> {
+  const projects = await findProjectsForOrganization(input.organizationId, {
+    includeArchived: input.includeArchived,
+    limit: input.limit,
+    offset: input.offset,
+  });
+  return attachBoardsCountToProjects(projects);
+}
+
+function attachBoardsCountToProjects(projects: ProjectWithBoardsCount[]): ProjectListItem[] {
+  return projects.map(mapProjectWithBoardsCountToListItem);
+}
+
+function mapProjectWithBoardsCountToListItem(project: ProjectWithBoardsCount): ProjectListItem {
+  return {
+    id: project.id,
+    name: project.name,
+    key: project.key,
+    description: project.description,
+    isArchived: project.isArchived,
+    createdAt: project.createdAt,
+    boardsCount: project._count.boards,
+  };
 }
