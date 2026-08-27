@@ -38,6 +38,12 @@ export async function findProjectById(id: string) {
   return prisma.project.findUnique({ where: { id } });
 }
 
+export async function findProjectByIdAndOrganizationId(projectId: string, organizationId: string) {
+  return prisma.project.findFirst({
+    where: { id: projectId, organizationId, deletedAt: null },
+  });
+}
+
 export async function findProjectsForOrganization(
   organizationId: string,
   filters: ProjectListFilters,

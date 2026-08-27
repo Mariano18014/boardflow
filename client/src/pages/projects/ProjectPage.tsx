@@ -1,10 +1,14 @@
 import { useParams } from "wouter";
 import { AppShell } from "@/components/layout/AppShell";
 import { useProject } from "@/components/modules/projects/use-project";
+import { useHasPermission } from "@/components/modules/permissions/use-has-permission";
+import { CreateBoardDialog } from "@/components/modules/boards/CreateBoardDialog";
 
 export default function ProjectPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const { data: project, isLoading, isError } = useProject(projectId);
+  const { hasPermission } = useHasPermission(project?.organizationId);
+  const canCreateBoards = hasPermission("boards:create");
 
   return (
     <AppShell title={project?.name ?? "Proyecto"}>
@@ -15,7 +19,12 @@ export default function ProjectPage() {
         )}
         {project && (
           <>
-            <div className="text-xs font-mono text-text-3 mb-1">{project.key}</div>
+            <div className="flex items-center justify-between mb-1">
+              <div className="text-xs font-mono text-text-3">{project.key}</div>
+              {canCreateBoards && (
+                <CreateBoardDialog organizationId={project.organizationId} projectId={project.id} />
+              )}
+            </div>
             <h1 className="font-heading text-xl font-bold mb-1">{project.name}</h1>
             <p className="text-sm text-muted-foreground">
               El backlog, los sprints y el tablero de este proyecto todavía no están

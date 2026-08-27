@@ -11,6 +11,7 @@ import {
   removeMemberController,
 } from "../controllers/membership.controller";
 import { rolesRoutes } from "../modules/roles/roles.routes";
+import { boardsRoutes } from "../modules/boards/boards.routes";
 import { getMyPermissionsController } from "../modules/permissions/permissions.controller";
 import {
   createProjectController,
@@ -53,3 +54,4 @@ organizationRoutes.get(
   authMiddleware,
   listOrganizationProjectsController,
 );
+organizationRoutes.use("/:organizationId/projects/:projectId/boards", boardsRoutes);

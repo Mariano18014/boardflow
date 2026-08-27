@@ -10,6 +10,7 @@ import OnboardingPage from "@/pages/onboarding/OnboardingPage";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import ProjectPage from "@/pages/projects/ProjectPage";
 import ProjectsPage from "@/pages/projects/ProjectsPage";
+import BoardPage from "@/pages/boards/BoardPage";
 import MembersPage from "@/pages/members/MembersPage";
 import OrganizationSettingsPage from "@/pages/organizations/OrganizationSettingsPage";
 import RolesPage from "@/pages/roles/RolesPage";
@@ -38,6 +39,9 @@ export function AppRoutes() {
       </Route>
       <Route path="/projects/:projectId">
         <RequireOrganization component={ProjectPage} />
+      </Route>
+      <Route path="/boards/:boardId">
+        <RequireOrganization component={BoardPage} />
       </Route>
       <Route path="/members">
         <RequireOrganization component={MembersPage} />
