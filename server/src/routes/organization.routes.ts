@@ -12,6 +12,7 @@ import {
 } from "../controllers/membership.controller";
 import { rolesRoutes } from "../modules/roles/roles.routes";
 import { getMyPermissionsController } from "../modules/permissions/permissions.controller";
+import { createProjectController } from "../controllers/project.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { uploadSingleFile } from "../middlewares/upload.middleware";
 
@@ -43,3 +44,4 @@ organizationRoutes.delete(
   authMiddleware,
   removeMemberController,
 );
+organizationRoutes.post("/:organizationId/projects", authMiddleware, createProjectController);

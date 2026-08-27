@@ -1,6 +1,7 @@
 import type { CreateProjectInput } from "@shared/schemas/project.schema";
 import { ForbiddenError, NotFoundError } from "../lib/errors";
 import { findMembershipForUser } from "../db/repositories/membership.repository";
+import { checkRequesterHasPermission } from "../modules/permissions/check-permission";
 import {
   createProject as saveProjectRecord,
   findProjectByKey,
@@ -8,10 +9,13 @@ import {
   findProjectsByOrganizationId,
 } from "../db/repositories/project.repository";
 
-export async function createProject(input: CreateProjectInput, creatorId: string) {
-  await validateUserIsMember(input.organizationId, creatorId);
+const MIN_PROJECT_KEY_LENGTH = 2;
+const MAX_PROJECT_KEY_LENGTH = 5;
+
+export async function createProject(input: CreateProjectInput, requesterId: string) {
+  await checkRequesterHasPermission(input.organizationId, requesterId, "projects:create");
   const key = await generateUniqueProjectKey(input.name, input.organizationId);
-  const project = await saveProjectInDatabase(input.name, key, input.organizationId, creatorId);
+  const project = await saveProjectInDatabase(input, key, requesterId);
   return project;
 }
 
@@ -34,9 +38,22 @@ async function generateUniqueProjectKey(name: string, organizationId: string) {
 }
 
 function buildProjectKeyFromName(name: string): string {
-  const firstWord = name.trim().split(/\s+/)[0] ?? "";
-  const letters = firstWord.replace(/[^a-zA-Z]/g, "");
-  return (letters.slice(0, 3) || "PRJ").toUpperCase();
+  const words = name.trim().split(/\s+/).filter((word) => word.length > 0);
+  const initials = buildInitialsFromWords(words);
+  return ensureMinimumKeyLength(initials, words);
+}
+
+function buildInitialsFromWords(words: string[]): string {
+  const initials = words.map((word) => word.charAt(0)).join("").toUpperCase();
+  return initials.slice(0, MAX_PROJECT_KEY_LENGTH);
+}
+
+function ensureMinimumKeyLength(initials: string, words: string[]): string {
+  if (initials.length >= MIN_PROJECT_KEY_LENGTH) {
+    return initials;
+  }
+  const firstWordLetters = (words[0] ?? "").toUpperCase();
+  return firstWordLetters.slice(0, MIN_PROJECT_KEY_LENGTH).padEnd(MIN_PROJECT_KEY_LENGTH, "X");
 }
 
 async function checkProjectKeyAvailability(key: string, organizationId: string) {
@@ -44,13 +61,14 @@ async function checkProjectKeyAvailability(key: string, organizationId: string) 
   return existingProject === null;
 }
 
-async function saveProjectInDatabase(
-  name: string,
-  key: string,
-  organizationId: string,
-  creatorId: string,
-) {
-  return saveProjectRecord({ name, key, organizationId, createdBy: creatorId });
+async function saveProjectInDatabase(input: CreateProjectInput, key: string, creatorId: string) {
+  return saveProjectRecord({
+    name: input.name,
+    key,
+    organizationId: input.organizationId,
+    createdBy: creatorId,
+    description: input.description,
+  });
 }
 
 export async function getProjectsForOrganization(organizationId: string, userId: string) {

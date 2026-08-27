@@ -1,4 +1,4 @@
-import type { CreateProjectInput } from "@shared/schemas/project.schema";
+import type { CreateProjectBody } from "@shared/schemas/project.schema";
 import { buildAuthorizationHeaders } from "@/lib/queryClient";
 import { buildProjectApiError } from "./project-api-error";
 
@@ -6,11 +6,15 @@ export type CreatedProject = {
   id: string;
   name: string;
   key: string;
+  description: string | null;
   organizationId: string;
 };
 
-export async function createProject(input: CreateProjectInput): Promise<CreatedProject> {
-  const response = await fetch("/api/projects", {
+export async function createProject(
+  organizationId: string,
+  input: CreateProjectBody,
+): Promise<CreatedProject> {
+  const response = await fetch(`/api/organizations/${organizationId}/projects`, {
     method: "POST",
     headers: { ...buildAuthorizationHeaders(), "Content-Type": "application/json" },
     credentials: "include",

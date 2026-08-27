@@ -5,11 +5,14 @@ import { useAuthSession } from "@/components/modules/auth/use-auth-session";
 import { useCurrentOrganization } from "@/components/modules/organizations/use-current-organization";
 import { CreateProjectDialog } from "@/components/modules/projects/CreateProjectDialog";
 import { useProjects } from "@/components/modules/projects/use-projects";
+import { useHasPermission } from "@/components/modules/permissions/use-has-permission";
 
 export default function DashboardPage() {
   const session = useAuthSession();
   const { organization: currentOrganization } = useCurrentOrganization();
   const { data: projects } = useProjects(currentOrganization?.id);
+  const { hasPermission } = useHasPermission(currentOrganization?.id);
+  const canCreateProjects = hasPermission("projects:create");
 
   return (
     <AppShell title="Dashboard">
@@ -48,7 +51,9 @@ export default function DashboardPage() {
           <div className="text-[11px] font-semibold uppercase tracking-wide text-text-3">
             Tus proyectos
           </div>
-          {currentOrganization && <CreateProjectDialog organizationId={currentOrganization.id} />}
+          {canCreateProjects && currentOrganization && (
+            <CreateProjectDialog organizationId={currentOrganization.id} />
+          )}
         </div>
         {projects && projects.length === 0 && (
           <p className="text-sm text-muted-foreground">

@@ -1,13 +1,14 @@
 import type { NextFunction, Request, Response } from "express";
 import type { Project } from "@prisma/client";
-import { createProjectSchema, type CreateProjectInput } from "@shared/schemas/project.schema";
+import { createProjectBodySchema, type CreateProjectBody } from "@shared/schemas/project.schema";
 import { ValidationError } from "../lib/errors";
 import { createProject, getProjectById, getProjectsForOrganization } from "../services/project.service";
 
 export async function createProjectController(req: Request, res: Response, next: NextFunction) {
   try {
-    const input = parseCreateProjectRequestBody(req.body);
-    const project = await createProject(input, req.userId!);
+    const organizationId = parseOrganizationIdParam(req.params.organizationId);
+    const body = parseCreateProjectRequestBody(req.body);
+    const project = await createProject({ ...body, organizationId }, req.userId!);
     res.status(201).json({ project: formatProjectForResponse(project) });
   } catch (error) {
     next(error);
@@ -34,12 +35,19 @@ export async function getProjectController(req: Request, res: Response, next: Ne
   }
 }
 
-function parseCreateProjectRequestBody(body: unknown): CreateProjectInput {
-  const result = createProjectSchema.safeParse(body);
+function parseCreateProjectRequestBody(body: unknown): CreateProjectBody {
+  const result = createProjectBodySchema.safeParse(body);
   if (!result.success) {
     throw new ValidationError(result.error.flatten().fieldErrors);
   }
   return result.data;
+}
+
+function parseOrganizationIdParam(value: unknown): string {
+  if (typeof value !== "string" || value.length === 0) {
+    throw new ValidationError({ organizationId: ["organizationId inválido."] });
+  }
+  return value;
 }
 
 function parseOrganizationIdQueryParam(value: unknown): string {
@@ -61,6 +69,7 @@ function formatProjectForResponse(project: Project) {
     id: project.id,
     name: project.name,
     key: project.key,
+    description: project.description,
     organizationId: project.organizationId,
   };
 }

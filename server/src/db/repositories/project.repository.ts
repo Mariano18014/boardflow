@@ -5,6 +5,7 @@ type CreateProjectData = {
   key: string;
   organizationId: string;
   createdBy: string;
+  description?: string;
 };
 
 export async function createProject(data: CreateProjectData) {
