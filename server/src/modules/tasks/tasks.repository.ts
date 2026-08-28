@@ -132,3 +132,9 @@ export async function updateTaskColumnAssignment(
     data: { boardId, columnId, position },
   });
 }
+
+export async function countTasksInColumn(columnId: string): Promise<number> {
+  return prisma.task.count({
+    where: { columnId, isArchived: false, deletedAt: null },
+  });
+}

@@ -18,7 +18,10 @@ import {
   assignTaskToSprintController,
   getSprintTasksController,
 } from "../modules/tasks/sprint-planning.controller";
-import { getSprintBoardController } from "../modules/tasks/sprint-board.controller";
+import {
+  getSprintBoardController,
+  moveTaskToColumnController,
+} from "../modules/tasks/sprint-board.controller";
 import { getMyPermissionsController } from "../modules/permissions/permissions.controller";
 import {
   archiveProjectController,
@@ -90,4 +93,9 @@ organizationRoutes.get(
   "/:organizationId/projects/:projectId/sprints/:sprintId/board",
   authMiddleware,
   getSprintBoardController,
+);
+organizationRoutes.patch(
+  "/:organizationId/projects/:projectId/tasks/:taskId/column",
+  authMiddleware,
+  moveTaskToColumnController,
 );

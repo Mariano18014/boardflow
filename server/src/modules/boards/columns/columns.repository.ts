@@ -7,6 +7,10 @@ export async function findColumnsByBoardId(boardId: string) {
   });
 }
 
+export async function findColumnById(columnId: string) {
+  return prisma.column.findUnique({ where: { id: columnId } });
+}
+
 type CreateColumnData = {
   boardId: string;
   name: string;
