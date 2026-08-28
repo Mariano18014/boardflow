@@ -13,6 +13,7 @@ import {
 import { rolesRoutes } from "../modules/roles/roles.routes";
 import { boardsRoutes } from "../modules/boards/boards.routes";
 import { tasksRoutes } from "../modules/tasks/tasks.routes";
+import { sprintsRoutes } from "../modules/sprints/sprints.routes";
 import { getMyPermissionsController } from "../modules/permissions/permissions.controller";
 import {
   archiveProjectController,
@@ -69,3 +70,4 @@ organizationRoutes.patch(
   restoreProjectController,
 );
 organizationRoutes.use("/:organizationId/projects/:projectId", tasksRoutes);
+organizationRoutes.use("/:organizationId/projects/:projectId/sprints", sprintsRoutes);

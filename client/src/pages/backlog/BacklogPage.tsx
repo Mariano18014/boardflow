@@ -5,6 +5,7 @@ import { useHasPermission } from "@/components/modules/permissions/use-has-permi
 import { useBacklog } from "@/components/modules/tasks/use-backlog";
 import { BacklogList } from "@/components/modules/tasks/BacklogList";
 import { CreateBacklogTaskDialog } from "@/components/modules/tasks/CreateBacklogTaskDialog";
+import { CreateSprintDialog } from "@/components/modules/sprints/CreateSprintDialog";
 
 export default function BacklogPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -12,6 +13,7 @@ export default function BacklogPage() {
   const { hasPermission } = useHasPermission(project?.organizationId);
   const canCreateTasks = hasPermission("tasks:create");
   const canEditTasks = hasPermission("tasks:edit");
+  const canCreateSprints = hasPermission("sprints:create");
   const { data: tasks, isLoading, isError } = useBacklog(project?.organizationId, projectId);
 
   return (
@@ -24,9 +26,14 @@ export default function BacklogPage() {
               Tareas de {project?.name ?? "este proyecto"} sin sprint asignado.
             </p>
           </div>
-          {canCreateTasks && project && (
-            <CreateBacklogTaskDialog organizationId={project.organizationId} projectId={project.id} />
-          )}
+          <div className="flex items-center gap-2">
+            {canCreateSprints && project && (
+              <CreateSprintDialog organizationId={project.organizationId} projectId={project.id} />
+            )}
+            {canCreateTasks && project && (
+              <CreateBacklogTaskDialog organizationId={project.organizationId} projectId={project.id} />
+            )}
+          </div>
         </div>
 
         {isLoading && <p className="text-sm text-muted-foreground">Cargando backlog...</p>}

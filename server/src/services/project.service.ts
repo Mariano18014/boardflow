@@ -166,11 +166,12 @@ export async function findProjectById(projectId: string, organizationId: string)
   return project;
 }
 
-// Shared by every module that creates child records (boards, tasks, ...) under
-// a project, since none of them make sense once the project is archived.
+// Shared by every module that creates child records (boards, tasks, sprints,
+// ...) under a project, since none of them make sense once the project is
+// archived.
 export async function checkProjectIsNotArchived(project: Project) {
   if (project.isArchived) {
-    throw new ConflictError("No se pueden agregar tableros ni tareas a un proyecto archivado.");
+    throw new ConflictError("No se pueden agregar elementos a un proyecto archivado.");
   }
 }
 
