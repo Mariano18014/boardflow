@@ -8,3 +8,12 @@ export function usePlannedSprints(organizationId: string | undefined, projectId:
     enabled: organizationId !== undefined && projectId !== undefined,
   });
 }
+
+export function useActiveSprint(organizationId: string | undefined, projectId: string | undefined) {
+  return useQuery({
+    queryKey: ["/api/projects", projectId, "sprints", { status: "ACTIVE" }],
+    queryFn: () => listSprints(organizationId as string, projectId as string, "ACTIVE"),
+    enabled: organizationId !== undefined && projectId !== undefined,
+    select: (sprints) => sprints[0],
+  });
+}

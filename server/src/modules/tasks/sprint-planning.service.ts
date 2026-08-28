@@ -2,7 +2,7 @@ import type { Sprint, Task } from "@prisma/client";
 import type { BacklogTaskItem } from "@shared/schemas/task.schema";
 import { ConflictError, NotFoundError } from "../../lib/errors";
 import { findProjectById } from "../../services/project.service";
-import { findSprintByIdAndProjectId } from "../sprints/sprints.repository";
+import { findSprintById } from "../sprints/sprints.service";
 import { checkRequesterHasPermission } from "../permissions/check-permission";
 import { calculateNextPosition } from "../../lib/next-position.util";
 import { mapTaskToBacklogItem } from "./task-item.mapper";
@@ -75,14 +75,6 @@ async function findTaskById(taskId: string, projectId: string): Promise<Task> {
     throw new NotFoundError("La tarea no existe en este proyecto.");
   }
   return task;
-}
-
-async function findSprintById(sprintId: string, projectId: string): Promise<Sprint> {
-  const sprint = await findSprintByIdAndProjectId(sprintId, projectId);
-  if (!sprint) {
-    throw new NotFoundError("El sprint no existe en este proyecto.");
-  }
-  return sprint;
 }
 
 function checkSprintIsPlanned(sprint: Sprint) {

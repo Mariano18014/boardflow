@@ -34,3 +34,14 @@ export async function findSprintsByProjectId(projectId: string, status?: SprintS
 export async function findSprintByIdAndProjectId(sprintId: string, projectId: string) {
   return prisma.sprint.findFirst({ where: { id: sprintId, projectId } });
 }
+
+export async function findActiveSprintByProjectId(projectId: string) {
+  return prisma.sprint.findFirst({ where: { projectId, status: "ACTIVE" } });
+}
+
+export async function updateSprintStatus(sprintId: string, status: SprintStatus) {
+  return prisma.sprint.update({
+    where: { id: sprintId },
+    data: { status },
+  });
+}

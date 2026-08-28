@@ -7,7 +7,7 @@ import {
   type ListSprintsQuery,
 } from "@shared/schemas/sprint.schema";
 import { ValidationError } from "../../lib/errors";
-import { createSprint, getSprintsByProject } from "./sprints.service";
+import { createSprint, getSprintsByProject, startSprint } from "./sprints.service";
 
 export async function createSprintController(req: Request, res: Response, next: NextFunction) {
   try {
@@ -36,6 +36,18 @@ export async function listSprintsController(req: Request, res: Response, next: N
   }
 }
 
+export async function startSprintController(req: Request, res: Response, next: NextFunction) {
+  try {
+    const organizationId = parseOrganizationIdParam(req.params.organizationId);
+    const projectId = parseProjectIdParam(req.params.projectId);
+    const sprintId = parseSprintIdParam(req.params.sprintId);
+    const sprint = await startSprint({ organizationId, projectId, sprintId }, req.userId!);
+    res.status(200).json({ sprint: formatSprintForResponse(sprint) });
+  } catch (error) {
+    next(error);
+  }
+}
+
 function parseOrganizationIdParam(value: unknown): string {
   if (typeof value !== "string" || value.length === 0) {
     throw new ValidationError({ organizationId: ["organizationId inválido."] });
@@ -46,6 +58,13 @@ function parseOrganizationIdParam(value: unknown): string {
 function parseProjectIdParam(value: unknown): string {
   if (typeof value !== "string" || value.length === 0) {
     throw new ValidationError({ projectId: ["projectId inválido."] });
+  }
+  return value;
+}
+
+function parseSprintIdParam(value: unknown): string {
+  if (typeof value !== "string" || value.length === 0) {
+    throw new ValidationError({ sprintId: ["sprintId inválido."] });
   }
   return value;
 }

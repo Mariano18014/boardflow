@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { AppShell } from "@/components/layout/AppShell";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProject } from "@/components/modules/projects/use-project";
@@ -7,19 +7,28 @@ import { useHasPermission } from "@/components/modules/permissions/use-has-permi
 import { useBacklog } from "@/components/modules/tasks/use-backlog";
 import { useSprintTasks } from "@/components/modules/tasks/use-sprint-tasks";
 import { SprintPlanningBoard } from "@/components/modules/tasks/SprintPlanningBoard";
-import { usePlannedSprints } from "@/components/modules/sprints/use-sprints";
+import { useActiveSprint, usePlannedSprints } from "@/components/modules/sprints/use-sprints";
+import { StartSprintButton } from "@/components/modules/sprints/StartSprintButton";
+import type { SprintSummary } from "@/components/modules/sprints/list-sprints.api";
 
 export default function SprintPlanningPage() {
   const { projectId } = useParams<{ projectId: string }>();
+  const [, navigate] = useLocation();
   const { data: project } = useProject(projectId);
   const { hasPermission } = useHasPermission(project?.organizationId);
   const canEditTasks = hasPermission("tasks:edit");
+  const canEditSprints = hasPermission("sprints:edit");
 
   const { data: plannedSprints, isLoading: isLoadingSprints } = usePlannedSprints(
     project?.organizationId,
     projectId,
   );
+  const { data: activeSprint } = useActiveSprint(project?.organizationId, projectId);
   const [selectedSprintId, setSelectedSprintId] = useState<string | undefined>(undefined);
+
+  function handleSprintStarted(sprint: SprintSummary) {
+    navigate(`/projects/${projectId}/sprints/${sprint.id}/board`);
+  }
 
   useEffect(() => {
     if (!selectedSprintId && plannedSprints && plannedSprints.length > 0) {
@@ -52,19 +61,31 @@ export default function SprintPlanningPage() {
           </p>
         )}
         {plannedSprints && plannedSprints.length > 0 && (
-          <div className="mb-6 max-w-xs">
-            <Select value={selectedSprintId} onValueChange={setSelectedSprintId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Elegí un sprint" />
-              </SelectTrigger>
-              <SelectContent>
-                {plannedSprints.map((sprint) => (
-                  <SelectItem key={sprint.id} value={sprint.id}>
-                    {sprint.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="mb-6 flex items-end gap-3">
+            <div className="max-w-xs flex-1">
+              <Select value={selectedSprintId} onValueChange={setSelectedSprintId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Elegí un sprint" />
+                </SelectTrigger>
+                <SelectContent>
+                  {plannedSprints.map((sprint) => (
+                    <SelectItem key={sprint.id} value={sprint.id}>
+                      {sprint.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {project && selectedSprintId && (
+              <StartSprintButton
+                organizationId={project.organizationId}
+                projectId={project.id}
+                sprintId={selectedSprintId}
+                canEditSprints={canEditSprints}
+                activeSprint={activeSprint}
+                onSprintStarted={handleSprintStarted}
+              />
+            )}
           </div>
         )}
 
