@@ -54,9 +54,12 @@ export default function ProjectPage() {
               />
             )}
 
-            <p className="mt-6 text-sm text-muted-foreground">
-              Los sprints de este proyecto todavía no están implementados.
-            </p>
+            <Link
+              href={`/projects/${project.id}/sprint-planning`}
+              className="mt-6 block text-sm text-primary underline-offset-4 hover:underline"
+            >
+              Ir a Sprint Planning
+            </Link>
           </>
         )}
       </div>
