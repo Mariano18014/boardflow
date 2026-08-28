@@ -4,6 +4,7 @@ import { ConflictError, ValidationError } from "../../lib/errors";
 import { checkProjectIsNotArchived, findProjectById } from "../../services/project.service";
 import { checkRequesterHasPermission } from "../permissions/check-permission";
 import { calculateNextPosition } from "../../lib/next-position.util";
+import { mapTaskToBacklogItem } from "./task-item.mapper";
 import {
   createTask as saveTaskRecord,
   findActiveBacklogTasksByProjectId,
@@ -71,18 +72,6 @@ async function findTasksWithoutSprint(
 ): Promise<BacklogTaskItem[]> {
   const tasks = await findBacklogTasksInDatabase(projectId, pagination);
   return tasks.map(mapTaskToBacklogItem);
-}
-
-function mapTaskToBacklogItem(task: Task): BacklogTaskItem {
-  return {
-    id: task.id,
-    title: task.title,
-    priority: task.priority,
-    estimatedPoints: task.estimatedPoints,
-    position: task.position,
-    createdAt: task.createdAt,
-    assignees: [],
-  };
 }
 
 export type ReorderBacklogInput = {

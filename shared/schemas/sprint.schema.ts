@@ -29,7 +29,12 @@ export const updateSprintSchema = sprintSchema
   .pick({ name: true, goal: true, startDate: true, endDate: true })
   .partial();
 
+export const listSprintsQuerySchema = z.object({
+  status: z.enum(SPRINT_STATUS).optional(),
+});
+
 export type Sprint = z.infer<typeof sprintSchema>;
 export type CreateSprintBody = z.infer<typeof createSprintBodySchema>;
 export type CreateSprintInput = z.infer<typeof createSprintSchema>;
 export type UpdateSprintInput = z.infer<typeof updateSprintSchema>;
+export type ListSprintsQuery = z.infer<typeof listSprintsQuerySchema>;

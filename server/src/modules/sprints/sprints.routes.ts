@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../../middlewares/auth.middleware";
-import { createSprintController } from "./sprints.controller";
+import { createSprintController, listSprintsController } from "./sprints.controller";
 
 // mergeParams: true — this router is mounted at
 // /organizations/:organizationId/projects/:projectId/sprints and needs access
@@ -8,3 +8,4 @@ import { createSprintController } from "./sprints.controller";
 export const sprintsRoutes = Router({ mergeParams: true });
 
 sprintsRoutes.post("/", authMiddleware, createSprintController);
+sprintsRoutes.get("/", authMiddleware, listSprintsController);

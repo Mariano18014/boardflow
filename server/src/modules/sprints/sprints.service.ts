@@ -1,8 +1,13 @@
+import type { Sprint } from "@prisma/client";
+import type { SprintStatus } from "@shared/types/enums";
 import type { CreateSprintInput } from "@shared/schemas/sprint.schema";
 import { ValidationError } from "../../lib/errors";
 import { checkProjectIsNotArchived, findProjectById } from "../../services/project.service";
 import { checkRequesterHasPermission } from "../permissions/check-permission";
-import { createSprint as saveSprintRecord } from "./sprints.repository";
+import {
+  createSprint as saveSprintRecord,
+  findSprintsByProjectId,
+} from "./sprints.repository";
 
 export async function createSprint(input: CreateSprintInput, requesterId: string) {
   await checkRequesterHasPermission(input.organizationId, requesterId, "sprints:create");
@@ -29,4 +34,23 @@ async function saveSprintInDatabase(input: CreateSprintInput) {
     startDate: input.startDate,
     endDate: input.endDate,
   });
+}
+
+export type GetSprintsInput = {
+  organizationId: string;
+  projectId: string;
+  status?: SprintStatus;
+};
+
+export async function getSprintsByProject(
+  input: GetSprintsInput,
+  requesterId: string,
+): Promise<Sprint[]> {
+  await checkRequesterHasPermission(input.organizationId, requesterId, "sprints:view");
+  await findProjectById(input.projectId, input.organizationId);
+  return findSprintsForProject(input.projectId, input.status);
+}
+
+async function findSprintsForProject(projectId: string, status?: SprintStatus): Promise<Sprint[]> {
+  return findSprintsByProjectId(projectId, status);
 }

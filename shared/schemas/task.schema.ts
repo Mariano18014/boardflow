@@ -64,6 +64,10 @@ export const reorderBacklogTasksSchema = z.object({
   taskIds: z.array(z.string().uuid()).min(1),
 });
 
+export const assignTaskToSprintSchema = z.object({
+  sprintId: z.string().uuid().nullable(),
+});
+
 export type Task = z.infer<typeof taskSchema>;
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
@@ -72,6 +76,7 @@ export type ListBacklogQuery = z.infer<typeof listBacklogQuerySchema>;
 export type CreateBacklogTaskBody = z.infer<typeof createBacklogTaskBodySchema>;
 export type CreateBacklogTaskInput = z.infer<typeof createBacklogTaskSchema>;
 export type ReorderBacklogTasksBody = z.infer<typeof reorderBacklogTasksSchema>;
+export type AssignTaskToSprintBody = z.infer<typeof assignTaskToSprintSchema>;
 
 // The shape already includes `assignees` even though HU-22 never populates it
 // (assignment ships in HU-31) so the frontend contract doesn't need to change

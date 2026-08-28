@@ -1,0 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
+import { listSprints } from "./list-sprints.api";
+
+export function usePlannedSprints(organizationId: string | undefined, projectId: string | undefined) {
+  return useQuery({
+    queryKey: ["/api/projects", projectId, "sprints", { status: "PLANNED" }],
+    queryFn: () => listSprints(organizationId as string, projectId as string, "PLANNED"),
+    enabled: organizationId !== undefined && projectId !== undefined,
+  });
+}

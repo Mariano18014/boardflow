@@ -23,3 +23,14 @@ export async function createSprint(data: CreateSprintData) {
     },
   });
 }
+
+export async function findSprintsByProjectId(projectId: string, status?: SprintStatus) {
+  return prisma.sprint.findMany({
+    where: { projectId, ...(status ? { status } : {}) },
+    orderBy: { startDate: "asc" },
+  });
+}
+
+export async function findSprintByIdAndProjectId(sprintId: string, projectId: string) {
+  return prisma.sprint.findFirst({ where: { id: sprintId, projectId } });
+}

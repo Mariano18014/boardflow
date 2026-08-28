@@ -1,4 +1,4 @@
-import { useParams } from "wouter";
+import { Link, useParams } from "wouter";
 import { AppShell } from "@/components/layout/AppShell";
 import { useProject } from "@/components/modules/projects/use-project";
 import { useHasPermission } from "@/components/modules/permissions/use-has-permission";
@@ -25,6 +25,14 @@ export default function BacklogPage() {
             <p className="text-sm text-muted-foreground">
               Tareas de {project?.name ?? "este proyecto"} sin sprint asignado.
             </p>
+            {project && (
+              <Link
+                href={`/projects/${project.id}/sprint-planning`}
+                className="text-sm text-primary underline-offset-4 hover:underline"
+              >
+                Ir a Sprint Planning
+              </Link>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {canCreateSprints && project && (

@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Badge, type BadgeProps } from "@/components/ui/badge";
 import type { BacklogTask } from "./list-backlog.api";
+import { PriorityBadge } from "./PriorityBadge";
 
 type BacklogTaskRowProps = {
   task: BacklogTask;
@@ -48,25 +48,4 @@ export function BacklogTaskRow({ task, canDrag }: BacklogTaskRowProps) {
       </div>
     </div>
   );
-}
-
-function PriorityBadge({ priority }: { priority: BacklogTask["priority"] }) {
-  const { label, variant } = describePriority(priority);
-  return <Badge variant={variant}>{label}</Badge>;
-}
-
-function describePriority(priority: BacklogTask["priority"]): {
-  label: string;
-  variant: BadgeProps["variant"];
-} {
-  switch (priority) {
-    case "LOW":
-      return { label: "Baja", variant: "outline" };
-    case "MEDIUM":
-      return { label: "Media", variant: "secondary" };
-    case "HIGH":
-      return { label: "Alta", variant: "default" };
-    case "URGENT":
-      return { label: "Urgente", variant: "destructive" };
-  }
 }
