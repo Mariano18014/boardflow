@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "wouter";
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { useToast } from "@/hooks/use-toast";
 import { CloseSprintButton } from "@/components/modules/sprints/CloseSprintButton";
@@ -104,14 +105,22 @@ export function SprintBoardView({
           <p className="text-sm text-muted-foreground">{formatSprintDateRange(board.sprint)}</p>
           {board.sprint.goal && <p className="mt-1 text-sm text-muted-foreground">{board.sprint.goal}</p>}
         </div>
-        <CloseSprintButton
-          organizationId={organizationId}
-          projectId={projectId}
-          sprintId={sprintId}
-          canEditSprints={canEditSprints}
-          unfinishedTaskCount={countUnfinishedTasks(columns)}
-          onSprintClosed={onSprintClosed}
-        />
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/projects/${projectId}/velocity`}
+            className="text-sm text-primary underline-offset-4 hover:underline"
+          >
+            Ver reportes
+          </Link>
+          <CloseSprintButton
+            organizationId={organizationId}
+            projectId={projectId}
+            sprintId={sprintId}
+            canEditSprints={canEditSprints}
+            unfinishedTaskCount={countUnfinishedTasks(columns)}
+            onSprintClosed={onSprintClosed}
+          />
+        </div>
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <div className="flex gap-4 overflow-x-auto">

@@ -82,6 +82,18 @@ export async function findTasksBySprintId(sprintId: string) {
   });
 }
 
+// No columnId filter, intentionally: a sprint's committed scope is fixed once
+// it starts (HU-26 only allows moving tasks into a sprint while it's
+// PLANNED), so every task ever assigned to it counts toward the total,
+// regardless of which column it currently sits in.
+export async function sumEstimatedPointsForSprint(sprintId: string): Promise<number> {
+  const result = await prisma.task.aggregate({
+    where: { sprintId, isArchived: false, deletedAt: null },
+    _sum: { estimatedPoints: true },
+  });
+  return result._sum.estimatedPoints ?? 0;
+}
+
 export async function findMaxPositionInSprint(sprintId: string): Promise<number | null> {
   const result = await prisma.task.aggregate({
     where: { sprintId },
