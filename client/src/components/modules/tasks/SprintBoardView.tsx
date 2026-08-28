@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { useToast } from "@/hooks/use-toast";
+import { CloseSprintButton } from "@/components/modules/sprints/CloseSprintButton";
+import type { SprintSummary } from "@/components/modules/sprints/list-sprints.api";
 import type { SprintBoard, SprintBoardColumn } from "./get-sprint-board.api";
 import { BoardStatusColumn } from "./BoardStatusColumn";
 import { useMoveTaskToColumn } from "./use-move-task-to-column";
 import { moveTaskAcrossColumns, resolveDropTarget, type TaskMove } from "./board-columns.util";
+import { countUnfinishedTasks } from "./count-unfinished-tasks.util";
 
 type SprintBoardViewProps = {
   organizationId: string;
@@ -12,7 +15,9 @@ type SprintBoardViewProps = {
   sprintId: string;
   board: SprintBoard;
   canEditTasks: boolean;
+  canEditSprints: boolean;
   onOpenTaskDetail: (taskId: string) => void;
+  onSprintClosed: (sprint: SprintSummary) => void;
 };
 
 export function SprintBoardView({
@@ -21,7 +26,9 @@ export function SprintBoardView({
   sprintId,
   board,
   canEditTasks,
+  canEditSprints,
   onOpenTaskDetail,
+  onSprintClosed,
 }: SprintBoardViewProps) {
   const [columns, setColumns] = useState(board.columns);
   const { moveTaskToColumn } = useMoveTaskToColumn(organizationId, projectId, sprintId);
@@ -88,10 +95,20 @@ export function SprintBoardView({
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="font-heading text-xl font-bold mb-1">{board.sprint.name}</h1>
-        <p className="text-sm text-muted-foreground">{formatSprintDateRange(board.sprint)}</p>
-        {board.sprint.goal && <p className="mt-1 text-sm text-muted-foreground">{board.sprint.goal}</p>}
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-heading text-xl font-bold mb-1">{board.sprint.name}</h1>
+          <p className="text-sm text-muted-foreground">{formatSprintDateRange(board.sprint)}</p>
+          {board.sprint.goal && <p className="mt-1 text-sm text-muted-foreground">{board.sprint.goal}</p>}
+        </div>
+        <CloseSprintButton
+          organizationId={organizationId}
+          projectId={projectId}
+          sprintId={sprintId}
+          canEditSprints={canEditSprints}
+          unfinishedTaskCount={countUnfinishedTasks(columns)}
+          onSprintClosed={onSprintClosed}
+        />
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <div className="flex gap-4 overflow-x-auto">

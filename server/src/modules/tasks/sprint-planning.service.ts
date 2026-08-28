@@ -4,11 +4,9 @@ import { ConflictError, NotFoundError } from "../../lib/errors";
 import { findProjectById } from "../../services/project.service";
 import { findSprintById } from "../sprints/sprints.service";
 import { checkRequesterHasPermission } from "../permissions/check-permission";
-import { calculateNextPosition } from "../../lib/next-position.util";
+import { calculateNextPositionInScope } from "./task-position.service";
 import { mapTaskToBacklogItem } from "./task-item.mapper";
 import {
-  findMaxBacklogPositionByProjectId,
-  findMaxPositionInSprint,
   findTaskByIdAndProjectId,
   findTasksBySprintId,
   updateTaskSprintAssignment as saveTaskSprintAssignment,
@@ -81,13 +79,6 @@ function checkSprintIsPlanned(sprint: Sprint) {
   if (sprint.status !== "PLANNED") {
     throw new ConflictError("Solo se pueden mover tareas hacia o desde sprints en estado planificado.");
   }
-}
-
-async function calculateNextPositionInScope(projectId: string, sprintId: string | null): Promise<number> {
-  if (sprintId === null) {
-    return calculateNextPosition(() => findMaxBacklogPositionByProjectId(projectId));
-  }
-  return calculateNextPosition(() => findMaxPositionInSprint(sprintId));
 }
 
 async function updateTaskSprintAssignment(

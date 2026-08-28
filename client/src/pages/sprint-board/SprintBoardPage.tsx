@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { AppShell } from "@/components/layout/AppShell";
 import { useProject } from "@/components/modules/projects/use-project";
 import { useHasPermission } from "@/components/modules/permissions/use-has-permission";
@@ -9,15 +9,21 @@ import { TaskDetailPanel } from "@/components/modules/tasks/TaskDetailPanel";
 
 export default function SprintBoardPage() {
   const { projectId, sprintId } = useParams<{ projectId: string; sprintId: string }>();
+  const [, navigate] = useLocation();
   const { data: project } = useProject(projectId);
   const { hasPermission } = useHasPermission(project?.organizationId);
   const canEditTasks = hasPermission("tasks:edit");
+  const canEditSprints = hasPermission("sprints:edit");
   const { data: board, isLoading, isError, error } = useSprintBoard(
     project?.organizationId,
     projectId,
     sprintId,
   );
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+
+  function handleSprintClosed() {
+    navigate(`/projects/${projectId}/sprint-planning`);
+  }
 
   return (
     <AppShell title="Tablero del sprint">
@@ -35,7 +41,9 @@ export default function SprintBoardPage() {
             sprintId={sprintId}
             board={board}
             canEditTasks={canEditTasks}
+            canEditSprints={canEditSprints}
             onOpenTaskDetail={setSelectedTaskId}
+            onSprintClosed={handleSprintClosed}
           />
         )}
       </div>

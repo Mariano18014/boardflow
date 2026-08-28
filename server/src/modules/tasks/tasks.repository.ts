@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import type { TaskPriority } from "@shared/types/enums";
 import { prisma } from "../../db/client";
 import { runInTransaction } from "../../lib/reorder.util";
@@ -146,6 +147,30 @@ type UpdateTaskDetailsData = {
   estimatedPoints?: number;
   dueDate?: string;
 };
+
+export async function findSprintTasksNotInColumn(sprintId: string, excludedColumnId: string | null) {
+  return prisma.task.findMany({
+    where: {
+      sprintId,
+      isArchived: false,
+      deletedAt: null,
+      // No excluded column (the board was never opened) means nothing is
+      // filtered out — every sprint task counts as unfinished.
+      columnId: excludedColumnId === null ? undefined : { not: excludedColumnId },
+    },
+  });
+}
+
+export async function updateTaskReturnedToBacklog(
+  transaction: Prisma.TransactionClient,
+  taskId: string,
+  position: number,
+) {
+  return transaction.task.update({
+    where: { id: taskId },
+    data: { sprintId: null, boardId: null, columnId: null, position },
+  });
+}
 
 export async function updateTaskDetails(taskId: string, changes: UpdateTaskDetailsData) {
   return prisma.task.update({

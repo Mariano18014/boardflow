@@ -5,9 +5,9 @@ import type {
   SprintBoardSprint,
   SprintBoardTaskItem,
 } from "@shared/schemas/sprint-board.schema";
-import { ConflictError, NotFoundError } from "../../lib/errors";
+import { NotFoundError } from "../../lib/errors";
 import { findProjectById } from "../../services/project.service";
-import { findSprintById } from "../sprints/sprints.service";
+import { checkSprintIsActive, findSprintById } from "../sprints/sprints.service";
 import { checkRequesterHasPermission } from "../permissions/check-permission";
 import { calculateNextPosition } from "../../lib/next-position.util";
 import { findActiveBoardsByProjectId } from "../boards/boards.repository";
@@ -43,14 +43,6 @@ export async function getSprintBoard(input: GetSprintBoardInput, requesterId: st
   await ensureSprintTasksHaveColumnAssigned(sprint.id, board.id);
   const columns = await buildBoardColumnsWithTasks(board.id, sprint.id);
   return { sprint: mapSprintForBoard(sprint), columns };
-}
-
-function checkSprintIsActive(sprint: Sprint) {
-  if (sprint.status !== "ACTIVE") {
-    throw new ConflictError(
-      `Este tablero solo está disponible para el sprint activo del proyecto (estado actual: ${sprint.status}).`,
-    );
-  }
 }
 
 async function findProjectBoard(projectId: string): Promise<{ id: string }> {

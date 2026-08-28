@@ -1,9 +1,17 @@
-import type { Sprint } from "@prisma/client";
+import type { Prisma, Sprint, Task } from "@prisma/client";
 import type { SprintStatus } from "@shared/types/enums";
 import type { CreateSprintInput } from "@shared/schemas/sprint.schema";
 import { ConflictError, NotFoundError, ValidationError } from "../../lib/errors";
 import { checkProjectIsNotArchived, findProjectById } from "../../services/project.service";
 import { checkRequesterHasPermission } from "../permissions/check-permission";
+import { runInTransaction } from "../../lib/reorder.util";
+import { findActiveBoardsByProjectId } from "../boards/boards.repository";
+import { findColumnByBoardIdAndName } from "../boards/columns/columns.repository";
+import { calculateNextPositionInScope } from "../tasks/task-position.service";
+import {
+  findSprintTasksNotInColumn,
+  updateTaskReturnedToBacklog,
+} from "../tasks/tasks.repository";
 import {
   createSprint as saveSprintRecord,
   findActiveSprintByProjectId,
@@ -11,6 +19,8 @@ import {
   findSprintsByProjectId,
   updateSprintStatus as saveSprintStatus,
 } from "./sprints.repository";
+
+const DONE_COLUMN_NAME = "Done";
 
 export async function createSprint(input: CreateSprintInput, requesterId: string) {
   await checkRequesterHasPermission(input.organizationId, requesterId, "sprints:create");
@@ -110,4 +120,84 @@ async function checkNoOtherActiveSprintExists(projectId: string) {
 // helper can be reused by HU-32 (closing a sprint: ACTIVE -> COMPLETED).
 async function updateSprintStatus(sprint: Sprint, newStatus: SprintStatus): Promise<Sprint> {
   return saveSprintStatus(sprint.id, newStatus);
+}
+
+// Shared by every module that needs to confirm a sprint is currently the
+// project's active one (the sprint board in HU-28, closing a sprint here in
+// HU-32) so the check isn't duplicated.
+export function checkSprintIsActive(sprint: Sprint) {
+  if (sprint.status !== "ACTIVE") {
+    throw new ConflictError(
+      `Esta acción solo está disponible para el sprint activo del proyecto (estado actual: ${sprint.status}).`,
+    );
+  }
+}
+
+export type CloseSprintInput = {
+  organizationId: string;
+  projectId: string;
+  sprintId: string;
+};
+
+export async function closeSprint(input: CloseSprintInput, requesterId: string): Promise<Sprint> {
+  await checkRequesterHasPermission(input.organizationId, requesterId, "sprints:edit");
+  // findSprintById only confirms the sprint belongs to projectId — same
+  // reasoning as sprint-board.service.ts / move-task-column.service.ts for
+  // why this extra check is what actually prevents cross-organization access.
+  await findProjectById(input.projectId, input.organizationId);
+  const sprint = await findSprintById(input.sprintId, input.projectId);
+  checkSprintIsActive(sprint);
+  const doneColumn = await findDoneColumn(input.projectId);
+  const unfinishedTasks = await findUnfinishedSprintTasks(sprint.id, doneColumn?.id ?? null);
+  await returnTasksToBacklog(unfinishedTasks, input.projectId);
+  const closedSprint = await updateSprintStatus(sprint, "COMPLETED");
+  return closedSprint;
+}
+
+// Returns null (instead of throwing) when the project has no board yet, or
+// the board has no "Done" column — this can happen if the sprint is closed
+// without the board ever having been opened (HU-28 seeds the columns lazily).
+// In that case every sprint task is treated as unfinished.
+async function findDoneColumn(projectId: string) {
+  const boards = await findActiveBoardsByProjectId(projectId);
+  const board = boards[0];
+  if (!board) {
+    return null;
+  }
+  return findColumnByBoardIdAndName(board.id, DONE_COLUMN_NAME);
+}
+
+async function findUnfinishedSprintTasks(sprintId: string, doneColumnId: string | null): Promise<Task[]> {
+  return findSprintTasksNotInColumn(sprintId, doneColumnId);
+}
+
+async function returnTasksToBacklog(tasks: Task[], projectId: string) {
+  if (tasks.length === 0) {
+    return;
+  }
+  // calculateNextPositionInScope is only called once, to find where the
+  // backlog currently ends. Calling it again per task inside the transaction
+  // below would read through a separate, non-transactional connection that
+  // can't see the other tasks' uncommitted position updates yet, handing out
+  // the same position to every task. Every task after the first just takes
+  // the next integer instead.
+  const startingPosition = await calculateNextPositionInScope(projectId, null);
+  await runInTransaction(async (transaction) => {
+    for (let index = 0; index < tasks.length; index++) {
+      const position = calculateBacklogPositionForTask(startingPosition, index);
+      await saveTaskReturnedToBacklog(transaction, tasks[index].id, position);
+    }
+  });
+}
+
+function calculateBacklogPositionForTask(startingPosition: number, index: number): number {
+  return startingPosition + index;
+}
+
+async function saveTaskReturnedToBacklog(
+  transaction: Prisma.TransactionClient,
+  taskId: string,
+  position: number,
+) {
+  await updateTaskReturnedToBacklog(transaction, taskId, position);
 }

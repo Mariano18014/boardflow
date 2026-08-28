@@ -7,7 +7,7 @@ import {
   type ListSprintsQuery,
 } from "@shared/schemas/sprint.schema";
 import { ValidationError } from "../../lib/errors";
-import { createSprint, getSprintsByProject, startSprint } from "./sprints.service";
+import { closeSprint, createSprint, getSprintsByProject, startSprint } from "./sprints.service";
 
 export async function createSprintController(req: Request, res: Response, next: NextFunction) {
   try {
@@ -42,6 +42,18 @@ export async function startSprintController(req: Request, res: Response, next: N
     const projectId = parseProjectIdParam(req.params.projectId);
     const sprintId = parseSprintIdParam(req.params.sprintId);
     const sprint = await startSprint({ organizationId, projectId, sprintId }, req.userId!);
+    res.status(200).json({ sprint: formatSprintForResponse(sprint) });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function closeSprintController(req: Request, res: Response, next: NextFunction) {
+  try {
+    const organizationId = parseOrganizationIdParam(req.params.organizationId);
+    const projectId = parseProjectIdParam(req.params.projectId);
+    const sprintId = parseSprintIdParam(req.params.sprintId);
+    const sprint = await closeSprint({ organizationId, projectId, sprintId }, req.userId!);
     res.status(200).json({ sprint: formatSprintForResponse(sprint) });
   } catch (error) {
     next(error);
