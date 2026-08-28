@@ -6,9 +6,10 @@ import { PriorityBadge } from "./PriorityBadge";
 type BacklogTaskRowProps = {
   task: BacklogTask;
   canDrag: boolean;
+  onOpenDetail: (taskId: string) => void;
 };
 
-export function BacklogTaskRow({ task, canDrag }: BacklogTaskRowProps) {
+export function BacklogTaskRow({ task, canDrag, onOpenDetail }: BacklogTaskRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
     disabled: !canDrag,
@@ -24,7 +25,8 @@ export function BacklogTaskRow({ task, canDrag }: BacklogTaskRowProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between gap-3 rounded-md border border-border bg-surface px-4 py-3"
+      onClick={() => onOpenDetail(task.id)}
+      className="flex cursor-pointer items-center justify-between gap-3 rounded-md border border-border bg-surface px-4 py-3"
     >
       <div className="flex min-w-0 items-center gap-3">
         {canDrag && (
@@ -32,6 +34,7 @@ export function BacklogTaskRow({ task, canDrag }: BacklogTaskRowProps) {
             type="button"
             {...attributes}
             {...listeners}
+            onClick={(event) => event.stopPropagation()}
             className="cursor-grab touch-none text-text-3 hover:text-foreground"
             aria-label="Reordenar tarea"
           >

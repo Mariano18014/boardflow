@@ -138,3 +138,26 @@ export async function countTasksInColumn(columnId: string): Promise<number> {
     where: { columnId, isArchived: false, deletedAt: null },
   });
 }
+
+type UpdateTaskDetailsData = {
+  title?: string;
+  description?: string;
+  priority?: TaskPriority;
+  estimatedPoints?: number;
+  dueDate?: string;
+};
+
+export async function updateTaskDetails(taskId: string, changes: UpdateTaskDetailsData) {
+  return prisma.task.update({
+    where: { id: taskId },
+    data: {
+      title: changes.title,
+      description: changes.description,
+      priority: changes.priority,
+      estimatedPoints: changes.estimatedPoints,
+      // undefined here means "field not sent, don't touch it" (Prisma skips
+      // undefined keys); only convert to a real Date when a value was sent.
+      dueDate: changes.dueDate === undefined ? undefined : new Date(changes.dueDate),
+    },
+  });
+}

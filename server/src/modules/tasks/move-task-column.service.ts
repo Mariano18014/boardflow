@@ -9,7 +9,8 @@ import {
   shiftTasksForwardFromPosition,
 } from "../../lib/column-position.util";
 import { findColumnById } from "../boards/columns/columns.repository";
-import { countTasksInColumn, findTaskByIdAndProjectId } from "./tasks.repository";
+import { findTaskById } from "./task.service";
+import { countTasksInColumn } from "./tasks.repository";
 
 export type MoveTaskToColumnInput = {
   organizationId: string;
@@ -36,14 +37,6 @@ export async function moveTaskToColumn(input: MoveTaskToColumnInput, requesterId
     await moveBetweenColumns(task, input.columnId, input.position);
   }
   return findTaskById(input.taskId, input.projectId);
-}
-
-async function findTaskById(taskId: string, projectId: string): Promise<Task> {
-  const task = await findTaskByIdAndProjectId(taskId, projectId);
-  if (!task) {
-    throw new NotFoundError("La tarea no existe en este proyecto.");
-  }
-  return task;
 }
 
 function checkTaskBelongsToActiveSprint(task: Task) {

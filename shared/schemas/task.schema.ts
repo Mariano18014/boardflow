@@ -29,15 +29,18 @@ export const createTaskSchema = taskSchema.pick({
   estimatedPoints: true,
 });
 
-export const updateTaskSchema = taskSchema
-  .pick({
-    title: true,
-    description: true,
-    priority: true,
-    dueDate: true,
-    estimatedPoints: true,
-  })
-  .partial();
+// Deliberately loose: only the structural/format constraints that mirror the
+// database column limits live here (max title length). The semantic business
+// rules (title can't be blank, points must be positive, date must be valid)
+// are enforced in task-detail.service.ts's validateTitle/validateEstimatedPoints/
+// validateDueDate, per this HU's requested separation of concerns.
+export const updateTaskDetailsBodySchema = z.object({
+  title: z.string().max(200).optional(),
+  description: z.string().optional(),
+  priority: z.enum(TASK_PRIORITY).optional(),
+  estimatedPoints: z.number().int().optional(),
+  dueDate: z.string().optional(),
+});
 
 export const moveTaskSchema = z.object({
   columnId: z.string().uuid().nullable().optional(),
@@ -75,7 +78,7 @@ export const moveTaskToColumnSchema = z.object({
 
 export type Task = z.infer<typeof taskSchema>;
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
-export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
+export type UpdateTaskDetailsBody = z.infer<typeof updateTaskDetailsBodySchema>;
 export type MoveTaskInput = z.infer<typeof moveTaskSchema>;
 export type ListBacklogQuery = z.infer<typeof listBacklogQuerySchema>;
 export type CreateBacklogTaskBody = z.infer<typeof createBacklogTaskBodySchema>;
@@ -95,4 +98,23 @@ export type BacklogTaskItem = {
   position: number;
   createdAt: Date;
   assignees: unknown[];
+};
+
+// Full read-model for the task detail panel (HU-30). assignees/labels are
+// empty for now (HU-31 and Epic 5 populate them respectively).
+export type TaskDetail = {
+  id: string;
+  title: string;
+  description: string | null;
+  priority: TaskPriority;
+  estimatedPoints: number | null;
+  dueDate: Date | null;
+  position: number;
+  sprintId: string | null;
+  columnId: string | null;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  assignees: unknown[];
+  labels: unknown[];
 };

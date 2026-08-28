@@ -12,13 +12,23 @@ type SprintBoardViewProps = {
   sprintId: string;
   board: SprintBoard;
   canEditTasks: boolean;
+  onOpenTaskDetail: (taskId: string) => void;
 };
 
-export function SprintBoardView({ organizationId, projectId, sprintId, board, canEditTasks }: SprintBoardViewProps) {
+export function SprintBoardView({
+  organizationId,
+  projectId,
+  sprintId,
+  board,
+  canEditTasks,
+  onOpenTaskDetail,
+}: SprintBoardViewProps) {
   const [columns, setColumns] = useState(board.columns);
   const { moveTaskToColumn } = useMoveTaskToColumn(organizationId, projectId, sprintId);
   const { toast } = useToast();
-  const sensors = useSensors(useSensor(PointerSensor));
+  // Same reasoning as use-drag-to-reorder.ts: a small activation distance lets
+  // a plain click (opening a task's detail panel) pass through untouched.
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   useEffect(() => {
     setColumns(board.columns);
@@ -86,7 +96,12 @@ export function SprintBoardView({ organizationId, projectId, sprintId, board, ca
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <div className="flex gap-4 overflow-x-auto">
           {columns.map((column) => (
-            <BoardStatusColumn key={column.id} column={column} canDrag={canEditTasks} />
+            <BoardStatusColumn
+              key={column.id}
+              column={column}
+              canDrag={canEditTasks}
+              onOpenDetail={onOpenTaskDetail}
+            />
           ))}
         </div>
       </DndContext>

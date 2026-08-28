@@ -11,9 +11,10 @@ type BacklogListProps = {
   organizationId: string;
   projectId: string;
   canEditTasks: boolean;
+  onOpenDetail: (taskId: string) => void;
 };
 
-export function BacklogList({ tasks, organizationId, projectId, canEditTasks }: BacklogListProps) {
+export function BacklogList({ tasks, organizationId, projectId, canEditTasks, onOpenDetail }: BacklogListProps) {
   const { reorderBacklogTasks } = useReorderBacklog(organizationId, projectId);
   const { toast } = useToast();
   const { orderedItems, sensors, handleDragEnd, applyOptimisticOrder } = useDragToReorder({
@@ -48,7 +49,7 @@ export function BacklogList({ tasks, organizationId, projectId, canEditTasks }: 
       <SortableContext items={orderedItems.map((task) => task.id)} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col gap-2">
           {orderedItems.map((task) => (
-            <BacklogTaskRow key={task.id} task={task} canDrag={canEditTasks} />
+            <BacklogTaskRow key={task.id} task={task} canDrag={canEditTasks} onOpenDetail={onOpenDetail} />
           ))}
         </div>
       </SortableContext>

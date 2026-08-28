@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useParams } from "wouter";
 import { AppShell } from "@/components/layout/AppShell";
 import { useProject } from "@/components/modules/projects/use-project";
@@ -6,6 +7,7 @@ import { useBacklog } from "@/components/modules/tasks/use-backlog";
 import { BacklogList } from "@/components/modules/tasks/BacklogList";
 import { CreateBacklogTaskDialog } from "@/components/modules/tasks/CreateBacklogTaskDialog";
 import { CreateSprintDialog } from "@/components/modules/sprints/CreateSprintDialog";
+import { TaskDetailPanel } from "@/components/modules/tasks/TaskDetailPanel";
 
 export default function BacklogPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -15,6 +17,7 @@ export default function BacklogPage() {
   const canEditTasks = hasPermission("tasks:edit");
   const canCreateSprints = hasPermission("sprints:create");
   const { data: tasks, isLoading, isError } = useBacklog(project?.organizationId, projectId);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   return (
     <AppShell title="Backlog">
@@ -54,9 +57,19 @@ export default function BacklogPage() {
             organizationId={project.organizationId}
             projectId={project.id}
             canEditTasks={canEditTasks}
+            onOpenDetail={setSelectedTaskId}
           />
         )}
       </div>
+      {project && (
+        <TaskDetailPanel
+          organizationId={project.organizationId}
+          projectId={project.id}
+          taskId={selectedTaskId}
+          canEditTasks={canEditTasks}
+          onClose={() => setSelectedTaskId(null)}
+        />
+      )}
     </AppShell>
   );
 }

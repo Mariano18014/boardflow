@@ -6,9 +6,10 @@ import { SprintBoardTaskCard } from "./SprintBoardTaskCard";
 type BoardStatusColumnProps = {
   column: SprintBoardColumn;
   canDrag: boolean;
+  onOpenDetail: (taskId: string) => void;
 };
 
-export function BoardStatusColumn({ column, canDrag }: BoardStatusColumnProps) {
+export function BoardStatusColumn({ column, canDrag, onOpenDetail }: BoardStatusColumnProps) {
   const { setNodeRef } = useDroppable({ id: column.id });
   const taskIds = column.tasks.map((task) => task.id);
 
@@ -24,7 +25,13 @@ export function BoardStatusColumn({ column, canDrag }: BoardStatusColumnProps) {
       <div className="flex min-h-8 flex-col gap-2">
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
           {column.tasks.map((task) => (
-            <SprintBoardTaskCard key={task.id} task={task} columnId={column.id} canDrag={canDrag} />
+            <SprintBoardTaskCard
+              key={task.id}
+              task={task}
+              columnId={column.id}
+              canDrag={canDrag}
+              onOpenDetail={onOpenDetail}
+            />
           ))}
         </SortableContext>
       </div>

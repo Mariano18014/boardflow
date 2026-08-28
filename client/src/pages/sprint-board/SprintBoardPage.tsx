@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useParams } from "wouter";
 import { AppShell } from "@/components/layout/AppShell";
 import { useProject } from "@/components/modules/projects/use-project";
 import { useHasPermission } from "@/components/modules/permissions/use-has-permission";
 import { useSprintBoard } from "@/components/modules/tasks/use-sprint-board";
 import { SprintBoardView } from "@/components/modules/tasks/SprintBoardView";
+import { TaskDetailPanel } from "@/components/modules/tasks/TaskDetailPanel";
 
 export default function SprintBoardPage() {
   const { projectId, sprintId } = useParams<{ projectId: string; sprintId: string }>();
@@ -15,6 +17,7 @@ export default function SprintBoardPage() {
     projectId,
     sprintId,
   );
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   return (
     <AppShell title="Tablero del sprint">
@@ -32,9 +35,19 @@ export default function SprintBoardPage() {
             sprintId={sprintId}
             board={board}
             canEditTasks={canEditTasks}
+            onOpenTaskDetail={setSelectedTaskId}
           />
         )}
       </div>
+      {project && (
+        <TaskDetailPanel
+          organizationId={project.organizationId}
+          projectId={project.id}
+          taskId={selectedTaskId}
+          canEditTasks={canEditTasks}
+          onClose={() => setSelectedTaskId(null)}
+        />
+      )}
     </AppShell>
   );
 }

@@ -8,9 +8,10 @@ type SprintBoardTaskCardProps = {
   task: SprintBoardTask;
   columnId: string;
   canDrag: boolean;
+  onOpenDetail: (taskId: string) => void;
 };
 
-export function SprintBoardTaskCard({ task, columnId, canDrag }: SprintBoardTaskCardProps) {
+export function SprintBoardTaskCard({ task, columnId, canDrag, onOpenDetail }: SprintBoardTaskCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
     data: { columnId },
@@ -29,8 +30,9 @@ export function SprintBoardTaskCard({ task, columnId, canDrag }: SprintBoardTask
       style={style}
       {...(canDrag ? attributes : {})}
       {...(canDrag ? listeners : {})}
+      onClick={() => onOpenDetail(task.id)}
       className={cn(
-        "rounded-md border border-border bg-surface px-4 py-3",
+        "cursor-pointer rounded-md border border-border bg-surface px-4 py-3",
         canDrag && "cursor-grab touch-none",
       )}
     >

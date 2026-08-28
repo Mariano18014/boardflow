@@ -14,7 +14,11 @@ type UseDragToReorderOptions<T> = {
 // needs to (its own mutation, its own error message).
 export function useDragToReorder<T>({ items, getItemId, onReorder }: UseDragToReorderOptions<T>) {
   const [orderedItems, setOrderedItems] = useState(items);
-  const sensors = useSensors(useSensor(PointerSensor));
+  // A small activation distance lets a plain click (e.g. opening a task's
+  // detail panel) pass through untouched, while any real drag still starts
+  // reliably — without it, dnd-kit can swallow the click event that would
+  // otherwise fire right after a completed drag.
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   useEffect(() => {
     setOrderedItems(items);
