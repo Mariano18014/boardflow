@@ -98,3 +98,37 @@ export async function updateTaskSprintAssignment(taskId: string, sprintId: strin
     data: { sprintId, position },
   });
 }
+
+export async function findSprintTasksWithoutColumn(sprintId: string) {
+  return prisma.task.findMany({
+    where: { sprintId, columnId: null, isArchived: false, deletedAt: null },
+    orderBy: { position: "asc" },
+  });
+}
+
+export async function findColumnTasksForSprint(columnId: string, sprintId: string) {
+  return prisma.task.findMany({
+    where: { columnId, sprintId, isArchived: false, deletedAt: null },
+    orderBy: { position: "asc" },
+  });
+}
+
+export async function findMaxPositionInColumn(columnId: string): Promise<number | null> {
+  const result = await prisma.task.aggregate({
+    where: { columnId },
+    _max: { position: true },
+  });
+  return result._max.position;
+}
+
+export async function updateTaskColumnAssignment(
+  taskId: string,
+  boardId: string,
+  columnId: string,
+  position: number,
+) {
+  return prisma.task.update({
+    where: { id: taskId },
+    data: { boardId, columnId, position },
+  });
+}

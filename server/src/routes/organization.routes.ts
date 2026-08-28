@@ -18,6 +18,7 @@ import {
   assignTaskToSprintController,
   getSprintTasksController,
 } from "../modules/tasks/sprint-planning.controller";
+import { getSprintBoardController } from "../modules/tasks/sprint-board.controller";
 import { getMyPermissionsController } from "../modules/permissions/permissions.controller";
 import {
   archiveProjectController,
@@ -84,4 +85,9 @@ organizationRoutes.patch(
   "/:organizationId/projects/:projectId/tasks/:taskId/sprint-assignment",
   authMiddleware,
   assignTaskToSprintController,
+);
+organizationRoutes.get(
+  "/:organizationId/projects/:projectId/sprints/:sprintId/board",
+  authMiddleware,
+  getSprintBoardController,
 );

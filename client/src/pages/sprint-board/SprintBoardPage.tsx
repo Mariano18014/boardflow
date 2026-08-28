@@ -1,18 +1,28 @@
 import { useParams } from "wouter";
 import { AppShell } from "@/components/layout/AppShell";
+import { useProject } from "@/components/modules/projects/use-project";
+import { useSprintBoard } from "@/components/modules/tasks/use-sprint-board";
+import { SprintBoardView } from "@/components/modules/tasks/SprintBoardView";
 
 export default function SprintBoardPage() {
-  const { sprintId } = useParams<{ projectId: string; sprintId: string }>();
+  const { projectId, sprintId } = useParams<{ projectId: string; sprintId: string }>();
+  const { data: project } = useProject(projectId);
+  const { data: board, isLoading, isError, error } = useSprintBoard(
+    project?.organizationId,
+    projectId,
+    sprintId,
+  );
 
   return (
     <AppShell title="Tablero del sprint">
       <div className="p-7">
-        <div className="text-xs font-mono text-text-3 mb-1">{sprintId}</div>
-        <h1 className="font-heading text-xl font-bold mb-1">Tablero del sprint</h1>
-        <p className="text-sm text-muted-foreground">
-          El tablero con las columnas To Do / In Progress / Review / Done todavía no está
-          implementado.
-        </p>
+        {isLoading && <p className="text-sm text-muted-foreground">Cargando tablero...</p>}
+        {isError && (
+          <p className="text-sm text-destructive">
+            {error instanceof Error ? error.message : "No se pudo cargar el tablero de este sprint."}
+          </p>
+        )}
+        {board && <SprintBoardView board={board} />}
       </div>
     </AppShell>
   );
