@@ -43,7 +43,7 @@ export async function createBacklogTask(
   await checkProjectIsNotArchived(project);
   const nextPosition = await calculateNextBacklogPosition(input.projectId);
   const task = await saveTaskInDatabase(input, nextPosition, requesterId);
-  return mapTaskToBacklogItem(task);
+  return await mapTaskToBacklogItem(task);
 }
 
 async function calculateNextBacklogPosition(projectId: string): Promise<number> {
@@ -71,7 +71,7 @@ async function findTasksWithoutSprint(
   pagination: Pagination,
 ): Promise<BacklogTaskItem[]> {
   const tasks = await findBacklogTasksInDatabase(projectId, pagination);
-  return tasks.map(mapTaskToBacklogItem);
+  return Promise.all(tasks.map(mapTaskToBacklogItem));
 }
 
 export type ReorderBacklogInput = {
@@ -90,7 +90,7 @@ export async function reorderBacklogTasks(
   checkAllTaskIdsBelongToBacklog(input.taskIds, backlogTasks);
   checkTaskIdsCountMatchesBacklogTasks(input.taskIds, backlogTasks);
   const reorderedTasks = await updateTaskPositionsInTransaction(input.taskIds);
-  return reorderedTasks.map(mapTaskToBacklogItem);
+  return Promise.all(reorderedTasks.map(mapTaskToBacklogItem));
 }
 
 async function findActiveBacklogTasks(projectId: string): Promise<Task[]> {

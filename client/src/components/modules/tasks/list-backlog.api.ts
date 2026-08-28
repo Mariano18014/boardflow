@@ -1,5 +1,6 @@
 import { buildAuthorizationHeaders } from "@/lib/queryClient";
 import { buildTaskApiError } from "./task-api-error";
+import type { AssigneeSummary } from "./assignee-summary";
 
 export type BacklogTask = {
   id: string;
@@ -8,7 +9,7 @@ export type BacklogTask = {
   estimatedPoints: number | null;
   position: number;
   createdAt: string;
-  assignees: unknown[];
+  assignees: AssigneeSummary[];
 };
 
 export async function listBacklogTasks(organizationId: string, projectId: string): Promise<BacklogTask[]> {

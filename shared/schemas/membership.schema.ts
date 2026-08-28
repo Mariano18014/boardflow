@@ -27,6 +27,11 @@ export type ListOrganizationMembersQuery = z.infer<typeof listOrganizationMember
 export type OrganizationMemberListItem = {
   type: "member" | "invitation";
   id: string;
+  // The membership's own user, distinct from `id` (which is the membership id
+  // for members or the invitation id for invitations) — null for invitations,
+  // since nobody has accepted them into a real User yet. This is what the
+  // task assignee selector (HU-31) needs, since assignees are keyed by user.
+  userId: string | null;
   fullName: string | null;
   email: string;
   avatarUrl: string | null;

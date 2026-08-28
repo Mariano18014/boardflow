@@ -28,7 +28,7 @@ export async function getSprintTasks(
   await findProjectById(input.projectId, input.organizationId);
   await findSprintById(input.sprintId, input.projectId);
   const tasks = await findTasksInSprint(input.sprintId);
-  return tasks.map(mapTaskToBacklogItem);
+  return Promise.all(tasks.map(mapTaskToBacklogItem));
 }
 
 async function findTasksInSprint(sprintId: string): Promise<Task[]> {
@@ -55,7 +55,7 @@ export async function assignTaskToSprint(
   }
   const nextPosition = await calculateNextPositionInScope(input.projectId, input.sprintId);
   const updatedTask = await updateTaskSprintAssignment(task, input.sprintId, nextPosition);
-  return mapTaskToBacklogItem(updatedTask);
+  return await mapTaskToBacklogItem(updatedTask);
 }
 
 // A task can only move (to the backlog, or to another sprint) while its

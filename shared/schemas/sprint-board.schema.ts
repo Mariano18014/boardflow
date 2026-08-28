@@ -1,4 +1,5 @@
 import type { SprintStatus, TaskPriority } from "../types/enums";
+import type { AssigneeSummary } from "./task-assignee.schema";
 
 // Composed read-model for the "active sprint board" screen (HU-28) — not a
 // persisted entity, so it lives in its own file instead of task.schema.ts or
@@ -9,8 +10,8 @@ export type SprintBoardTaskItem = {
   priority: TaskPriority;
   estimatedPoints: number | null;
   position: number;
-  // Both arrays are empty for now: assignees ships in HU-31, labels in Epic 5.
-  assignees: unknown[];
+  assignees: AssigneeSummary[];
+  // Still empty for now: labels ship in Epic 5 (deferred).
   labels: unknown[];
 };
 

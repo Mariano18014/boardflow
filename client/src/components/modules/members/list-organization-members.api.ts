@@ -4,6 +4,7 @@ import { buildMembersApiError } from "./members-api-error";
 export type OrganizationMember = {
   type: "member" | "invitation";
   id: string;
+  userId: string | null;
   fullName: string | null;
   email: string;
   avatarUrl: string | null;

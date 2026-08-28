@@ -113,6 +113,7 @@ function formatMemberForResponse(member: OrganizationMemberListItem) {
   return {
     type: member.type,
     id: member.id,
+    userId: member.userId,
     fullName: member.fullName,
     email: member.email,
     avatarUrl: member.avatarUrl,

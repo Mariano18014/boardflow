@@ -6,6 +6,7 @@ import {
   reorderBacklogTasksController,
 } from "./backlog.controller";
 import { getTaskDetailController, updateTaskDetailsController } from "./task-detail.controller";
+import { replaceTaskAssigneesController } from "./assignees/assignees.controller";
 
 // mergeParams: true — this router is mounted at
 // /organizations/:organizationId/projects/:projectId and needs access to the
@@ -17,3 +18,4 @@ tasksRoutes.post("/backlog/tasks", authMiddleware, createBacklogTaskController);
 tasksRoutes.patch("/backlog/reorder", authMiddleware, reorderBacklogTasksController);
 tasksRoutes.get("/tasks/:taskId", authMiddleware, getTaskDetailController);
 tasksRoutes.patch("/tasks/:taskId", authMiddleware, updateTaskDetailsController);
+tasksRoutes.put("/tasks/:taskId/assignees", authMiddleware, replaceTaskAssigneesController);

@@ -15,7 +15,11 @@ export function useUpdateTaskDetails(organizationId: string, projectId: string, 
     },
   });
 
-  return { updateTaskDetails: mutation.mutate, isPending: mutation.isPending };
+  return {
+    updateTaskDetails: mutation.mutate,
+    updateTaskDetailsAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+  };
 }
 
 function updateTaskDetailCache(queryClient: QueryClient, projectId: string, taskId: string, task: TaskDetail) {

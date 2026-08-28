@@ -2,6 +2,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { BacklogTask } from "./list-backlog.api";
 import { PriorityBadge } from "./PriorityBadge";
+import { AssigneeAvatarStack } from "./AssigneeAvatarStack";
 
 type BacklogTaskRowProps = {
   task: BacklogTask;
@@ -48,6 +49,7 @@ export function BacklogTaskRow({ task, canDrag, onOpenDetail }: BacklogTaskRowPr
           <span className="text-xs text-muted-foreground">{task.estimatedPoints} pts</span>
         )}
         <PriorityBadge priority={task.priority} />
+        <AssigneeAvatarStack assignees={task.assignees} />
       </div>
     </div>
   );

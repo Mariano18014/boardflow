@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { TASK_PRIORITY, type TaskPriority } from "../types/enums";
 import { paginationQuerySchema } from "./pagination.schema";
+import type { AssigneeSummary } from "./task-assignee.schema";
 
 export const taskSchema = z.object({
   id: z.string().uuid(),
@@ -87,9 +88,6 @@ export type ReorderBacklogTasksBody = z.infer<typeof reorderBacklogTasksSchema>;
 export type AssignTaskToSprintBody = z.infer<typeof assignTaskToSprintSchema>;
 export type MoveTaskToColumnBody = z.infer<typeof moveTaskToColumnSchema>;
 
-// The shape already includes `assignees` even though HU-22 never populates it
-// (assignment ships in HU-31) so the frontend contract doesn't need to change
-// again once assignees exist.
 export type BacklogTaskItem = {
   id: string;
   title: string;
@@ -97,11 +95,11 @@ export type BacklogTaskItem = {
   estimatedPoints: number | null;
   position: number;
   createdAt: Date;
-  assignees: unknown[];
+  assignees: AssigneeSummary[];
 };
 
-// Full read-model for the task detail panel (HU-30). assignees/labels are
-// empty for now (HU-31 and Epic 5 populate them respectively).
+// Full read-model for the task detail panel (HU-30). labels stay empty for
+// now (Epic 5 is deferred); assignees are real as of HU-31.
 export type TaskDetail = {
   id: string;
   title: string;
@@ -115,6 +113,6 @@ export type TaskDetail = {
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
-  assignees: unknown[];
+  assignees: AssigneeSummary[];
   labels: unknown[];
 };

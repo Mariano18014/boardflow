@@ -5,6 +5,7 @@ import { ValidationError } from "../../lib/errors";
 import { findProjectById } from "../../services/project.service";
 import { checkRequesterHasPermission } from "../permissions/check-permission";
 import { findTaskById } from "./task.service";
+import { findAssigneesByTaskId } from "./assignees/assignees.service";
 import { updateTaskDetails as saveTaskDetailChanges } from "./tasks.repository";
 
 export type GetTaskDetailInput = {
@@ -17,7 +18,7 @@ export async function getTaskDetail(input: GetTaskDetailInput, requesterId: stri
   await checkRequesterHasPermission(input.organizationId, requesterId, "tasks:view");
   await findProjectById(input.projectId, input.organizationId);
   const task = await findTaskById(input.taskId, input.projectId);
-  return mapTaskToDetail(task);
+  return await mapTaskToDetail(task);
 }
 
 // Only the fields this HU is allowed to touch. sprintId/columnId/position are
@@ -48,7 +49,7 @@ export async function updateTaskDetails(
   const allowedChanges = filterEditableFields(input.changes);
   validateTaskDetailChanges(allowedChanges);
   const updatedTask = await saveTaskDetailChanges(task.id, allowedChanges);
-  return mapTaskToDetail(updatedTask);
+  return await mapTaskToDetail(updatedTask);
 }
 
 // Explicitly picks only the editable fields, so anything else that might ride
@@ -93,7 +94,8 @@ function validateDueDate(dueDate: string | undefined) {
   }
 }
 
-function mapTaskToDetail(task: Task): TaskDetail {
+async function mapTaskToDetail(task: Task): Promise<TaskDetail> {
+  const assignees = await findAssigneesByTaskId(task.id);
   return {
     id: task.id,
     title: task.title,
@@ -107,7 +109,7 @@ function mapTaskToDetail(task: Task): TaskDetail {
     createdBy: task.createdBy,
     createdAt: task.createdAt,
     updatedAt: task.updatedAt,
-    assignees: [],
+    assignees,
     labels: [],
   };
 }

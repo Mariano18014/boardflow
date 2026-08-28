@@ -1,5 +1,6 @@
 import { buildAuthorizationHeaders } from "@/lib/queryClient";
 import { buildTaskApiError } from "./task-api-error";
+import type { AssigneeSummary } from "./assignee-summary";
 
 export type TaskDetail = {
   id: string;
@@ -14,7 +15,7 @@ export type TaskDetail = {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
-  assignees: unknown[];
+  assignees: AssigneeSummary[];
   labels: unknown[];
 };
 

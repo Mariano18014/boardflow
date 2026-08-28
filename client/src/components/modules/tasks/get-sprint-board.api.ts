@@ -1,5 +1,6 @@
 import { buildAuthorizationHeaders } from "@/lib/queryClient";
 import { buildTaskApiError } from "./task-api-error";
+import type { AssigneeSummary } from "./assignee-summary";
 
 export type SprintBoardTask = {
   id: string;
@@ -7,7 +8,7 @@ export type SprintBoardTask = {
   priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
   estimatedPoints: number | null;
   position: number;
-  assignees: unknown[];
+  assignees: AssigneeSummary[];
   labels: unknown[];
 };
 

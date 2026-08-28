@@ -2,6 +2,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
 import { PriorityBadge } from "./PriorityBadge";
+import { AssigneeAvatarStack } from "./AssigneeAvatarStack";
 import type { SprintBoardTask } from "./get-sprint-board.api";
 
 type SprintBoardTaskCardProps = {
@@ -37,11 +38,14 @@ export function SprintBoardTaskCard({ task, columnId, canDrag, onOpenDetail }: S
       )}
     >
       <p className="mb-2 text-sm font-medium">{task.title}</p>
-      <div className="flex items-center gap-2">
-        {task.estimatedPoints !== null && (
-          <span className="text-xs text-muted-foreground">{task.estimatedPoints} pts</span>
-        )}
-        <PriorityBadge priority={task.priority} />
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {task.estimatedPoints !== null && (
+            <span className="text-xs text-muted-foreground">{task.estimatedPoints} pts</span>
+          )}
+          <PriorityBadge priority={task.priority} />
+        </div>
+        <AssigneeAvatarStack assignees={task.assignees} />
       </div>
     </div>
   );

@@ -75,6 +75,7 @@ function mapMembershipToListItem(membership: MembershipWithRelations): Organizat
   return {
     type: "member",
     id: membership.id,
+    userId: membership.userId,
     fullName: membership.user.fullName,
     email: membership.user.email,
     avatarUrl: membership.user.avatarUrl,
@@ -89,6 +90,7 @@ function mapInvitationToListItem(invitation: InvitationWithRole): OrganizationMe
   return {
     type: "invitation",
     id: invitation.id,
+    userId: null,
     fullName: null,
     email: invitation.email,
     avatarUrl: null,
