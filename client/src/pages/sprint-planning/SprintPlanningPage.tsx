@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "wouter";
+import { Link, useLocation, useParams } from "wouter";
 import { AppShell } from "@/components/layout/AppShell";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProject } from "@/components/modules/projects/use-project";
@@ -49,7 +49,17 @@ export default function SprintPlanningPage() {
   return (
     <AppShell title="Sprint Planning">
       <div className="p-7">
-        <h1 className="font-heading text-xl font-bold mb-1">Sprint Planning</h1>
+        <div className="mb-1 flex items-center justify-between">
+          <h1 className="font-heading text-xl font-bold">Sprint Planning</h1>
+          {project && (
+            <Link
+              href={`/projects/${project.id}/velocity`}
+              className="text-sm text-primary underline-offset-4 hover:underline"
+            >
+              Ver velocity
+            </Link>
+          )}
+        </div>
         <p className="text-sm text-muted-foreground mb-6">
           Elegí un sprint planificado y arrastrá tareas entre el backlog y el sprint.
         </p>

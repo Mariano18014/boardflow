@@ -161,6 +161,17 @@ export async function findSprintTasksNotInColumn(sprintId: string, excludedColum
   });
 }
 
+export async function sumEstimatedPointsForSprintAndColumn(
+  sprintId: string,
+  columnId: string,
+): Promise<number> {
+  const result = await prisma.task.aggregate({
+    where: { sprintId, columnId, isArchived: false, deletedAt: null },
+    _sum: { estimatedPoints: true },
+  });
+  return result._sum.estimatedPoints ?? 0;
+}
+
 export async function updateTaskReturnedToBacklog(
   transaction: Prisma.TransactionClient,
   taskId: string,

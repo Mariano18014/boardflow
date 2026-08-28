@@ -158,7 +158,9 @@ export async function closeSprint(input: CloseSprintInput, requesterId: string):
 // the board has no "Done" column — this can happen if the sprint is closed
 // without the board ever having been opened (HU-28 seeds the columns lazily).
 // In that case every sprint task is treated as unfinished.
-async function findDoneColumn(projectId: string) {
+// Exported so velocity.service.ts (HU-33) can reuse the same lookup when
+// calculating completed points per sprint.
+export async function findDoneColumn(projectId: string) {
   const boards = await findActiveBoardsByProjectId(projectId);
   const board = boards[0];
   if (!board) {
