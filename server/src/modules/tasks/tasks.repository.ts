@@ -134,12 +134,6 @@ export async function updateTaskColumnAssignment(
   });
 }
 
-export async function countTasksInColumn(columnId: string): Promise<number> {
-  return prisma.task.count({
-    where: { columnId, isArchived: false, deletedAt: null },
-  });
-}
-
 type UpdateTaskDetailsData = {
   title?: string;
   description?: string;

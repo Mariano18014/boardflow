@@ -94,6 +94,7 @@ async function mapColumnWithTasks(column: Column, tasks: Task[]): Promise<Sprint
     id: column.id,
     name: column.name,
     position: column.position,
+    wipLimit: column.wipLimit,
     tasks: await Promise.all(tasks.map(mapTaskToBoardItem)),
   };
 }

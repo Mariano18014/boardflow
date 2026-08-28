@@ -8,9 +8,9 @@ import {
   shiftTasksForReorderWithinColumn,
   shiftTasksForwardFromPosition,
 } from "../../lib/column-position.util";
-import { findColumnById } from "../boards/columns/columns.repository";
+import { countTasksInColumn, findColumnById } from "../boards/columns/columns.repository";
+import { checkDestinationColumnHasCapacity } from "../boards/columns/columns.service";
 import { findTaskById } from "./task.service";
-import { countTasksInColumn } from "./tasks.repository";
 
 export type MoveTaskToColumnInput = {
   organizationId: string;
@@ -31,6 +31,9 @@ export async function moveTaskToColumn(input: MoveTaskToColumnInput, requesterId
   checkTaskBelongsToActiveSprint(task);
   await checkColumnBelongsToSameBoard(input.columnId, task.boardId);
   const isSameColumn = task.columnId === input.columnId;
+  if (!isSameColumn) {
+    await checkDestinationColumnHasCapacity(input.columnId);
+  }
   if (isSameColumn) {
     await reorderWithinColumn(task, input.position);
   } else {

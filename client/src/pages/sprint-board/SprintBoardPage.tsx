@@ -14,6 +14,7 @@ export default function SprintBoardPage() {
   const { hasPermission } = useHasPermission(project?.organizationId);
   const canEditTasks = hasPermission("tasks:edit");
   const canEditSprints = hasPermission("sprints:edit");
+  const canEditBoards = hasPermission("boards:edit");
   const { data: board, isLoading, isError, error } = useSprintBoard(
     project?.organizationId,
     projectId,
@@ -42,6 +43,7 @@ export default function SprintBoardPage() {
             board={board}
             canEditTasks={canEditTasks}
             canEditSprints={canEditSprints}
+            canEditBoards={canEditBoards}
             onOpenTaskDetail={setSelectedTaskId}
             onSprintClosed={handleSprintClosed}
           />

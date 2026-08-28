@@ -5,6 +5,7 @@ import {
   listBoardsController,
   reorderBoardsController,
 } from "./boards.controller";
+import { columnsRoutes } from "./columns/columns.routes";
 
 // mergeParams: true — this router is mounted at
 // /organizations/:organizationId/projects/:projectId/boards and needs access
@@ -14,3 +15,4 @@ export const boardsRoutes = Router({ mergeParams: true });
 boardsRoutes.post("/", authMiddleware, createBoardController);
 boardsRoutes.get("/", authMiddleware, listBoardsController);
 boardsRoutes.patch("/reorder", authMiddleware, reorderBoardsController);
+boardsRoutes.use("/columns", columnsRoutes);

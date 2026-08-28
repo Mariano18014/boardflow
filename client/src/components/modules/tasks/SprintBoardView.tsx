@@ -8,6 +8,7 @@ import { BoardStatusColumn } from "./BoardStatusColumn";
 import { useMoveTaskToColumn } from "./use-move-task-to-column";
 import { moveTaskAcrossColumns, resolveDropTarget, type TaskMove } from "./board-columns.util";
 import { countUnfinishedTasks } from "./count-unfinished-tasks.util";
+import { TaskApiError } from "./task-api-error";
 
 type SprintBoardViewProps = {
   organizationId: string;
@@ -16,6 +17,7 @@ type SprintBoardViewProps = {
   board: SprintBoard;
   canEditTasks: boolean;
   canEditSprints: boolean;
+  canEditBoards: boolean;
   onOpenTaskDetail: (taskId: string) => void;
   onSprintClosed: (sprint: SprintSummary) => void;
 };
@@ -27,6 +29,7 @@ export function SprintBoardView({
   board,
   canEditTasks,
   canEditSprints,
+  canEditBoards,
   onOpenTaskDetail,
   onSprintClosed,
 }: SprintBoardViewProps) {
@@ -81,12 +84,12 @@ export function SprintBoardView({
     moveTaskToColumn(
       { taskId: move.taskId, columnId: move.destinationColumnId, position: move.destinationIndex },
       {
-        onError: () => {
+        onError: (error) => {
           applyOptimisticColumns(previousColumns);
           toast({
             variant: "destructive",
             title: "No se pudo mover la tarea",
-            description: "Se restauró el estado anterior. Probá de nuevo.",
+            description: error instanceof TaskApiError ? error.message : "Se restauró el estado anterior. Probá de nuevo.",
           });
         },
       },
@@ -115,8 +118,12 @@ export function SprintBoardView({
           {columns.map((column) => (
             <BoardStatusColumn
               key={column.id}
+              organizationId={organizationId}
+              projectId={projectId}
+              sprintId={sprintId}
               column={column}
               canDrag={canEditTasks}
+              canEditBoards={canEditBoards}
               onOpenDetail={onOpenTaskDetail}
             />
           ))}

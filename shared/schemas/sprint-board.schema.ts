@@ -19,6 +19,7 @@ export type SprintBoardColumn = {
   id: string;
   name: string;
   position: number;
+  wipLimit: number | null;
   tasks: SprintBoardTaskItem[];
 };
 
