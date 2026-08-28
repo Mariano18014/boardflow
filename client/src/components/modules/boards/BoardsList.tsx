@@ -1,14 +1,7 @@
-import { useEffect, useState } from "react";
-import {
-  DndContext,
-  PointerSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useToast } from "@/hooks/use-toast";
+import { useDragToReorder } from "@/hooks/use-drag-to-reorder";
 import type { Board } from "./list-boards.api";
 import { BoardCard } from "./BoardCard";
 import { useReorderBoards } from "./use-reorder-boards";
@@ -21,34 +14,15 @@ type BoardsListProps = {
 };
 
 export function BoardsList({ boards, organizationId, projectId, canEditBoards }: BoardsListProps) {
-  const [orderedBoards, setOrderedBoards] = useState(boards);
   const { reorderBoards } = useReorderBoards(organizationId, projectId);
   const { toast } = useToast();
-  const sensors = useSensors(useSensor(PointerSensor));
+  const { orderedItems, sensors, handleDragEnd, applyOptimisticOrder } = useDragToReorder({
+    items: boards,
+    getItemId: (board) => board.id,
+    onReorder: persistBoardOrder,
+  });
 
-  useEffect(() => {
-    setOrderedBoards(boards);
-  }, [boards]);
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    if (!over || active.id === over.id) {
-      return;
-    }
-    const oldIndex = orderedBoards.findIndex((board) => board.id === active.id);
-    const newIndex = orderedBoards.findIndex((board) => board.id === over.id);
-    const previousOrder = orderedBoards;
-    const newOrder = arrayMove(orderedBoards, oldIndex, newIndex);
-    applyOptimisticOrder(newOrder);
-    persistBoardOrder(newOrder, previousOrder);
-  }
-
-  function applyOptimisticOrder(newOrder: Board[]) {
-    setOrderedBoards(newOrder);
-  }
-
-  function persistBoardOrder(newOrder: Board[], previousOrder: Board[]) {
-    const boardIds = newOrder.map((board) => board.id);
+  function persistBoardOrder(boardIds: string[], previousOrder: Board[]) {
     reorderBoards(boardIds, {
       onError: () => {
         applyOptimisticOrder(previousOrder);
@@ -63,12 +37,9 @@ export function BoardsList({ boards, organizationId, projectId, canEditBoards }:
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext
-        items={orderedBoards.map((board) => board.id)}
-        strategy={verticalListSortingStrategy}
-      >
+      <SortableContext items={orderedItems.map((board) => board.id)} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col gap-2">
-          {orderedBoards.map((board) => (
+          {orderedItems.map((board) => (
             <BoardCard key={board.id} board={board} canDrag={canEditBoards} />
           ))}
         </div>

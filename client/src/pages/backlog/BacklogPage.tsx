@@ -11,6 +11,7 @@ export default function BacklogPage() {
   const { data: project } = useProject(projectId);
   const { hasPermission } = useHasPermission(project?.organizationId);
   const canCreateTasks = hasPermission("tasks:create");
+  const canEditTasks = hasPermission("tasks:edit");
   const { data: tasks, isLoading, isError } = useBacklog(project?.organizationId, projectId);
 
   return (
@@ -32,7 +33,14 @@ export default function BacklogPage() {
         {isError && (
           <p className="text-sm text-destructive">No se pudo cargar el backlog de este proyecto.</p>
         )}
-        {tasks && <BacklogList tasks={tasks} />}
+        {tasks && project && (
+          <BacklogList
+            tasks={tasks}
+            organizationId={project.organizationId}
+            projectId={project.id}
+            canEditTasks={canEditTasks}
+          />
+        )}
       </div>
     </AppShell>
   );

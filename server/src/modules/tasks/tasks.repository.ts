@@ -1,5 +1,6 @@
 import type { TaskPriority } from "@shared/types/enums";
 import { prisma } from "../../db/client";
+import { runInTransaction } from "../../lib/reorder.util";
 
 type Pagination = {
   limit: number;
@@ -48,4 +49,21 @@ export async function createTask(data: CreateTaskData) {
       columnId: null,
     },
   });
+}
+
+export async function findActiveBacklogTasksByProjectId(projectId: string) {
+  return prisma.task.findMany({
+    where: { projectId, sprintId: null, isArchived: false, deletedAt: null },
+    orderBy: { position: "asc" },
+  });
+}
+
+export async function updateTaskPositions(taskIds: string[]) {
+  return runInTransaction((transaction) =>
+    Promise.all(
+      taskIds.map((taskId, index) =>
+        transaction.task.update({ where: { id: taskId }, data: { position: index } }),
+      ),
+    ),
+  );
 }

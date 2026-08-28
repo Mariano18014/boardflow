@@ -2,12 +2,14 @@ import type { NextFunction, Request, Response } from "express";
 import {
   createBacklogTaskBodySchema,
   listBacklogQuerySchema,
+  reorderBacklogTasksSchema,
   type BacklogTaskItem,
   type CreateBacklogTaskBody,
   type ListBacklogQuery,
+  type ReorderBacklogTasksBody,
 } from "@shared/schemas/task.schema";
 import { ValidationError } from "../../lib/errors";
-import { createBacklogTask, getProjectBacklog } from "./backlog.service";
+import { createBacklogTask, getProjectBacklog, reorderBacklogTasks } from "./backlog.service";
 
 export async function getBacklogController(req: Request, res: Response, next: NextFunction) {
   try {
@@ -43,6 +45,21 @@ export async function createBacklogTaskController(req: Request, res: Response, n
   }
 }
 
+export async function reorderBacklogTasksController(req: Request, res: Response, next: NextFunction) {
+  try {
+    const organizationId = parseOrganizationIdParam(req.params.organizationId);
+    const projectId = parseProjectIdParam(req.params.projectId);
+    const body = parseReorderBacklogTasksRequestBody(req.body);
+    const tasks = await reorderBacklogTasks(
+      { organizationId, projectId, taskIds: body.taskIds },
+      req.userId!,
+    );
+    res.status(200).json({ tasks: tasks.map(formatBacklogTaskForResponse) });
+  } catch (error) {
+    next(error);
+  }
+}
+
 function parseOrganizationIdParam(value: unknown): string {
   if (typeof value !== "string" || value.length === 0) {
     throw new ValidationError({ organizationId: ["organizationId inválido."] });
@@ -67,6 +84,14 @@ function parseListBacklogQuery(query: unknown): ListBacklogQuery {
 
 function parseCreateBacklogTaskRequestBody(body: unknown): CreateBacklogTaskBody {
   const result = createBacklogTaskBodySchema.safeParse(body);
+  if (!result.success) {
+    throw new ValidationError(result.error.flatten().fieldErrors);
+  }
+  return result.data;
+}
+
+function parseReorderBacklogTasksRequestBody(body: unknown): ReorderBacklogTasksBody {
+  const result = reorderBacklogTasksSchema.safeParse(body);
   if (!result.success) {
     throw new ValidationError(result.error.flatten().fieldErrors);
   }
