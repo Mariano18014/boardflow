@@ -24,3 +24,30 @@ export async function findCommentRecordsByTaskId(taskId: string, pagination: Pag
     include: { author: true },
   });
 }
+
+export async function findCommentRecordByIdAndTaskId(commentId: string, taskId: string) {
+  return prisma.comment.findFirst({
+    where: { id: commentId, taskId },
+    include: { author: true },
+  });
+}
+
+type UpdateCommentContentData = {
+  content: string;
+  editedAt: Date;
+};
+
+export async function updateCommentContent(commentId: string, data: UpdateCommentContentData) {
+  return prisma.comment.update({
+    where: { id: commentId },
+    data,
+    include: { author: true },
+  });
+}
+
+export async function softDeleteComment(commentId: string, deletedAt: Date) {
+  return prisma.comment.update({
+    where: { id: commentId },
+    data: { deletedAt },
+  });
+}

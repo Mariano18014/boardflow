@@ -172,7 +172,12 @@ export function TaskDetailPanel({ organizationId, projectId, taskId, canEditTask
                 <h3 className="font-heading text-sm font-semibold uppercase tracking-wide text-text-3">
                   Comentarios
                 </h3>
-                <CommentsList comments={comments ?? []} />
+                <CommentsList
+                  organizationId={organizationId}
+                  projectId={projectId}
+                  taskId={task.id}
+                  comments={comments ?? []}
+                />
                 {/* Publishing a comment is independent and immediate — it has
                     its own mutation and button, unlike the rest of this panel
                     which only saves on "Guardar cambios". */}

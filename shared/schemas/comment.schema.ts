@@ -22,8 +22,7 @@ export const createCommentSchema = createCommentBodySchema.extend({
   taskId: z.string().uuid(),
 });
 
-// HU-38 only covers creating and listing comments — editing/deleting is
-// HU-39's endpoint, so updateCommentSchema isn't used by anything yet.
+// Same content rule as creation (HU-39 edit endpoint).
 export const updateCommentSchema = createCommentBodySchema;
 
 export const listCommentsQuerySchema = paginationQuerySchema;
