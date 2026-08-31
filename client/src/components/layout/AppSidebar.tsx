@@ -1,15 +1,31 @@
-import { Link, useRoute } from "wouter";
+import { Link, useLocation, useRoute } from "wouter";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuthSession } from "@/components/modules/auth/use-auth-session";
+import { clearSession } from "@/components/modules/auth/auth-session.store";
 import { useCurrentOrganization } from "@/components/modules/organizations/use-current-organization";
 import { useProjects } from "@/components/modules/projects/use-projects";
+import { useMyProfile } from "@/components/modules/users/use-my-profile";
 import { getInitials } from "@/lib/utils";
 
 export function AppSidebar() {
   const session = useAuthSession();
+  const { data: profile } = useMyProfile();
+  const [, navigate] = useLocation();
   const { organization: currentOrganization } = useCurrentOrganization();
   const { data: projects } = useProjects(currentOrganization?.id);
+
+  function logOut() {
+    clearSession();
+    navigate("/login");
+  }
   const [, activeParams] = useRoute<{ projectId: string }>("/projects/:projectId");
   const [isDashboardActive] = useRoute("/dashboard");
   const [isProjectsListActive] = useRoute("/projects");
@@ -101,14 +117,24 @@ export function AppSidebar() {
       )}
 
       {session && (
-        <div className="mt-auto flex items-center gap-2 px-2 py-1.5">
-          <Avatar className="h-6 w-6">
-            <AvatarFallback className="bg-accent text-accent-foreground text-[10px] font-heading font-semibold">
-              {getInitials(session.user.fullName)}
-            </AvatarFallback>
-          </Avatar>
-          <span className="text-sm truncate">{session.user.fullName}</span>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="mt-auto flex items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-accent">
+            <Avatar className="h-6 w-6">
+              {profile?.avatarUrl && <AvatarImage src={profile.avatarUrl} alt={session.user.fullName} />}
+              <AvatarFallback className="bg-accent text-accent-foreground text-[10px] font-heading font-semibold">
+                {getInitials(session.user.fullName)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-sm truncate">{profile?.fullName ?? session.user.fullName}</span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" side="top">
+            <DropdownMenuItem asChild>
+              <Link href="/profile">Mi perfil</Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={logOut}>Cerrar sesión</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </aside>
   );

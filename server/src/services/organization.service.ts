@@ -1,7 +1,7 @@
 import type { Organization } from "@prisma/client";
 import type { CreateOrganizationInput } from "@shared/schemas/organization.schema";
 import { slugify } from "../lib/slug.util";
-import { NotFoundError, ValidationError } from "../lib/errors";
+import { NotFoundError } from "../lib/errors";
 import {
   createOrganization as saveOrganizationRecord,
   findOrganizationById as findOrganizationRecordById,
@@ -12,7 +12,7 @@ import { createMembership, findOrganizationsByUserId } from "../db/repositories/
 import { createRole, createRolePermissions } from "../modules/roles/roles.repository";
 import { findAllPermissions } from "../modules/permissions/permissions.repository";
 import { checkRequesterHasPermission } from "../modules/permissions/check-permission";
-import { deleteFile, saveFile } from "./file-storage.service";
+import { deleteFile, saveFile, validateImageFile } from "./file-storage.service";
 
 const OWNER_ROLE_NAME = "owner";
 const OWNER_ROLE_DESCRIPTION = "Rol con acceso total a la organización.";
@@ -20,8 +20,6 @@ const MEMBER_ROLE_NAME = "member";
 const MEMBER_ROLE_DESCRIPTION = "Rol estándar, sin permisos administrativos.";
 
 const ORGANIZATION_LOGOS_SUBFOLDER = "organization-logos";
-const ALLOWED_LOGO_MIME_TYPES = ["image/jpeg", "image/png", "image/svg+xml"];
-const MAX_LOGO_SIZE_BYTES = 2 * 1024 * 1024;
 
 export async function createOrganization(input: CreateOrganizationInput, ownerId: string) {
   const slug = await generateUniqueSlug(input.name);
@@ -135,20 +133,7 @@ async function findOrganizationById(organizationId: string): Promise<Organizatio
 }
 
 async function validateLogoFile(file: Express.Multer.File) {
-  checkFileType(file);
-  checkFileSize(file);
-}
-
-function checkFileType(file: Express.Multer.File) {
-  if (!ALLOWED_LOGO_MIME_TYPES.includes(file.mimetype)) {
-    throw new ValidationError({ logo: ["El logo debe ser un archivo JPG, PNG o SVG."] });
-  }
-}
-
-function checkFileSize(file: Express.Multer.File) {
-  if (file.size > MAX_LOGO_SIZE_BYTES) {
-    throw new ValidationError({ logo: ["El logo no puede superar los 2MB."] });
-  }
+  validateImageFile(file, "logo");
 }
 
 async function saveLogoFileToDisk(file: Express.Multer.File): Promise<string> {

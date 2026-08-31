@@ -1,6 +1,7 @@
 import { Switch, Route } from "wouter";
 import { RequireNoOrganization } from "@/components/modules/organizations/RequireNoOrganization";
 import { RequireOrganization } from "@/components/modules/organizations/RequireOrganization";
+import { RequireAuth } from "@/components/modules/auth/RequireAuth";
 import LandingPage from "@/pages/landing/LandingPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
@@ -20,6 +21,7 @@ import ProjectLabelsPage from "@/pages/project-labels/ProjectLabelsPage";
 import MembersPage from "@/pages/members/MembersPage";
 import OrganizationSettingsPage from "@/pages/organizations/OrganizationSettingsPage";
 import RolesPage from "@/pages/roles/RolesPage";
+import ProfilePage from "@/pages/profile/ProfilePage";
 import InvitationPage from "@/pages/invitations/InvitationPage";
 import NotFoundPage from "@/pages/not-found/NotFoundPage";
 
@@ -69,6 +71,9 @@ export function AppRoutes() {
       </Route>
       <Route path="/members">
         <RequireOrganization component={MembersPage} />
+      </Route>
+      <Route path="/profile">
+        <RequireAuth component={ProfilePage} />
       </Route>
       <Route path="/settings">
         <RequireOrganization component={OrganizationSettingsPage} />
