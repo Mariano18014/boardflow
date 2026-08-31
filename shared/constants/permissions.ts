@@ -2,12 +2,12 @@
 // Es la fuente de verdad para: (a) seedear la tabla Permission, (b) el middleware authorize.middleware.ts,
 // (c) la matriz de checkboxes del frontend (modules/roles).
 
-// HU-14 seeded 7 resources x 4 actions = 28 permissions. HU-36 adds "labels" as
-// an 8th resource (still idempotent: seedPermissions upserts by key, so
-// re-running it only adds the 4 new labels:* permissions without touching or
-// duplicating the original 28). Resources like "comments" or "invitations" are
-// intentionally NOT included yet — add them here (and re-run the seed) only
-// when a later HU actually needs them.
+// HU-14 seeded 7 resources x 4 actions = 28 permissions. HU-36 added "labels"
+// as an 8th resource, and HU-38 adds "comments" as a 9th — still idempotent:
+// seedPermissions upserts by key, so re-running it only adds the 4 new
+// comments:* permissions without touching or duplicating the previous 32.
+// Resources like "invitations" are intentionally NOT included yet — add them
+// here (and re-run the seed) only when a later HU actually needs them.
 export const PERMISSION_RESOURCES = [
   "organizations",
   "members",
@@ -17,6 +17,7 @@ export const PERMISSION_RESOURCES = [
   "sprints",
   "tasks",
   "labels",
+  "comments",
 ] as const;
 export type PermissionResource = (typeof PERMISSION_RESOURCES)[number];
 

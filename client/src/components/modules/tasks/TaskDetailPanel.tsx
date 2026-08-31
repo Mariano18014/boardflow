@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useOrganizationMembers } from "@/components/modules/members/use-organization-members";
 import { useLabels } from "@/components/modules/labels/use-labels";
+import { useHasPermission } from "@/components/modules/permissions/use-has-permission";
 import { useTaskDetail } from "./use-task-detail";
 import { useUpdateTaskDetails } from "./use-update-task-details";
 import { useReplaceTaskAssignees } from "./use-replace-task-assignees";
 import { useReplaceTaskLabels } from "./use-replace-task-labels";
+import { useComments } from "./use-comments";
 import { buildEditableFieldsFromTask, buildTaskDetailChanges, type EditableTaskFields } from "./task-detail-changes.util";
 import { TaskTitleField } from "./TaskTitleField";
 import { TaskDescriptionField } from "./TaskDescriptionField";
@@ -16,6 +18,8 @@ import { TaskEstimatedPointsField } from "./TaskEstimatedPointsField";
 import { TaskDueDateField } from "./TaskDueDateField";
 import { AssigneeSelect } from "./AssigneeSelect";
 import { LabelSelect } from "./LabelSelect";
+import { CommentsList } from "./CommentsList";
+import { AddCommentForm } from "./AddCommentForm";
 import { TaskApiError } from "./task-api-error";
 import type { TaskDetail } from "./get-task-detail.api";
 
@@ -31,6 +35,10 @@ export function TaskDetailPanel({ organizationId, projectId, taskId, canEditTask
   const { data: task, isLoading } = useTaskDetail(organizationId, projectId, taskId ?? undefined);
   const { data: members } = useOrganizationMembers(organizationId);
   const { data: projectLabels } = useLabels(organizationId, projectId);
+  const { hasPermission } = useHasPermission(organizationId);
+  const canViewComments = hasPermission("comments:view");
+  const canCreateComments = hasPermission("comments:create");
+  const { data: comments } = useComments(organizationId, projectId, taskId ?? undefined, canViewComments);
   const { updateTaskDetailsAsync, isPending } = useUpdateTaskDetails(organizationId, projectId, taskId ?? "");
   const { replaceTaskAssigneesAsync, isReplacingAssignees } = useReplaceTaskAssignees(
     organizationId,
@@ -157,6 +165,21 @@ export function TaskDetailPanel({ organizationId, projectId, taskId, canEditTask
                   {isSaving ? "Guardando..." : "Guardar cambios"}
                 </Button>
               </DialogFooter>
+            )}
+
+            {canViewComments && (
+              <div className="mt-4 flex flex-col gap-4 border-t border-border pt-4">
+                <h3 className="font-heading text-sm font-semibold uppercase tracking-wide text-text-3">
+                  Comentarios
+                </h3>
+                <CommentsList comments={comments ?? []} />
+                {/* Publishing a comment is independent and immediate — it has
+                    its own mutation and button, unlike the rest of this panel
+                    which only saves on "Guardar cambios". */}
+                {canCreateComments && (
+                  <AddCommentForm organizationId={organizationId} projectId={projectId} taskId={task.id} />
+                )}
+              </div>
             )}
           </>
         )}

@@ -8,6 +8,7 @@ import {
 import { getTaskDetailController, updateTaskDetailsController } from "./task-detail.controller";
 import { replaceTaskAssigneesController } from "./assignees/assignees.controller";
 import { replaceTaskLabelsController } from "./labels/labels.controller";
+import { createCommentController, listCommentsController } from "./comments/comments.controller";
 
 // mergeParams: true — this router is mounted at
 // /organizations/:organizationId/projects/:projectId and needs access to the
@@ -21,3 +22,5 @@ tasksRoutes.get("/tasks/:taskId", authMiddleware, getTaskDetailController);
 tasksRoutes.patch("/tasks/:taskId", authMiddleware, updateTaskDetailsController);
 tasksRoutes.put("/tasks/:taskId/assignees", authMiddleware, replaceTaskAssigneesController);
 tasksRoutes.put("/tasks/:taskId/labels", authMiddleware, replaceTaskLabelsController);
+tasksRoutes.post("/tasks/:taskId/comments", authMiddleware, createCommentController);
+tasksRoutes.get("/tasks/:taskId/comments", authMiddleware, listCommentsController);
