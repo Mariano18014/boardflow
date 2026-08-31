@@ -10,6 +10,7 @@ import { generateRandomToken, hashToken } from "../lib/token";
 import {
   createRefreshToken,
   findRefreshTokenByHash,
+  revokeAllRefreshTokensExcept,
   revokeRefreshToken,
 } from "../db/repositories/refresh-token.repository";
 import {
@@ -45,7 +46,7 @@ async function validateEmailIsUnique(email: string) {
   }
 }
 
-async function hashPassword(password: string) {
+export async function hashPassword(password: string) {
   return bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
 }
 
@@ -79,7 +80,7 @@ async function validateCredentials(plainPassword: string, user: User) {
   }
 }
 
-async function comparePassword(plainPassword: string, hashedPassword: string) {
+export async function comparePassword(plainPassword: string, hashedPassword: string) {
   return bcrypt.compare(plainPassword, hashedPassword);
 }
 
@@ -118,6 +119,25 @@ async function validateRefreshToken(refreshTokenValue: string): Promise<RefreshT
 
 async function revokeUsedRefreshToken(id: string) {
   await revokeRefreshToken(id);
+}
+
+// Resolves the RefreshToken row behind the value the client is currently
+// holding, so a caller (e.g. HU-43's password change) can identify "this
+// session" without the access token needing to carry a session/jti claim.
+export async function findCurrentSessionTokenId(refreshTokenValue: string): Promise<string> {
+  const tokenHash = hashToken(refreshTokenValue);
+  const refreshToken = await findRefreshTokenByHash(tokenHash);
+  if (!refreshToken) {
+    throw new UnauthorizedError("La sesión actual no es válida.");
+  }
+  return refreshToken.id;
+}
+
+export async function revokeOtherActiveSessions(
+  userId: string,
+  excludeSessionTokenId: string,
+): Promise<void> {
+  await revokeAllRefreshTokensExcept(userId, excludeSessionTokenId);
 }
 
 export async function getCurrentUser(userId: string) {

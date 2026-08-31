@@ -2,6 +2,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileAvatarUpload } from "@/components/modules/users/ProfileAvatarUpload";
 import { ProfileNameForm } from "@/components/modules/users/ProfileNameForm";
+import { ChangePasswordForm } from "@/components/modules/users/ChangePasswordForm";
 import { useMyProfile } from "@/components/modules/users/use-my-profile";
 
 export default function ProfilePage() {
@@ -27,6 +28,16 @@ export default function ProfilePage() {
               <p className="text-xs text-muted-foreground">{profile.email}</p>
             </CardContent>
           )}
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-heading text-lg">Seguridad</CardTitle>
+            <CardDescription>Cambiá tu contraseña. Vas a cerrar sesión en tus otros dispositivos.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChangePasswordForm />
+          </CardContent>
         </Card>
       </div>
     </AppShell>

@@ -27,7 +27,7 @@ export async function updateOwnProfile(input: UpdateProfileInput, userId: string
   return updatedUser;
 }
 
-async function findUserById(userId: string): Promise<User> {
+export async function findUserById(userId: string): Promise<User> {
   const user = await findUserRecordById(userId);
   if (!user) {
     throw new NotFoundError("El usuario no existe.");
