@@ -1,5 +1,6 @@
 import express from "express";
 import helmet from "helmet";
+import path from "path";
 import { router } from "./routes";
 import { errorHandlerMiddleware } from "./middlewares/error-handler.middleware";
 import { authRateLimiter } from "./middlewares/rate-limit.middleware";
@@ -14,6 +15,10 @@ export function createApp() {
       crossOriginEmbedderPolicy: false,
     }),
   );
+
+  // Uploaded files (e.g. organization logos) live on local disk under
+  // ./uploads and are served back as plain static assets.
+  app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
   app.use("/api/auth/login", authRateLimiter);
   app.use("/api/auth/register", authRateLimiter);

@@ -10,5 +10,10 @@ export function errorHandlerMiddleware(err: any, _req: Request, res: Response, n
     return next(err);
   }
 
-  return res.status(status).json({ message });
+  const responseBody: Record<string, unknown> = { message };
+  if (err.fieldErrors) {
+    responseBody.fieldErrors = err.fieldErrors;
+  }
+
+  return res.status(status).json(responseBody);
 }

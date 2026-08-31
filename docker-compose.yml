@@ -43,9 +43,10 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    # Genera el client de Prisma y sincroniza el schema contra la DB en cada arranque,
-    # asi "docker compose up" siempre deja la base al dia sin pasos manuales extra.
-    command: sh -c "npx prisma generate && npx prisma db push --skip-generate && npm run dev"
+    # Genera el client de Prisma, sincroniza el schema y siembra el catalogo de
+    # permisos en cada arranque, asi "docker compose up" siempre deja la base al
+    # dia sin pasos manuales extra.
+    command: sh -c "npx prisma generate && npx prisma db push --skip-generate && npx prisma db seed && npm run dev"
     depends_on:
       postgres:
         condition: service_healthy

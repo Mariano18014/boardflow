@@ -3,7 +3,7 @@ import { PLAN_TYPE } from "../types/enums";
 
 export const organizationSchema = z.object({
   id: z.string().uuid(),
-  name: z.string().min(1),
+  name: z.string().min(1, "El nombre es obligatorio.").max(100, "El nombre no puede superar los 100 caracteres."),
   slug: z.string().min(1),
   logoUrl: z.string().url().nullable(),
   planType: z.enum(PLAN_TYPE),
@@ -14,11 +14,12 @@ export const organizationSchema = z.object({
   deletedAt: z.date().nullable(),
 });
 
-export const createOrganizationSchema = organizationSchema.pick({ name: true, slug: true });
+export const createOrganizationSchema = organizationSchema.pick({ name: true });
 
-export const updateOrganizationSchema = organizationSchema
-  .pick({ name: true, logoUrl: true, settings: true })
-  .partial();
+// The multipart PATCH body only ever carries the text field `name` — the logo
+// travels as a separate uploaded file (see organization.service.ts), never as
+// a JSON `logoUrl` string, so this schema intentionally only covers `name`.
+export const updateOrganizationSchema = organizationSchema.pick({ name: true }).partial();
 
 export type Organization = z.infer<typeof organizationSchema>;
 export type CreateOrganizationInput = z.infer<typeof createOrganizationSchema>;

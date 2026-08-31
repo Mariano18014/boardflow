@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+@keyframes pulse { 0%,100%{opacity:.55} 50%{opacity:1} }
+body { margin:0; background:#f6f6f5; font-family:'Public Sans',system-ui,sans-serif; }
+::selection { background:oklch(85% 0.05 265); }
+</style>
+</helmet>
+
+<div style="--bg:oklch(98.7% 0.002 90);--surface:oklch(100% 0 0);--surface-2:oklch(97% 0.003 90);--surface-3:oklch(94.5% 0.004 90);--border:oklch(90% 0.004 90);--border-strong:oklch(83% 0.005 90);--text:oklch(21% 0.006 270);--text-2:oklch(48% 0.008 270);--text-3:oklch(64% 0.006 270);--accent:oklch(55% 0.17 264);--accent-hover:oklch(49% 0.17 264);--accent-subtle:oklch(94% 0.03 264);--accent-text:oklch(40% 0.15 264);--danger:oklch(58% 0.19 25);--danger-subtle:oklch(95% 0.03 25);--warning:oklch(70% 0.15 70);--warning-subtle:oklch(95% 0.04 70);--success:oklch(62% 0.13 150);--success-subtle:oklch(95% 0.03 150);--radius:8px;--radius-sm:6px;--radius-lg:12px;--d-bg:oklch(17% 0.006 265);--d-surface:oklch(21% 0.007 265);--d-surface-2:oklch(25% 0.008 265);--d-border:oklch(31% 0.008 265);--d-text:oklch(95% 0.003 265);--d-text-2:oklch(68% 0.012 265);--d-accent:oklch(72% 0.15 264); font-family:'Public Sans',system-ui,sans-serif; color:var(--text); background:var(--bg);">
+
+<!-- STICKY TOC -->
+<nav style="position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:18px; padding:0 28px; height:52px; background:color-mix(in oklch, var(--bg) 85%, transparent); backdrop-filter:blur(8px); border-bottom:1px solid var(--border); overflow-x:auto; white-space:nowrap;">
+  <span style="font-family:'Manrope'; font-weight:800; font-size:14px; letter-spacing:-0.02em;">BoardFlow</span>
+  <span style="color:var(--text-3); font-size:11px;">UI/UX Design</span>
+  <div style="width:1px; height:20px; background:var(--border); margin:0 6px;"></div>
+  <a href="#system" style="font-size:12.5px; color:var(--text-2); text-decoration:none;">Design System</a>
+  <a href="#sprintboard" style="font-size:12.5px; color:var(--text-2); text-decoration:none;">Sprint Board</a>
+  <a href="#backlog" style="font-size:12.5px; color:var(--text-2); text-decoration:none;">Backlog</a>
+  <a href="#dashboard" style="font-size:12.5px; color:var(--text-2); text-decoration:none;">Dashboard</a>
+  <a href="#planning" style="font-size:12.5px; color:var(--text-2); text-decoration:none;">Sprint Planning</a>
+  <a href="#taskdetail" style="font-size:12.5px; color:var(--text-2); text-decoration:none;">Task Detail</a>
+  <a href="#roles" style="font-size:12.5px; color:var(--text-2); text-decoration:none;">Roles</a>
+  <a href="#members" style="font-size:12.5px; color:var(--text-2); text-decoration:none;">Members</a>
+  <a href="#projects" style="font-size:12.5px; color:var(--text-2); text-decoration:none;">Projects</a>
+  <a href="#landing" style="font-size:12.5px; color:var(--text-2); text-decoration:none;">Landing/Auth</a>
+  <a href="#rationale" style="font-size:12.5px; color:var(--text-2); text-decoration:none;">Rationale</a>
+</nav>
+
+<!-- COVER -->
+<section style="max-width:920px; margin:0 auto; padding:72px 28px 40px;">
+  <div style="font-family:'IBM Plex Mono'; font-size:11px; color:var(--accent-text); background:var(--accent-subtle); display:inline-block; padding:3px 9px; border-radius:20px; margin-bottom:18px;">DESIGN DELIVERABLE — v1</div>
+  <h1 style="font-family:'Manrope'; font-weight:800; font-size:44px; line-height:1.08; letter-spacing:-0.02em; margin:0 0 16px;">BoardFlow — UI/UX Design</h1>
+  <p style="font-size:16px; line-height:1.6; color:var(--text-2); max-width:680px; margin:0 0 28px;">Static high-fidelity mockups for a Scrum-oriented project management app. Desktop-first (1280px+), light mode throughout, with the Sprint Board also shown in dark mode. Screens are grouped by priority tier below; the design system tokens and core components are documented first.</p>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <span style="font-size:12px; padding:5px 10px; border:1px solid var(--border); border-radius:20px; color:var(--text-2);">Tenant: Nova Labs</span>
+    <span style="font-size:12px; padding:5px 10px; border:1px solid var(--border); border-radius:20px; color:var(--text-2);">Project: Mobile App Revamp</span>
+    <span style="font-size:12px; padding:5px 10px; border:1px solid var(--border); border-radius:20px; color:var(--text-2);">Nav: sidebar + topbar shell</span>
+  </div>
+</section>
+
+<!-- ASSUMPTIONS -->
+<section style="max-width:920px; margin:0 auto; padding:0 28px 56px;">
+  <h2 style="font-family:'Manrope'; font-weight:700; font-size:15px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-3); margin:0 0 14px;">Assumptions &amp; reasoning</h2>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+    <div style="border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; background:var(--surface);">
+      <div style="font-family:'Manrope'; font-weight:600; font-size:13.5px; margin-bottom:6px;">Nav shell is constant</div>
+      <div style="font-size:13px; line-height:1.55; color:var(--text-2);">Sidebar (org switcher, projects, settings) + topbar (breadcrumb, search, avatar) repeats on every authenticated screen, per spec — this is the anchor of consistency across the whole app.</div>
+    </div>
+    <div style="border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; background:var(--surface);">
+      <div style="font-family:'Manrope'; font-weight:600; font-size:13.5px; margin-bottom:6px;">One accent, used sparingly</div>
+      <div style="font-size:13px; line-height:1.55; color:var(--text-2);">Indigo-blue is reserved for primary actions, active nav/tab states, links, and progress bars — never for decoration. Priority/status get their own semantic hues.</div>
+    </div>
+    <div style="border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; background:var(--surface);">
+      <div style="font-family:'Manrope'; font-weight:600; font-size:13.5px; margin-bottom:6px;">Two-font system</div>
+      <div style="font-size:13px; line-height:1.55; color:var(--text-2);">Manrope (medium/bold) for headings and UI labels gives a precise, geometric feel; Public Sans (regular/medium) for body and data-dense text stays highly legible at small sizes.</div>
+    </div>
+    <div style="border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; background:var(--surface);">
+      <div style="font-family:'Manrope'; font-weight:600; font-size:13.5px; margin-bottom:6px;">Tier-1 screens get full states</div>
+      <div style="font-size:13px; line-height:1.55; color:var(--text-2);">Sprint Board and Backlog show empty, loading (skeleton), and populated — these are the screens users live in daily, so their edge cases matter most.</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- DESIGN SYSTEM -->
+<section id="system" style="max-width:1180px; margin:0 auto; padding:8px 28px 72px; scroll-margin-top:64px;">
+  <h2 style="font-family:'Manrope'; font-weight:700; font-size:22px; letter-spacing:-0.01em; margin:0 0 4px;">Design system</h2>
+  <p style="font-size:13.5px; color:var(--text-2); margin:0 0 28px;">Tokens and core components used consistently across every screen.</p>
+
+  <div style="font-family:'Manrope'; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-3); margin-bottom:10px;">Color tokens — light</div>
+  <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:24px;">
+    <div style="background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px;"><div style="height:32px;"></div><div style="font-size:11px; font-family:'IBM Plex Mono';">bg</div></div>
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px;"><div style="height:32px;"></div><div style="font-size:11px; font-family:'IBM Plex Mono';">surface</div></div>
+    <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px;"><div style="height:32px;"></div><div style="font-size:11px; font-family:'IBM Plex Mono';">surface-2</div></div>
+    <div style="background:var(--border-strong); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px;"><div style="height:32px;"></div><div style="font-size:11px; font-family:'IBM Plex Mono'; color:white;">border</div></div>
+    <div style="background:var(--text); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px;"><div style="height:32px;"></div><div style="font-size:11px; font-family:'IBM Plex Mono'; color:white;">text</div></div>
+    <div style="background:var(--accent); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px;"><div style="height:32px;"></div><div style="font-size:11px; font-family:'IBM Plex Mono'; color:white;">accent</div></div>
+  </div>
+
+  <div style="font-family:'Manrope'; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-3); margin-bottom:10px;">Color tokens — dark</div>
+  <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:24px; background:var(--d-bg); padding:12px; border-radius:var(--radius);">
+    <div style="background:var(--d-bg); border:1px solid var(--d-border); border-radius:var(--radius-sm); padding:10px 12px;"><div style="height:32px;"></div><div style="font-size:11px; font-family:'IBM Plex Mono'; color:var(--d-text-2);">d-bg</div></div>
+    <div style="background:var(--d-surface); border:1px solid var(--d-border); border-radius:var(--radius-sm); padding:10px 12px;"><div style="height:32px;"></div><div style="font-size:11px; font-family:'IBM Plex Mono'; color:var(--d-text-2);">d-surface</div></div>
+    <div style="background:var(--d-surface-2); border:1px solid var(--d-border); border-radius:var(--radius-sm); padding:10px 12px;"><div style="height:32px;"></div><div style="font-size:11px; font-family:'IBM Plex Mono'; color:var(--d-text-2);">d-surface-2</div></div>
+    <div style="background:var(--d-border); border:1px solid var(--d-border); border-radius:var(--radius-sm); padding:10px 12px;"><div style="height:32px;"></div><div style="font-size:11px; font-family:'IBM Plex Mono'; color:var(--d-text);">d-border</div></div>
+    <div style="background:var(--d-text); border:1px solid var(--d-border); border-radius:var(--radius-sm); padding:10px 12px;"><div style="height:32px;"></div><div style="font-size:11px; font-family:'IBM Plex Mono'; color:var(--d-bg);">d-text</div></div>
+    <div style="background:var(--d-accent); border:1px solid var(--d-border); border-radius:var(--radius-sm); padding:10px 12px;"><div style="height:32px;"></div><div style="font-size:11px; font-family:'IBM Plex Mono'; color:var(--d-bg);">d-accent</div></div>
+  </div>
+
+  <div style="font-family:'Manrope'; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-3); margin-bottom:10px;">Semantic &amp; priority</div>
+  <div style="display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap;">
+    <span style="font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px; background:oklch(94% 0.03 25); color:oklch(40% 0.19 25);">Urgent</span>
+    <span style="font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px; background:oklch(94% 0.05 55); color:oklch(40% 0.16 55);">High</span>
+    <span style="font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px; background:oklch(94% 0.05 264); color:oklch(40% 0.10 264);">Medium</span>
+    <span style="font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px; background:oklch(94% 0.01 90); color:oklch(45% 0.01 90);">Low</span>
+    <span style="font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px; background:var(--success-subtle); color:oklch(35% 0.10 150);">Done / Success</span>
+    <span style="font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px; background:var(--warning-subtle); color:oklch(40% 0.12 70);">Review / Warning</span>
+    <span style="font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px; background:var(--danger-subtle); color:oklch(40% 0.16 25);">Error</span>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:24px; margin-bottom:28px;">
+    <div>
+      <div style="font-family:'Manrope'; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-3); margin-bottom:10px;">Typography</div>
+      <div style="font-family:'Manrope'; font-weight:800; font-size:26px; letter-spacing:-0.01em;">Heading / Manrope 800</div>
+      <div style="font-family:'Manrope'; font-weight:600; font-size:16px; margin-top:4px;">Subheading / Manrope 600</div>
+      <div style="font-family:'Public Sans'; font-weight:400; font-size:14px; color:var(--text-2); margin-top:4px;">Body / Public Sans 400 — clean, legible at small sizes.</div>
+      <div style="font-family:'IBM Plex Mono'; font-weight:400; font-size:12.5px; color:var(--text-3); margin-top:4px;">Mono / IBM Plex Mono — IDs, dates, code.</div>
+    </div>
+    <div>
+      <div style="font-family:'Manrope'; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-3); margin-bottom:10px;">Spacing scale (px)</div>
+      <div style="display:flex; align-items:flex-end; gap:8px; height:40px;">
+        <div style="width:4px; height:4px; background:var(--accent);"></div>
+        <div style="width:8px; height:8px; background:var(--accent);"></div>
+        <div style="width:12px; height:12px; background:var(--accent);"></div>
+        <div style="width:16px; height:16px; background:var(--accent);"></div>
+        <div style="width:24px; height:24px; background:var(--accent);"></div>
+        <div style="width:32px; height:32px; background:var(--accent);"></div>
+      </div>
+      <div style="font-size:11.5px; color:var(--text-3); margin-top:6px; font-family:'IBM Plex Mono';">4 · 8 · 12 · 16 · 24 · 32</div>
+    </div>
+    <div>
+      <div style="font-family:'Manrope'; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-3); margin-bottom:10px;">Radius scale</div>
+      <div style="display:flex; gap:10px;">
+        <div style="width:32px; height:32px; background:var(--surface-3); border-radius:var(--radius-sm);"></div>
+        <div style="width:32px; height:32px; background:var(--surface-3); border-radius:var(--radius);"></div>
+        <div style="width:32px; height:32px; background:var(--surface-3); border-radius:var(--radius-lg);"></div>
+      </div>
+      <div style="font-size:11.5px; color:var(--text-3); margin-top:6px; font-family:'IBM Plex Mono';">6 · 8 · 12</div>
+    </div>
+  </div>
+
+  <div style="font-family:'Manrope'; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-3); margin-bottom:10px;">Buttons</div>
+  <div style="display:flex; gap:10px; align-items:center; margin-bottom:24px; flex-wrap:wrap;">
+    <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--accent); color:white; border:1px solid var(--accent); border-radius:var(--radius-sm); padding:7px 14px; cursor:pointer;">Primary</button>
+    <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--surface); color:var(--text); border:1px solid var(--border-strong); border-radius:var(--radius-sm); padding:7px 14px; cursor:pointer;">Secondary</button>
+    <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:transparent; color:var(--text-2); border:1px solid transparent; border-radius:var(--radius-sm); padding:7px 14px; cursor:pointer;">Ghost</button>
+    <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--danger); color:white; border:1px solid var(--danger); border-radius:var(--radius-sm); padding:7px 14px; cursor:pointer;">Destructive</button>
+  </div>
+
+  <div style="font-family:'Manrope'; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-3); margin-bottom:10px;">Inputs &amp; avatar stack</div>
+  <div style="display:flex; gap:16px; align-items:center; margin-bottom:8px; flex-wrap:wrap;">
+    <input placeholder="Search tasks..." style="font-family:'Public Sans'; font-size:13px; padding:7px 11px; border:1px solid var(--border-strong); border-radius:var(--radius-sm); background:var(--surface); color:var(--text); width:200px;"/>
+    <div style="display:flex;">
+      <div style="width:26px; height:26px; border-radius:50%; background:oklch(88% 0.07 264); color:oklch(35% 0.12 264); font-family:'Manrope'; font-weight:600; font-size:10.5px; display:flex; align-items:center; justify-content:center; border:2px solid var(--surface); margin-right:-8px;">AK</div>
+      <div style="width:26px; height:26px; border-radius:50%; background:oklch(88% 0.07 190); color:oklch(35% 0.12 190); font-family:'Manrope'; font-weight:600; font-size:10.5px; display:flex; align-items:center; justify-content:center; border:2px solid var(--surface); margin-right:-8px;">PR</div>
+      <div style="width:26px; height:26px; border-radius:50%; background:oklch(88% 0.07 50); color:oklch(35% 0.12 50); font-family:'Manrope'; font-weight:600; font-size:10.5px; display:flex; align-items:center; justify-content:center; border:2px solid var(--surface); margin-right:-8px;">SM</div>
+      <div style="width:26px; height:26px; border-radius:50%; background:var(--surface-3); color:var(--text-2); font-family:'Manrope'; font-weight:600; font-size:10px; display:flex; align-items:center; justify-content:center; border:2px solid var(--surface);">+3</div>
+    </div>
+  </div>
+</section>
+
+<!-- TIER 1 -->
+<section style="max-width:1180px; margin:0 auto; padding:0 28px 8px;">
+  <div style="font-family:'IBM Plex Mono'; font-size:11px; color:var(--accent-text); background:var(--accent-subtle); display:inline-block; padding:3px 9px; border-radius:20px;">TIER 1 — CORE, ALL STATES</div>
+</section>
+
+<section id="sprintboard" style="max-width:1180px; margin:0 auto; padding:16px 28px 12px; scroll-margin-top:64px;">
+  <h2 style="font-family:'Manrope'; font-weight:700; font-size:22px; letter-spacing:-0.01em; margin:0 0 4px;">Sprint Board</h2>
+  <p style="font-size:13.5px; color:var(--text-2); margin:0 0 20px;">Scrum board with draggable cards across four status columns. Sprint header shows name, date range, and progress.</p>
+</section>
+
+<!-- Sprint Board: Empty -->
+<section style="max-width:1180px; margin:0 auto; padding:0 28px 28px;">
+  <div style="font-size:12px; font-family:'IBM Plex Mono'; color:var(--text-3); margin-bottom:8px;">Empty state</div>
+  <div style="border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; box-shadow:0 1px 2px rgba(0,0,0,.03); display:flex; height:760px;">
+    <div style="width:240px; flex:none; background:var(--surface); border-right:1px solid var(--border); padding:16px 12px; display:flex; flex-direction:column; gap:4px;">
+      <button style="display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface-2); font-family:'Manrope'; font-weight:600; font-size:13px; margin-bottom:16px; cursor:pointer;">
+        <div style="width:20px; height:20px; border-radius:5px; background:var(--accent); color:white; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">N</div>
+        Nova Labs<span style="margin-left:auto; color:var(--text-3); font-size:11px;">⌄</span>
+      </button>
+      <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text-3); padding:0 8px; margin:8px 0 4px;">Projects</div>
+      <sc-for list="{{ sidebarProjects }}" as="p" hint-placeholder-count="3">
+        <div style="padding:7px 10px; border-radius:var(--radius-sm); font-size:13px; font-weight:500;">{{ p.name }}</div>
+      </sc-for>
+      <div style="margin-top:auto; display:flex; flex-direction:column; gap:2px;">
+        <div style="padding:7px 10px; font-size:13px; color:var(--text-2);">Settings</div>
+        <div style="display:flex; align-items:center; gap:8px; padding:7px 10px;">
+          <div style="width:22px; height:22px; border-radius:50%; background:oklch(88% 0.07 264); color:oklch(35% 0.12 264); font-family:'Manrope'; font-weight:600; font-size:10px; display:flex; align-items:center; justify-content:center;">AK</div>
+          <span style="font-size:13px;">Alex Kim</span>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+      <div style="height:56px; flex:none; border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:12px; background:var(--surface);">
+        <span style="font-size:13px; color:var(--text-2);">Mobile App Revamp</span><span style="color:var(--text-3);">/</span><span style="font-size:13px; font-weight:600;">Sprint Board</span>
+        <input placeholder="Search..." style="margin-left:auto; font-size:13px; padding:6px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2); width:180px;"/>
+        <div style="width:26px; height:26px; border-radius:50%; background:oklch(88% 0.07 264); color:oklch(35% 0.12 264); font-family:'Manrope'; font-weight:600; font-size:10.5px; display:flex; align-items:center; justify-content:center;">AK</div>
+      </div>
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:var(--text-3); text-align:center; padding:40px;">
+        <div style="width:56px; height:56px; border-radius:14px; border:1.5px dashed var(--border-strong); display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--text-3);">◫</div>
+        <div style="font-family:'Manrope'; font-weight:600; font-size:15px; color:var(--text);">No sprint in progress</div>
+        <div style="font-size:13px; max-width:320px; line-height:1.5;">Start a sprint from your backlog to see tasks flow through To Do, In Progress, Review, and Done.</div>
+        <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); padding:8px 16px; cursor:pointer; margin-top:4px;">Go to Backlog</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Sprint Board: Loading -->
+<section style="max-width:1180px; margin:0 auto; padding:0 28px 28px;">
+  <div style="font-size:12px; font-family:'IBM Plex Mono'; color:var(--text-3); margin-bottom:8px;">Loading state</div>
+  <div style="border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; box-shadow:0 1px 2px rgba(0,0,0,.03); display:flex; height:760px;">
+    <div style="width:240px; flex:none; background:var(--surface); border-right:1px solid var(--border); padding:16px 12px;">
+      <div style="height:36px; border-radius:var(--radius-sm); background:var(--surface-3); margin-bottom:16px; animation:pulse 1.6s ease-in-out infinite;"></div>
+      <div style="height:14px; width:60px; border-radius:4px; background:var(--surface-3); margin:0 0 10px 8px; animation:pulse 1.6s ease-in-out infinite;"></div>
+      <div style="height:28px; border-radius:var(--radius-sm); background:var(--surface-3); margin-bottom:6px; animation:pulse 1.6s ease-in-out infinite;"></div>
+      <div style="height:28px; border-radius:var(--radius-sm); background:var(--surface-3); margin-bottom:6px; animation:pulse 1.6s ease-in-out infinite;"></div>
+      <div style="height:28px; border-radius:var(--radius-sm); background:var(--surface-3); animation:pulse 1.6s ease-in-out infinite;"></div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+      <div style="height:56px; flex:none; border-bottom:1px solid var(--border); background:var(--surface);"></div>
+      <div style="padding:20px; display:flex; flex-direction:column; gap:8px;">
+        <div style="height:22px; width:220px; border-radius:5px; background:var(--surface-3); animation:pulse 1.6s ease-in-out infinite;"></div>
+        <div style="height:14px; width:140px; border-radius:5px; background:var(--surface-3); animation:pulse 1.6s ease-in-out infinite;"></div>
+      </div>
+      <div style="flex:1; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; padding:0 20px 20px;">
+        <sc-for list="{{ boardColumnsLight }}" as="col" hint-placeholder-count="4">
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="height:16px; width:80px; border-radius:4px; background:var(--surface-3); animation:pulse 1.6s ease-in-out infinite;"></div>
+            <div style="height:88px; border-radius:var(--radius); background:var(--surface-2); border:1px solid var(--border); animation:pulse 1.6s ease-in-out infinite;"></div>
+            <div style="height:88px; border-radius:var(--radius); background:var(--surface-2); border:1px solid var(--border); animation:pulse 1.6s ease-in-out infinite;"></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Sprint Board: Populated (light) -->
+<section style="max-width:1180px; margin:0 auto; padding:0 28px 28px;">
+  <div style="font-size:12px; font-family:'IBM Plex Mono'; color:var(--text-3); margin-bottom:8px;">Populated state — light</div>
+  <div style="border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; box-shadow:0 1px 2px rgba(0,0,0,.03); display:flex; height:820px;">
+    <div style="width:240px; flex:none; background:var(--surface); border-right:1px solid var(--border); padding:16px 12px; display:flex; flex-direction:column; gap:4px;">
+      <button style="display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface-2); font-family:'Manrope'; font-weight:600; font-size:13px; margin-bottom:16px; cursor:pointer;">
+        <div style="width:20px; height:20px; border-radius:5px; background:var(--accent); color:white; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">N</div>
+        Nova Labs<span style="margin-left:auto; color:var(--text-3); font-size:11px;">⌄</span>
+      </button>
+      <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text-3); padding:0 8px; margin:8px 0 4px;">Projects</div>
+      <div style="padding:7px 10px; border-radius:var(--radius-sm); font-size:13px; font-weight:600; background:var(--accent-subtle); color:var(--accent-text);">Mobile App Revamp</div>
+      <div style="padding:7px 10px; border-radius:var(--radius-sm); font-size:13px; color:var(--text-2);">Website Redesign</div>
+      <div style="padding:7px 10px; border-radius:var(--radius-sm); font-size:13px; color:var(--text-2);">API Platform</div>
+      <div style="margin-top:auto; display:flex; flex-direction:column; gap:2px;">
+        <div style="padding:7px 10px; font-size:13px; color:var(--text-2);">Settings</div>
+        <div style="display:flex; align-items:center; gap:8px; padding:7px 10px;">
+          <div style="width:22px; height:22px; border-radius:50%; background:oklch(88% 0.07 264); color:oklch(35% 0.12 264); font-family:'Manrope'; font-weight:600; font-size:10px; display:flex; align-items:center; justify-content:center;">AK</div>
+          <span style="font-size:13px;">Alex Kim</span>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+      <div style="height:56px; flex:none; border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:12px; background:var(--surface);">
+        <span style="font-size:13px; color:var(--text-2);">Mobile App Revamp</span><span style="color:var(--text-3);">/</span><span style="font-size:13px; font-weight:600;">Sprint Board</span>
+        <input placeholder="Search..." style="margin-left:auto; font-size:13px; padding:6px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2); width:180px;"/>
+        <div style="width:26px; height:26px; border-radius:50%; background:oklch(88% 0.07 264); color:oklch(35% 0.12 264); font-family:'Manrope'; font-weight:600; font-size:10.5px; display:flex; align-items:center; justify-content:center;">AK</div>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 20px 14px; border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-family:'Manrope'; font-weight:700; font-size:18px;">Sprint 14</div>
+          <div style="font-size:12.5px; color:var(--text-2); font-family:'IBM Plex Mono'; margin-top:2px;">Jul 28 – Aug 8 · 5 days left</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+            <span style="font-size:12px; color:var(--text-2);">36 / 58 pts complete</span>
+            <div style="width:160px; height:6px; border-radius:4px; background:var(--surface-3); overflow:hidden;"><div style="width:62%; height:100%; background:var(--accent);"></div></div>
+          </div>
+          <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--surface); color:var(--text); border:1px solid var(--border-strong); border-radius:var(--radius-sm); padding:7px 14px; cursor:pointer;">Complete Sprint</button>
+        </div>
+      </div>
+      <div style="flex:1; overflow:auto; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; padding:16px 20px 20px;">
+        <sc-for list="{{ boardColumnsLight }}" as="col" hint-placeholder-count="4">
+          <div style="display:flex; flex-direction:column; gap:10px; min-width:0;">
+            <div style="display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; color:var(--text-2); font-family:'Manrope';">
+              {{ col.name }}<span style="background:var(--surface-3); color:var(--text-3); font-size:11px; padding:1px 6px; border-radius:10px; font-weight:600;">{{ col.count }}</span>
+            </div>
+            <sc-for list="{{ col.tasks }}" as="t" hint-placeholder-count="3">
+              <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:11px 12px; display:flex; flex-direction:column; gap:8px; cursor:pointer;">
+                <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                  <sc-for list="{{ t.labelObjs }}" as="l" hint-placeholder-count="1">
+                    <span style="font-size:10.5px; font-weight:600; padding:2px 7px; border-radius:10px; background:{{ l.bg }}; color:{{ l.fg }};">{{ l.name }}</span>
+                  </sc-for>
+                </div>
+                <div style="font-size:13px; line-height:1.35; font-weight:500;">{{ t.title }}</div>
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                  <span style="font-size:11px; font-family:'IBM Plex Mono'; color:var(--text-3);">{{ t.id }}</span>
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-size:10.5px; font-weight:600; padding:2px 6px; border-radius:5px; background:{{ t.priorityBg }}; color:{{ t.priorityFg }};">{{ t.priority }}</span>
+                    <span style="font-size:11px; font-weight:600; color:var(--text-2); background:var(--surface-2); border-radius:5px; padding:2px 6px;">{{ t.points }}</span>
+                    <div style="display:flex;">
+                      <sc-for list="{{ t.assigneeObjs }}" as="a" hint-placeholder-count="1">
+                        <div style="width:20px; height:20px; border-radius:50%; margin-left:-6px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; font-family:'Manrope'; background:{{ a.bg }}; color:{{ a.color }}; border:{{ a.border }};">{{ a.initials }}</div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Sprint Board: Populated (dark) -->
+<section style="max-width:1180px; margin:0 auto; padding:0 28px 40px;">
+  <div style="font-size:12px; font-family:'IBM Plex Mono'; color:var(--text-3); margin-bottom:8px;">Populated state — dark mode</div>
+  <div style="border:1px solid var(--d-border); border-radius:var(--radius-lg); overflow:hidden; display:flex; height:820px; background:var(--d-bg);">
+    <div style="width:240px; flex:none; background:var(--d-surface); border-right:1px solid var(--d-border); padding:16px 12px; display:flex; flex-direction:column; gap:4px;">
+      <button style="display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:var(--radius-sm); border:1px solid var(--d-border); background:var(--d-surface-2); font-family:'Manrope'; font-weight:600; font-size:13px; margin-bottom:16px; cursor:pointer; color:var(--d-text);">
+        <div style="width:20px; height:20px; border-radius:5px; background:var(--d-accent); color:var(--d-bg); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">N</div>
+        Nova Labs<span style="margin-left:auto; color:var(--d-text-2); font-size:11px;">⌄</span>
+      </button>
+      <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--d-text-2); padding:0 8px; margin:8px 0 4px;">Projects</div>
+      <div style="padding:7px 10px; border-radius:var(--radius-sm); font-size:13px; font-weight:600; background:oklch(30% 0.05 264); color:oklch(85% 0.06 264);">Mobile App Revamp</div>
+      <div style="padding:7px 10px; border-radius:var(--radius-sm); font-size:13px; color:var(--d-text-2);">Website Redesign</div>
+      <div style="padding:7px 10px; border-radius:var(--radius-sm); font-size:13px; color:var(--d-text-2);">API Platform</div>
+      <div style="margin-top:auto; display:flex; flex-direction:column; gap:2px;">
+        <div style="padding:7px 10px; font-size:13px; color:var(--d-text-2);">Settings</div>
+        <div style="display:flex; align-items:center; gap:8px; padding:7px 10px;">
+          <div style="width:22px; height:22px; border-radius:50%; background:oklch(38% 0.09 264); color:oklch(92% 0.03 264); font-family:'Manrope'; font-weight:600; font-size:10px; display:flex; align-items:center; justify-content:center;">AK</div>
+          <span style="font-size:13px; color:var(--d-text);">Alex Kim</span>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+      <div style="height:56px; flex:none; border-bottom:1px solid var(--d-border); display:flex; align-items:center; padding:0 20px; gap:12px; background:var(--d-surface);">
+        <span style="font-size:13px; color:var(--d-text-2);">Mobile App Revamp</span><span style="color:var(--d-text-2);">/</span><span style="font-size:13px; font-weight:600; color:var(--d-text);">Sprint Board</span>
+        <input placeholder="Search..." style="margin-left:auto; font-size:13px; padding:6px 10px; border:1px solid var(--d-border); border-radius:var(--radius-sm); background:var(--d-surface-2); width:180px; color:var(--d-text);"/>
+        <div style="width:26px; height:26px; border-radius:50%; background:oklch(38% 0.09 264); color:oklch(92% 0.03 264); font-family:'Manrope'; font-weight:600; font-size:10.5px; display:flex; align-items:center; justify-content:center;">AK</div>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 20px 14px; border-bottom:1px solid var(--d-border);">
+        <div>
+          <div style="font-family:'Manrope'; font-weight:700; font-size:18px; color:var(--d-text);">Sprint 14</div>
+          <div style="font-size:12.5px; color:var(--d-text-2); font-family:'IBM Plex Mono'; margin-top:2px;">Jul 28 – Aug 8 · 5 days left</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+            <span style="font-size:12px; color:var(--d-text-2);">36 / 58 pts complete</span>
+            <div style="width:160px; height:6px; border-radius:4px; background:var(--d-surface-2); overflow:hidden;"><div style="width:62%; height:100%; background:var(--d-accent);"></div></div>
+          </div>
+          <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--d-surface-2); color:var(--d-text); border:1px solid var(--d-border); border-radius:var(--radius-sm); padding:7px 14px; cursor:pointer;">Complete Sprint</button>
+        </div>
+      </div>
+      <div style="flex:1; overflow:auto; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; padding:16px 20px 20px;">
+        <sc-for list="{{ boardColumnsDark }}" as="col" hint-placeholder-count="4">
+          <div style="display:flex; flex-direction:column; gap:10px; min-width:0;">
+            <div style="display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; color:var(--d-text-2); font-family:'Manrope';">
+              {{ col.name }}<span style="background:var(--d-surface-2); color:var(--d-text-2); font-size:11px; padding:1px 6px; border-radius:10px; font-weight:600;">{{ col.count }}</span>
+            </div>
+            <sc-for list="{{ col.tasks }}" as="t" hint-placeholder-count="3">
+              <div style="background:var(--d-surface); border:1px solid var(--d-border); border-radius:var(--radius); padding:11px 12px; display:flex; flex-direction:column; gap:8px; cursor:pointer;">
+                <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                  <sc-for list="{{ t.labelObjs }}" as="l" hint-placeholder-count="1">
+                    <span style="font-size:10.5px; font-weight:600; padding:2px 7px; border-radius:10px; background:oklch(28% 0.05 264); color:oklch(82% 0.05 264);">{{ l.name }}</span>
+                  </sc-for>
+                </div>
+                <div style="font-size:13px; line-height:1.35; font-weight:500; color:var(--d-text);">{{ t.title }}</div>
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                  <span style="font-size:11px; font-family:'IBM Plex Mono'; color:var(--d-text-2);">{{ t.id }}</span>
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-size:10.5px; font-weight:600; padding:2px 6px; border-radius:5px; background:var(--d-surface-2); color:var(--d-text-2);">{{ t.priority }}</span>
+                    <span style="font-size:11px; font-weight:600; color:var(--d-text-2); background:var(--d-surface-2); border-radius:5px; padding:2px 6px;">{{ t.points }}</span>
+                    <div style="display:flex;">
+                      <sc-for list="{{ t.assigneeObjs }}" as="a" hint-placeholder-count="1">
+                        <div style="width:20px; height:20px; border-radius:50%; margin-left:-6px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; font-family:'Manrope'; background:{{ a.bg }}; color:{{ a.color }}; border:{{ a.border }};">{{ a.initials }}</div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BACKLOG -->
+<section id="backlog" style="max-width:1180px; margin:0 auto; padding:0 28px 12px; scroll-margin-top:64px;">
+  <h2 style="font-family:'Manrope'; font-weight:700; font-size:22px; letter-spacing:-0.01em; margin:0 0 4px;">Product Backlog</h2>
+  <p style="font-size:13.5px; color:var(--text-2); margin:0 0 20px;">Prioritized, reorderable list of unassigned tasks with point estimates and a Create Sprint action.</p>
+</section>
+
+<!-- Backlog: Empty -->
+<section style="max-width:1180px; margin:0 auto; padding:0 28px 28px;">
+  <div style="font-size:12px; font-family:'IBM Plex Mono'; color:var(--text-3); margin-bottom:8px;">Empty state</div>
+  <div style="border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; display:flex; height:520px;">
+    <div style="width:240px; flex:none; background:var(--surface); border-right:1px solid var(--border);"></div>
+    <div style="flex:1; display:flex; flex-direction:column;">
+      <div style="height:56px; flex:none; border-bottom:1px solid var(--border); background:var(--surface);"></div>
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:var(--text-3); text-align:center; padding:40px;">
+        <div style="width:56px; height:56px; border-radius:14px; border:1.5px dashed var(--border-strong); display:flex; align-items:center; justify-content:center; font-size:22px;">☰</div>
+        <div style="font-family:'Manrope'; font-weight:600; font-size:15px; color:var(--text);">Backlog is empty</div>
+        <div style="font-size:13px; max-width:320px; line-height:1.5;">Create a task to start building out work for Mobile App Revamp.</div>
+        <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); padding:8px 16px; cursor:pointer; margin-top:4px;">+ Create Task</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Backlog: Loading -->
+<section style="max-width:1180px; margin:0 auto; padding:0 28px 28px;">
+  <div style="font-size:12px; font-family:'IBM Plex Mono'; color:var(--text-3); margin-bottom:8px;">Loading state</div>
+  <div style="border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; display:flex; height:520px;">
+    <div style="width:240px; flex:none; background:var(--surface); border-right:1px solid var(--border);"></div>
+    <div style="flex:1; display:flex; flex-direction:column;">
+      <div style="height:56px; flex:none; border-bottom:1px solid var(--border); background:var(--surface);"></div>
+      <div style="padding:20px; display:flex; flex-direction:column; gap:10px;">
+        <div style="height:22px; width:180px; border-radius:5px; background:var(--surface-3); animation:pulse 1.6s ease-in-out infinite;"></div>
+        <div style="height:44px; border-radius:var(--radius); background:var(--surface-2); border:1px solid var(--border); animation:pulse 1.6s ease-in-out infinite;"></div>
+        <div style="height:44px; border-radius:var(--radius); background:var(--surface-2); border:1px solid var(--border); animation:pulse 1.6s ease-in-out infinite;"></div>
+        <div style="height:44px; border-radius:var(--radius); background:var(--surface-2); border:1px solid var(--border); animation:pulse 1.6s ease-in-out infinite;"></div>
+        <div style="height:44px; border-radius:var(--radius); background:var(--surface-2); border:1px solid var(--border); animation:pulse 1.6s ease-in-out infinite;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Backlog: Populated -->
+<section style="max-width:1180px; margin:0 auto; padding:0 28px 40px;">
+  <div style="font-size:12px; font-family:'IBM Plex Mono'; color:var(--text-3); margin-bottom:8px;">Populated state</div>
+  <div style="border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; box-shadow:0 1px 2px rgba(0,0,0,.03); display:flex; height:720px;">
+    <div style="width:240px; flex:none; background:var(--surface); border-right:1px solid var(--border); padding:16px 12px; display:flex; flex-direction:column; gap:4px;">
+      <button style="display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface-2); font-family:'Manrope'; font-weight:600; font-size:13px; margin-bottom:16px; cursor:pointer;">
+        <div style="width:20px; height:20px; border-radius:5px; background:var(--accent); color:white; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">N</div>
+        Nova Labs<span style="margin-left:auto; color:var(--text-3); font-size:11px;">⌄</span>
+      </button>
+      <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text-3); padding:0 8px; margin:8px 0 4px;">Projects</div>
+      <div style="padding:7px 10px; border-radius:var(--radius-sm); font-size:13px; font-weight:600; background:var(--accent-subtle); color:var(--accent-text);">Mobile App Revamp</div>
+      <div style="padding:7px 10px; border-radius:var(--radius-sm); font-size:13px; color:var(--text-2);">Website Redesign</div>
+      <div style="padding:7px 10px; border-radius:var(--radius-sm); font-size:13px; color:var(--text-2);">API Platform</div>
+      <div style="margin-top:auto; display:flex; flex-direction:column; gap:2px;">
+        <div style="padding:7px 10px; font-size:13px; color:var(--text-2);">Settings</div>
+        <div style="display:flex; align-items:center; gap:8px; padding:7px 10px;">
+          <div style="width:22px; height:22px; border-radius:50%; background:oklch(88% 0.07 264); color:oklch(35% 0.12 264); font-family:'Manrope'; font-weight:600; font-size:10px; display:flex; align-items:center; justify-content:center;">AK</div>
+          <span style="font-size:13px;">Alex Kim</span>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+      <div style="height:56px; flex:none; border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:12px; background:var(--surface);">
+        <span style="font-size:13px; color:var(--text-2);">Mobile App Revamp</span><span style="color:var(--text-3);">/</span><span style="font-size:13px; font-weight:600;">Backlog</span>
+        <input placeholder="Search..." style="margin-left:auto; font-size:13px; padding:6px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2); width:180px;"/>
+        <div style="width:26px; height:26px; border-radius:50%; background:oklch(88% 0.07 264); color:oklch(35% 0.12 264); font-family:'Manrope'; font-weight:600; font-size:10.5px; display:flex; align-items:center; justify-content:center;">AK</div>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-family:'Manrope'; font-weight:700; font-size:16px;">Backlog</span>
+          <span style="font-size:12px; color:var(--text-2); background:var(--surface-2); padding:2px 8px; border-radius:20px;">8 items · 32 pts</span>
+        </div>
+        <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); padding:7px 14px; cursor:pointer;">Create Sprint</button>
+      </div>
+      <div style="flex:1; overflow:auto; padding:0 20px 20px; display:flex; flex-direction:column; gap:6px;">
+        <sc-for list="{{ backlogItems }}" as="t" hint-placeholder-count="6">
+          <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface);">
+            <span style="color:var(--text-3); cursor:grab; font-size:13px;">⠿</span>
+            <span style="font-size:12px; font-family:'IBM Plex Mono'; color:var(--text-3); width:20px;">{{ t.rank }}</span>
+            <span style="font-size:11px; font-family:'IBM Plex Mono'; color:var(--text-3); width:64px;">{{ t.id }}</span>
+            <span style="font-size:13.5px; font-weight:500; flex:1;">{{ t.title }}</span>
+            <div style="display:flex; gap:5px;">
+              <sc-for list="{{ t.labelObjs }}" as="l" hint-placeholder-count="1">
+                <span style="font-size:10.5px; font-weight:600; padding:2px 7px; border-radius:10px; background:{{ l.bg }}; color:{{ l.fg }};">{{ l.name }}</span>
+              </sc-for>
+            </div>
+            <span style="font-size:10.5px; font-weight:600; padding:2px 6px; border-radius:5px; background:{{ t.priorityBg }}; color:{{ t.priorityFg }}; width:44px; text-align:center;">{{ t.priority }}</span>
+            <span style="font-size:11.5px; font-weight:600; color:var(--text-2); background:var(--surface-2); border-radius:5px; padding:3px 8px; min-width:24px; text-align:center;">{{ t.points }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIER 2 -->
+<section style="max-width:1180px; margin:0 auto; padding:20px 28px 8px;">
+  <div style="font-family:'IBM Plex Mono'; font-size:11px; color:var(--accent-text); background:var(--accent-subtle); display:inline-block; padding:3px 9px; border-radius:20px;">TIER 2 — POPULATED ONLY</div>
+</section>
+
+<!-- DASHBOARD -->
+<section id="dashboard" style="max-width:1180px; margin:0 auto; padding:16px 28px 12px; scroll-margin-top:64px;">
+  <h2 style="font-family:'Manrope'; font-weight:700; font-size:22px; letter-spacing:-0.01em; margin:0 0 20px;">Dashboard</h2>
+  <div style="border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; display:flex; height:640px;">
+    <div style="width:240px; flex:none; background:var(--surface); border-right:1px solid var(--border); padding:16px 12px; display:flex; flex-direction:column; gap:4px;">
+      <button style="display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface-2); font-family:'Manrope'; font-weight:600; font-size:13px; margin-bottom:16px; cursor:pointer;">
+        <div style="width:20px; height:20px; border-radius:5px; background:var(--accent); color:white; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">N</div>
+        Nova Labs<span style="margin-left:auto; color:var(--text-3); font-size:11px;">⌄</span>
+      </button>
+      <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text-3); padding:0 8px; margin:8px 0 4px;">Projects</div>
+      <div style="padding:7px 10px; border-radius:var(--radius-sm); font-size:13px; color:var(--text-2);">Mobile App Revamp</div>
+      <div style="padding:7px 10px; border-radius:var(--radius-sm); font-size:13px; color:var(--text-2);">Website Redesign</div>
+      <div style="padding:7px 10px; border-radius:var(--radius-sm); font-size:13px; color:var(--text-2);">API Platform</div>
+      <div style="margin-top:auto;"><div style="padding:7px 10px; font-size:13px; color:var(--text-2);">Settings</div></div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+      <div style="height:56px; flex:none; border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:12px; background:var(--surface);">
+        <span style="font-size:13px; font-weight:600;">Dashboard</span>
+        <input placeholder="Search..." style="margin-left:auto; font-size:13px; padding:6px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2); width:180px;"/>
+        <div style="width:26px; height:26px; border-radius:50%; background:oklch(88% 0.07 264); color:oklch(35% 0.12 264); font-family:'Manrope'; font-weight:600; font-size:10.5px; display:flex; align-items:center; justify-content:center;">AK</div>
+      </div>
+      <div style="flex:1; overflow:auto; padding:24px 28px;">
+        <div style="font-family:'Manrope'; font-weight:700; font-size:20px; margin-bottom:2px;">Welcome back, Alex</div>
+        <div style="font-size:13.5px; color:var(--text-2); margin-bottom:22px;">Here's what's happening across your organizations.</div>
+        <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text-3); margin-bottom:10px;">Your organizations</div>
+        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:28px;">
+          <sc-for list="{{ orgs }}" as="o" hint-placeholder-count="2">
+            <div style="border:1px solid var(--border); border-radius:var(--radius); padding:16px; background:var(--surface); display:flex; align-items:center; gap:12px;">
+              <div style="width:38px; height:38px; border-radius:8px; background:var(--accent-subtle); color:var(--accent-text); display:flex; align-items:center; justify-content:center; font-family:'Manrope'; font-weight:700; font-size:15px;">{{ o.name }}</div>
+              <div style="flex:1;">
+                <div style="font-family:'Manrope'; font-weight:600; font-size:14px;">{{ o.name }}</div>
+                <div style="font-size:12px; color:var(--text-2);">{{ o.role }} · {{ o.projects }} projects · {{ o.members }} members</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+          <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text-3);">Recent projects</div>
+          <a href="#projects" style="font-size:12.5px; color:var(--accent); text-decoration:none;">View all</a>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px;">
+          <sc-for list="{{ projectsList }}" as="p" hint-placeholder-count="3">
+            <div style="border:1px solid var(--border); border-radius:var(--radius); padding:16px; background:var(--surface);">
+              <div style="font-family:'Manrope'; font-weight:600; font-size:14px; margin-bottom:4px;">{{ p.name }}</div>
+              <div style="font-size:12px; color:var(--text-2); line-height:1.4; margin-bottom:12px;">{{ p.desc }}</div>
+              <div style="font-size:11.5px; color:var(--text-3); margin-bottom:6px;">{{ p.sprint }} · {{ p.tasks }} tasks</div>
+              <div style="width:100%; height:5px; border-radius:4px; background:var(--surface-3); overflow:hidden;"><div style="width:{{ p.progress }}%; height:100%; background:var(--accent);"></div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SPRINT PLANNING -->
+<section id="planning" style="max-width:1180px; margin:0 auto; padding:16px 28px 12px; scroll-margin-top:64px;">
+  <h2 style="font-family:'Manrope'; font-weight:700; font-size:22px; letter-spacing:-0.01em; margin:0 0 4px;">Sprint Planning</h2>
+  <p style="font-size:13.5px; color:var(--text-2); margin:0 0 20px;">Move tasks from the backlog into the upcoming sprint before starting it.</p>
+  <div style="border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; display:flex; height:640px;">
+    <div style="width:240px; flex:none; background:var(--surface); border-right:1px solid var(--border);"></div>
+    <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+      <div style="height:56px; flex:none; border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:12px; background:var(--surface);">
+        <span style="font-size:13px; color:var(--text-2);">Mobile App Revamp</span><span style="color:var(--text-3);">/</span><span style="font-size:13px; font-weight:600;">Plan Sprint 15</span>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border);">
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input value="Sprint 15" style="font-family:'Manrope'; font-weight:600; font-size:14px; padding:6px 10px; border:1px solid var(--border-strong); border-radius:var(--radius-sm); width:120px;"/>
+          <input value="Aug 11 – Aug 22" style="font-size:12.5px; font-family:'IBM Plex Mono'; padding:6px 10px; border:1px solid var(--border-strong); border-radius:var(--radius-sm); width:150px; color:var(--text-2);"/>
+        </div>
+        <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); padding:7px 14px; cursor:pointer;">Start Sprint</button>
+      </div>
+      <div style="flex:1; display:grid; grid-template-columns:1fr 1fr; min-height:0;">
+        <div style="border-right:1px solid var(--border); display:flex; flex-direction:column; min-height:0;">
+          <div style="padding:12px 16px; font-size:12px; font-weight:600; color:var(--text-2); border-bottom:1px solid var(--border);">Backlog · 32 pts</div>
+          <div style="flex:1; overflow:auto; padding:10px 16px; display:flex; flex-direction:column; gap:6px;">
+            <sc-for list="{{ backlogItems }}" as="t" hint-placeholder-count="6">
+              <div style="display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface);">
+                <span style="font-size:13px; flex:1;">{{ t.title }}</span>
+                <span style="font-size:11px; font-weight:600; color:var(--text-2); background:var(--surface-2); border-radius:5px; padding:2px 6px;">{{ t.points }}</span>
+                <span style="color:var(--text-3); font-size:15px; cursor:pointer;">→</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; min-height:0;">
+          <div style="padding:12px 16px; font-size:12px; font-weight:600; color:var(--text-2); border-bottom:1px solid var(--border);">Sprint 15 · 18 pts</div>
+          <div style="flex:1; overflow:auto; padding:10px 16px; display:flex; flex-direction:column; gap:6px;">
+            <div style="display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface);">
+              <span style="color:var(--text-3); font-size:14px;">←</span><span style="font-size:13px; flex:1;">Support offline draft mode for tasks</span>
+              <span style="font-size:11px; font-weight:600; color:var(--text-2); background:var(--surface-2); border-radius:5px; padding:2px 6px;">8</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface);">
+              <span style="color:var(--text-3); font-size:14px;">←</span><span style="font-size:13px; flex:1;">Add bulk task import from CSV</span>
+              <span style="font-size:11px; font-weight:600; color:var(--text-2); background:var(--surface-2); border-radius:5px; padding:2px 6px;">5</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface);">
+              <span style="color:var(--text-3); font-size:14px;">←</span><span style="font-size:13px; flex:1;">Rate-limit invite endpoint</span>
+              <span style="font-size:11px; font-weight:600; color:var(--text-2); background:var(--surface-2); border-radius:5px; padding:2px 6px;">3</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface);">
+              <span style="color:var(--text-3); font-size:14px;">←</span><span style="font-size:13px; flex:1;">Fix flaky sprint-report test</span>
+              <span style="font-size:11px; font-weight:600; color:var(--text-2); background:var(--surface-2); border-radius:5px; padding:2px 6px;">1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TASK DETAIL PANEL -->
+<section id="taskdetail" style="max-width:1180px; margin:0 auto; padding:16px 28px 12px; scroll-margin-top:64px;">
+  <h2 style="font-family:'Manrope'; font-weight:700; font-size:22px; letter-spacing:-0.01em; margin:0 0 4px;">Task Detail Panel</h2>
+  <p style="font-size:13.5px; color:var(--text-2); margin:0 0 20px;">Opens as a right-side panel over the board; shows description, people, labels, comments and activity.</p>
+  <div style="border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; display:flex; height:720px; position:relative;">
+    <div style="flex:1; background:var(--surface-2);"></div>
+    <div style="width:460px; flex:none; background:var(--surface); border-left:1px solid var(--border); display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:center; gap:10px; padding:14px 20px; border-bottom:1px solid var(--border);">
+        <span style="font-size:12px; font-family:'IBM Plex Mono'; color:var(--text-3);">MOB-144</span>
+        <span style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:5px; background:var(--warning-subtle); color:oklch(40% 0.12 80);">In Progress</span>
+        <span style="margin-left:auto; color:var(--text-3); cursor:pointer; font-size:15px;">✕</span>
+      </div>
+      <div style="flex:1; overflow:auto; padding:18px 20px; display:flex; flex-direction:column; gap:18px;">
+        <div>
+          <div style="font-family:'Manrope'; font-weight:700; font-size:17px; line-height:1.3; margin-bottom:10px;">Fix login redirect bug</div>
+          <div style="font-size:13.5px; line-height:1.6; color:var(--text-2);">Users are occasionally redirected to a blank page instead of the dashboard after logging in. Appears related to a race condition in the token refresh flow when the access token expires mid-navigation.</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; padding:14px; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface-2);">
+          <div>
+            <div style="font-size:11px; color:var(--text-3); margin-bottom:5px;">Assignees</div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div style="width:22px; height:22px; border-radius:50%; background:oklch(88% 0.07 264); color:oklch(35% 0.12 264); font-family:'Manrope'; font-weight:600; font-size:10px; display:flex; align-items:center; justify-content:center;">AK</div>
+              <span style="font-size:13px;">Alex Kim</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px; color:var(--text-3); margin-bottom:5px;">Priority</div>
+            <span style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:5px; background:oklch(94% 0.03 25); color:oklch(40% 0.19 25);">Urgent</span>
+          </div>
+          <div>
+            <div style="font-size:11px; color:var(--text-3); margin-bottom:5px;">Story points</div>
+            <span style="font-size:13px; font-weight:600;">2</span>
+          </div>
+          <div>
+            <div style="font-size:11px; color:var(--text-3); margin-bottom:5px;">Sprint</div>
+            <span style="font-size:13px;">Sprint 14</span>
+          </div>
+          <div style="grid-column:1/-1;">
+            <div style="font-size:11px; color:var(--text-3); margin-bottom:5px;">Labels</div>
+            <div style="display:flex; gap:5px;">
+              <span style="font-size:10.5px; font-weight:600; padding:2px 7px; border-radius:10px; background:oklch(94% 0.035 25); color:oklch(38% 0.10 25);">bug</span>
+              <span style="font-size:10.5px; font-weight:600; padding:2px 7px; border-radius:10px; background:oklch(94% 0.035 264); color:oklch(38% 0.10 264);">frontend</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text-3); margin-bottom:10px;">Comments</div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <sc-for list="{{ comments }}" as="c" hint-placeholder-count="3">
+              <div style="display:flex; gap:10px;">
+                <div style="width:24px; height:24px; border-radius:50%; flex:none; background:{{ c.bg }}; color:{{ c.color }}; font-family:'Manrope'; font-weight:600; font-size:10px; display:flex; align-items:center; justify-content:center;">{{ c.initials }}</div>
+                <div>
+                  <div style="display:flex; gap:6px; align-items:baseline; margin-bottom:2px;"><span style="font-size:13px; font-weight:600;">{{ c.name }}</span><span style="font-size:11px; color:var(--text-3);">{{ c.time }}</span></div>
+                  <div style="font-size:13px; line-height:1.5; color:var(--text-2);">{{ c.text }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text-3); margin-bottom:10px;">Activity</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <sc-for list="{{ activity }}" as="a" hint-placeholder-count="4">
+              <div style="display:flex; gap:8px; align-items:baseline;">
+                <span style="width:5px; height:5px; border-radius:50%; background:var(--border-strong); flex:none;"></span>
+                <span style="font-size:12.5px; color:var(--text-2); flex:1;">{{ a.text }}</span>
+                <span style="font-size:11px; color:var(--text-3);">{{ a.time }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--border); padding:12px 20px;">
+        <input placeholder="Add a comment..." style="width:100%; box-sizing:border-box; font-size:13px; padding:9px 12px; border:1px solid var(--border-strong); border-radius:var(--radius-sm); background:var(--surface-2);"/>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROLES & PERMISSIONS -->
+<section id="roles" style="max-width:1180px; margin:0 auto; padding:16px 28px 12px; scroll-margin-top:64px;">
+  <h2 style="font-family:'Manrope'; font-weight:700; font-size:22px; letter-spacing:-0.01em; margin:0 0 4px;">Roles &amp; Permissions</h2>
+  <p style="font-size:13.5px; color:var(--text-2); margin:0 0 20px;">Role list plus a per-resource permission matrix — six representative resources shown.</p>
+  <div style="border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; display:flex; height:640px;">
+    <div style="width:240px; flex:none; background:var(--surface); border-right:1px solid var(--border);"></div>
+    <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+      <div style="height:56px; flex:none; border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:12px; background:var(--surface);">
+        <span style="font-size:13px; color:var(--text-2);">Nova Labs</span><span style="color:var(--text-3);">/</span><span style="font-size:13px; font-weight:600;">Roles &amp; Permissions</span>
+      </div>
+      <div style="flex:1; overflow:auto; display:grid; grid-template-columns:260px 1fr;">
+        <div style="border-right:1px solid var(--border); padding:16px 14px; display:flex; flex-direction:column; gap:6px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+            <span style="font-size:12px; font-weight:600; color:var(--text-2);">Roles</span>
+            <button style="font-size:12px; font-weight:600; color:var(--accent); background:none; border:none; cursor:pointer;">+ New</button>
+          </div>
+          <sc-for list="{{ roles }}" as="r" hint-placeholder-count="3">
+            <div style="padding:10px 12px; border-radius:var(--radius); border:1px solid var(--border); background:var(--surface);">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-family:'Manrope'; font-weight:600; font-size:13.5px;">{{ r.name }}</span>
+                <span style="font-size:11px; color:var(--text-3);">{{ r.count }}</span>
+              </div>
+              <div style="font-size:12px; color:var(--text-2); margin-top:3px; line-height:1.4;">{{ r.desc }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:20px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+            <div style="font-family:'Manrope'; font-weight:600; font-size:15px;">Member permissions</div>
+            <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); padding:7px 14px; cursor:pointer;">Save changes</button>
+          </div>
+          <div style="border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;">
+            <div style="display:grid; grid-template-columns:1.4fr repeat(4,1fr); background:var(--surface-2); border-bottom:1px solid var(--border);">
+              <div style="padding:10px 14px; font-size:11.5px; font-weight:600; color:var(--text-3); text-transform:uppercase; letter-spacing:.03em;">Resource</div>
+              <sc-for list="{{ permActions }}" as="a" hint-placeholder-count="4">
+                <div style="padding:10px 14px; font-size:11.5px; font-weight:600; color:var(--text-3); text-transform:uppercase; letter-spacing:.03em; text-align:center;">{{ a }}</div>
+              </sc-for>
+            </div>
+            <sc-for list="{{ permMatrix }}" as="row" hint-placeholder-count="6">
+              <div style="display:grid; grid-template-columns:1.4fr repeat(4,1fr); border-bottom:1px solid var(--border);">
+                <div style="padding:11px 14px; font-size:13.5px; font-weight:500;">{{ row.resource }}</div>
+                <sc-for list="{{ row.cells }}" as="cell" hint-placeholder-count="4">
+                  <div style="padding:11px 14px; display:flex; align-items:center; justify-content:center;">
+                    <sc-if value="{{ cell.checked }}" hint-placeholder-val="{{ true }}">
+                      <div style="width:16px; height:16px; border-radius:4px; background:var(--accent); display:flex; align-items:center; justify-content:center;"><span style="color:white; font-size:11px; font-weight:700;">✓</span></div>
+                    </sc-if>
+                    <sc-if value="{{ !cell.checked }}" hint-placeholder-val="{{ false }}">
+                      <div style="width:16px; height:16px; border-radius:4px; border:1px solid var(--border-strong);"></div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MEMBERS -->
+<section id="members" style="max-width:1180px; margin:0 auto; padding:16px 28px 12px; scroll-margin-top:64px;">
+  <h2 style="font-family:'Manrope'; font-weight:700; font-size:22px; letter-spacing:-0.01em; margin:0 0 4px;">Organization Members</h2>
+  <p style="font-size:13.5px; color:var(--text-2); margin:0 0 20px;">Member list with roles and an invite flow.</p>
+  <div style="border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; display:flex; height:640px;">
+    <div style="width:240px; flex:none; background:var(--surface); border-right:1px solid var(--border);"></div>
+    <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+      <div style="height:56px; flex:none; border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:12px; background:var(--surface);">
+        <span style="font-size:13px; color:var(--text-2);">Nova Labs</span><span style="color:var(--text-3);">/</span><span style="font-size:13px; font-weight:600;">Members</span>
+      </div>
+      <div style="flex:1; overflow:auto; padding:20px 24px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+          <span style="font-size:13px; color:var(--text-2);">6 members</span>
+          <div style="display:flex; gap:8px;">
+            <input placeholder="Invite by email..." style="font-size:13px; padding:7px 11px; border:1px solid var(--border-strong); border-radius:var(--radius-sm); width:220px;"/>
+            <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); padding:7px 14px; cursor:pointer;">Invite</button>
+          </div>
+        </div>
+        <div style="border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;">
+          <div style="display:grid; grid-template-columns:2fr 1fr 1fr 100px; background:var(--surface-2); border-bottom:1px solid var(--border); padding:10px 16px; font-size:11.5px; font-weight:600; color:var(--text-3); text-transform:uppercase; letter-spacing:.03em;">
+            <div>Member</div><div>Role</div><div>Status</div><div></div>
+          </div>
+          <sc-for list="{{ members }}" as="m" hint-placeholder-count="6">
+            <div style="display:grid; grid-template-columns:2fr 1fr 1fr 100px; align-items:center; padding:11px 16px; border-bottom:1px solid var(--border);">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:28px; height:28px; border-radius:50%; background:{{ m.bg }}; color:{{ m.color }}; font-family:'Manrope'; font-weight:600; font-size:11px; display:flex; align-items:center; justify-content:center;">{{ m.initials }}</div>
+                <div><div style="font-size:13.5px; font-weight:500;">{{ m.full }}</div><div style="font-size:12px; color:var(--text-3);">{{ m.email }}</div></div>
+              </div>
+              <div style="font-size:13px; color:var(--text-2);">{{ m.role }}</div>
+              <div><span style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; background:var(--success-subtle); color:oklch(35% 0.10 150);">{{ m.status }}</span></div>
+              <div style="font-size:13px; color:var(--text-3); cursor:pointer;">•••</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECT LIST -->
+<section id="projects" style="max-width:1180px; margin:0 auto; padding:16px 28px 40px; scroll-margin-top:64px;">
+  <h2 style="font-family:'Manrope'; font-weight:700; font-size:22px; letter-spacing:-0.01em; margin:0 0 4px;">Project List</h2>
+  <p style="font-size:13.5px; color:var(--text-2); margin:0 0 20px;">All projects within the current organization.</p>
+  <div style="border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; display:flex; height:560px;">
+    <div style="width:240px; flex:none; background:var(--surface); border-right:1px solid var(--border);"></div>
+    <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+      <div style="height:56px; flex:none; border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:12px; background:var(--surface);">
+        <span style="font-size:13px; color:var(--text-2);">Nova Labs</span><span style="color:var(--text-3);">/</span><span style="font-size:13px; font-weight:600;">Projects</span>
+      </div>
+      <div style="flex:1; overflow:auto; padding:20px 24px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+          <span style="font-size:13px; color:var(--text-2);">3 projects</span>
+          <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); padding:7px 14px; cursor:pointer;">+ New Project</button>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px;">
+          <sc-for list="{{ projectsList }}" as="p" hint-placeholder-count="3">
+            <div style="border:1px solid var(--border); border-radius:var(--radius); padding:18px; background:var(--surface); display:flex; flex-direction:column; gap:10px;">
+              <div style="width:36px; height:36px; border-radius:8px; background:var(--accent-subtle); color:var(--accent-text); display:flex; align-items:center; justify-content:center; font-family:'Manrope'; font-weight:700; font-size:15px;">{{ p.name }}</div>
+              <div>
+                <div style="font-family:'Manrope'; font-weight:600; font-size:14.5px; margin-bottom:3px;">{{ p.name }}</div>
+                <div style="font-size:12.5px; color:var(--text-2); line-height:1.4;">{{ p.desc }}</div>
+              </div>
+              <div style="font-size:11.5px; color:var(--text-3);">{{ p.sprint }} · {{ p.tasks }} tasks</div>
+              <div style="width:100%; height:5px; border-radius:4px; background:var(--surface-3); overflow:hidden;"><div style="width:{{ p.progress }}%; height:100%; background:var(--accent);"></div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIER 3 -->
+<section style="max-width:1180px; margin:0 auto; padding:20px 28px 8px;">
+  <div style="font-family:'IBM Plex Mono'; font-size:11px; color:var(--accent-text); background:var(--accent-subtle); display:inline-block; padding:3px 9px; border-radius:20px;">TIER 3 — LIGHT DETAIL</div>
+</section>
+
+<!-- LANDING -->
+<section id="landing" style="max-width:1180px; margin:0 auto; padding:16px 28px 12px; scroll-margin-top:64px;">
+  <h2 style="font-family:'Manrope'; font-weight:700; font-size:22px; letter-spacing:-0.01em; margin:0 0 20px;">Landing Page</h2>
+  <div style="border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden;">
+    <div style="display:flex; align-items:center; padding:16px 40px; border-bottom:1px solid var(--border);">
+      <span style="font-family:'Manrope'; font-weight:700; font-size:16px;">BoardFlow</span>
+      <div style="margin-left:auto; display:flex; gap:24px; align-items:center;">
+        <span style="font-size:13.5px; color:var(--text-2);">Features</span>
+        <span style="font-size:13.5px; color:var(--text-2);">Pricing</span>
+        <span style="font-size:13.5px; color:var(--text-2);">Log in</span>
+        <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); padding:8px 16px; cursor:pointer;">Sign up free</button>
+      </div>
+    </div>
+    <div style="text-align:center; padding:88px 40px 64px;">
+      <div style="font-family:'Manrope'; font-weight:800; font-size:46px; letter-spacing:-0.02em; line-height:1.1; max-width:680px; margin:0 auto 18px;">Scrum, without the overhead.</div>
+      <div style="font-size:16px; color:var(--text-2); max-width:520px; margin:0 auto 28px; line-height:1.6;">Backlogs, sprints, and boards for small software teams — simple enough to set up in an afternoon.</div>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button style="font-family:'Manrope'; font-weight:600; font-size:14px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); padding:11px 20px; cursor:pointer;">Get started free</button>
+        <button style="font-family:'Manrope'; font-weight:600; font-size:14px; background:var(--surface); color:var(--text); border:1px solid var(--border-strong); border-radius:var(--radius-sm); padding:11px 20px; cursor:pointer;">Watch demo</button>
+      </div>
+    </div>
+    <div style="padding:0 40px 72px; display:grid; grid-template-columns:repeat(3,1fr); gap:20px;">
+      <div style="border:1px solid var(--border); border-radius:var(--radius); padding:22px; background:var(--surface);">
+        <div style="width:32px; height:32px; border-radius:8px; background:var(--accent-subtle); color:var(--accent-text); display:flex; align-items:center; justify-content:center; font-weight:700; margin-bottom:14px;">◫</div>
+        <div style="font-family:'Manrope'; font-weight:600; font-size:15px; margin-bottom:6px;">Visual Scrum boards</div>
+        <div style="font-size:13.5px; color:var(--text-2); line-height:1.5;">Drag tasks through To Do, In Progress, Review, and Done — built for how sprints actually run.</div>
+      </div>
+      <div style="border:1px solid var(--border); border-radius:var(--radius); padding:22px; background:var(--surface);">
+        <div style="width:32px; height:32px; border-radius:8px; background:var(--accent-subtle); color:var(--accent-text); display:flex; align-items:center; justify-content:center; font-weight:700; margin-bottom:14px;">☰</div>
+        <div style="font-family:'Manrope'; font-weight:600; font-size:15px; margin-bottom:6px;">Prioritized backlogs</div>
+        <div style="font-size:13.5px; color:var(--text-2); line-height:1.5;">Reorder, estimate, and groom your backlog before every sprint planning session.</div>
+      </div>
+      <div style="border:1px solid var(--border); border-radius:var(--radius); padding:22px; background:var(--surface);">
+        <div style="width:32px; height:32px; border-radius:8px; background:var(--accent-subtle); color:var(--accent-text); display:flex; align-items:center; justify-content:center; font-weight:700; margin-bottom:14px;">⚿</div>
+        <div style="font-family:'Manrope'; font-weight:600; font-size:15px; margin-bottom:6px;">Granular roles</div>
+        <div style="font-size:13.5px; color:var(--text-2); line-height:1.5;">Per-organization roles and permissions, down to the individual resource and action.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AUTH -->
+<section style="max-width:1180px; margin:0 auto; padding:0 28px 12px;">
+  <h2 style="font-family:'Manrope'; font-weight:700; font-size:22px; letter-spacing:-0.01em; margin:0 0 20px;">Login, Register &amp; Onboarding</h2>
+  <div style="display:flex; gap:20px; flex-wrap:wrap;">
+    <div style="width:380px; border:1px solid var(--border); border-radius:var(--radius-lg); padding:36px 32px; background:var(--surface);">
+      <div style="font-family:'Manrope'; font-weight:700; font-size:15px; margin-bottom:24px; text-align:center;">BoardFlow</div>
+      <div style="font-family:'Manrope'; font-weight:700; font-size:19px; margin-bottom:4px;">Welcome back</div>
+      <div style="font-size:13px; color:var(--text-2); margin-bottom:22px;">Log in to continue to your workspace.</div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div>
+          <div style="font-size:12.5px; font-weight:500; margin-bottom:5px;">Email</div>
+          <input value="alex@novalabs.dev" style="width:100%; box-sizing:border-box; font-size:13.5px; padding:9px 12px; border:1px solid var(--border-strong); border-radius:var(--radius-sm);"/>
+        </div>
+        <div>
+          <div style="font-size:12.5px; font-weight:500; margin-bottom:5px;">Password</div>
+          <input type="password" value="········" style="width:100%; box-sizing:border-box; font-size:13.5px; padding:9px 12px; border:1px solid var(--border-strong); border-radius:var(--radius-sm);"/>
+        </div>
+        <button style="font-family:'Manrope'; font-weight:600; font-size:13.5px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); padding:9px; cursor:pointer; margin-top:6px;">Log in</button>
+      </div>
+      <div style="text-align:center; font-size:13px; color:var(--text-2); margin-top:18px;">Don't have an account? <span style="color:var(--accent);">Sign up</span></div>
+    </div>
+    <div style="width:380px; border:1px solid var(--border); border-radius:var(--radius-lg); padding:36px 32px; background:var(--surface);">
+      <div style="font-family:'Manrope'; font-weight:700; font-size:15px; margin-bottom:24px; text-align:center;">BoardFlow</div>
+      <div style="font-family:'Manrope'; font-weight:700; font-size:19px; margin-bottom:4px;">Create your account</div>
+      <div style="font-size:13px; color:var(--text-2); margin-bottom:22px;">Takes about a minute.</div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div>
+          <div style="font-size:12.5px; font-weight:500; margin-bottom:5px;">Full name</div>
+          <input value="Alex Kim" style="width:100%; box-sizing:border-box; font-size:13.5px; padding:9px 12px; border:1px solid var(--border-strong); border-radius:var(--radius-sm);"/>
+        </div>
+        <div>
+          <div style="font-size:12.5px; font-weight:500; margin-bottom:5px;">Email</div>
+          <input value="alex@novalabs.dev" style="width:100%; box-sizing:border-box; font-size:13.5px; padding:9px 12px; border:1px solid var(--border-strong); border-radius:var(--radius-sm);"/>
+        </div>
+        <div>
+          <div style="font-size:12.5px; font-weight:500; margin-bottom:5px;">Password</div>
+          <input type="password" value="········" style="width:100%; box-sizing:border-box; font-size:13.5px; padding:9px 12px; border:1px solid var(--border-strong); border-radius:var(--radius-sm);"/>
+        </div>
+        <button style="font-family:'Manrope'; font-weight:600; font-size:13.5px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); padding:9px; cursor:pointer; margin-top:6px;">Create account</button>
+      </div>
+    </div>
+    <div style="width:380px; border:1px solid var(--border); border-radius:var(--radius-lg); padding:36px 32px; background:var(--surface);">
+      <div style="font-size:11.5px; color:var(--text-3); margin-bottom:6px;">Step 1 of 1</div>
+      <div style="font-family:'Manrope'; font-weight:700; font-size:19px; margin-bottom:4px;">Create your organization</div>
+      <div style="font-size:13px; color:var(--text-2); margin-bottom:22px; line-height:1.5;">This is your team's workspace — you can invite people and create projects next.</div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div>
+          <div style="font-size:12.5px; font-weight:500; margin-bottom:5px;">Organization name</div>
+          <input value="Nova Labs" style="width:100%; box-sizing:border-box; font-size:13.5px; padding:9px 12px; border:1px solid var(--border-strong); border-radius:var(--radius-sm);"/>
+        </div>
+        <div>
+          <div style="font-size:12.5px; font-weight:500; margin-bottom:5px;">Team size</div>
+          <select style="width:100%; box-sizing:border-box; font-size:13.5px; padding:9px 12px; border:1px solid var(--border-strong); border-radius:var(--radius-sm); background:var(--surface);"><option>2–10 people</option></select>
+        </div>
+        <button style="font-family:'Manrope'; font-weight:600; font-size:13.5px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); padding:9px; cursor:pointer; margin-top:6px;">Create organization</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SETTINGS -->
+<section style="max-width:1180px; margin:0 auto; padding:16px 28px 60px;">
+  <h2 style="font-family:'Manrope'; font-weight:700; font-size:22px; letter-spacing:-0.01em; margin:0 0 20px;">Settings / Profile</h2>
+  <div style="border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; display:flex; height:560px;">
+    <div style="width:240px; flex:none; background:var(--surface); border-right:1px solid var(--border);"></div>
+    <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+      <div style="height:56px; flex:none; border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:12px; background:var(--surface);">
+        <span style="font-size:13px; font-weight:600;">Settings</span>
+      </div>
+      <div style="flex:1; overflow:auto; padding:28px; max-width:520px;">
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:28px;">
+          <div style="width:56px; height:56px; border-radius:50%; background:oklch(88% 0.07 264); color:oklch(35% 0.12 264); font-family:'Manrope'; font-weight:700; font-size:19px; display:flex; align-items:center; justify-content:center;">AK</div>
+          <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--surface); color:var(--text); border:1px solid var(--border-strong); border-radius:var(--radius-sm); padding:7px 14px; cursor:pointer;">Change photo</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:24px;">
+          <div>
+            <div style="font-size:12.5px; font-weight:500; margin-bottom:5px;">Full name</div>
+            <input value="Alex Kim" style="width:100%; box-sizing:border-box; font-size:13.5px; padding:9px 12px; border:1px solid var(--border-strong); border-radius:var(--radius-sm);"/>
+          </div>
+          <div>
+            <div style="font-size:12.5px; font-weight:500; margin-bottom:5px;">Email</div>
+            <input value="alex@novalabs.dev" style="width:100%; box-sizing:border-box; font-size:13.5px; padding:9px 12px; border:1px solid var(--border-strong); border-radius:var(--radius-sm);"/>
+          </div>
+        </div>
+        <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--accent); color:white; border:none; border-radius:var(--radius-sm); padding:8px 16px; cursor:pointer; margin-bottom:28px;">Save changes</button>
+        <div style="border-top:1px solid var(--border); padding-top:20px;">
+          <div style="font-family:'Manrope'; font-weight:600; font-size:14px; color:var(--danger); margin-bottom:6px;">Danger zone</div>
+          <div style="font-size:12.5px; color:var(--text-2); margin-bottom:10px;">Permanently delete your account and all associated data.</div>
+          <button style="font-family:'Manrope'; font-weight:600; font-size:13px; background:var(--danger); color:white; border:none; border-radius:var(--radius-sm); padding:7px 14px; cursor:pointer;">Delete account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RATIONALE -->
+<section id="rationale" style="max-width:920px; margin:0 auto; padding:16px 28px 100px; scroll-margin-top:64px;">
+  <h2 style="font-family:'Manrope'; font-weight:700; font-size:22px; letter-spacing:-0.01em; margin:0 0 16px;">Design rationale</h2>
+  <div style="display:flex; flex-direction:column; gap:14px; font-size:14px; line-height:1.65; color:var(--text-2);">
+    <p><strong style="color:var(--text);">Layout.</strong> A persistent 240px sidebar (org switcher, projects, settings) plus a 56px topbar (breadcrumb, search, avatar) frames every authenticated screen, so users never lose orientation as they move between backlog, board, and admin views. Content areas favor a single dominant surface — the board's four columns, the backlog's single list — over competing panels.</p>
+    <p><strong style="color:var(--text);">Color.</strong> A near-neutral gray scale carries 95% of the UI; the single indigo accent is reserved for primary buttons, active nav state, links, and progress bars, so it stays meaningful. Priority and status get their own semantic hues (red/orange/gray for priority, green/amber for status) so they scan instantly, independent of the accent.</p>
+    <p><strong style="color:var(--text);">Hierarchy.</strong> Manrope's medium/bold weights mark every heading and interactive label; Public Sans regular carries body and data-dense text (task titles, comments). This two-weight-family split gives clear scanning hierarchy without needing size alone to do the work — useful on dense screens like the board and permission matrix.</p>
+    <p><strong style="color:var(--text);">States.</strong> Sprint Board and Backlog — the screens teams live in daily — get full empty/loading/populated coverage, since their edge cases (no active sprint, first load) are common in real use. Tier 2/3 screens are shown populated only, where the interaction pattern matters more than edge-case handling.</p>
+    <p><strong style="color:var(--text);">Dark mode.</strong> Full tokens are defined for both modes, but only the Sprint Board is rendered dark, as the highest-usage screen and best proof of the palette holding up against long board-viewing sessions.</p>
+  </div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  AVATARS = {
+    Alex: { hue: 264, initials: 'AK' },
+    Priya: { hue: 190, initials: 'PR' },
+    Sam: { hue: 50, initials: 'SM' },
+    Jordan: { hue: 20, initials: 'JD' },
+    Casey: { hue: 305, initials: 'CS' },
+    Morgan: { hue: 150, initials: 'MG' },
+  };
+
+  avatarStyle(name, dark) {
+    const a = this.AVATARS[name] || { hue: 264, initials: name ? name.slice(0,2).toUpperCase() : '??' };
+    return {
+      width: 24, height: 24, borderRadius: '50%', flex: 'none',
+      background: dark ? `oklch(38% 0.09 ${a.hue})` : `oklch(88% 0.07 ${a.hue})`,
+      color: dark ? `oklch(92% 0.03 ${a.hue})` : `oklch(35% 0.12 ${a.hue})`,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontSize: 10, fontWeight: 600, fontFamily: 'Manrope', border: dark ? '1.5px solid var(--d-surface)' : '1.5px solid var(--surface)',
+    };
+  }
+
+  PRIORITY = {
+    Urgent: { hue: 25, c: 0.19 },
+    High: { hue: 55, c: 0.16 },
+    Medium: { hue: 264, c: 0.10 },
+    Low: { hue: 90, c: 0.01 },
+  };
+  priorityBadge(p) {
+    const d = this.PRIORITY[p] || this.PRIORITY.Medium;
+    return { fg: `oklch(40% ${d.c} ${d.hue})`, bg: `oklch(94% ${Math.min(d.c,0.05)} ${d.hue})` };
+  }
+
+  LABELS = {
+    bug: { hue: 25 }, frontend: { hue: 264 }, backend: { hue: 190 }, design: { hue: 305 }, infra: { hue: 60 }, tests: { hue: 150 },
+  };
+  labelChip(l) {
+    const d = this.LABELS[l] || { hue: 264 };
+    return { fg: `oklch(38% 0.10 ${d.hue})`, bg: `oklch(94% 0.035 ${d.hue})` };
+  }
+
+  boardColumns = [
+    { name: 'To Do', count: 4, tasks: [
+      { id: 'MOB-142', title: 'Set up CI pipeline for release branch', points: 5, priority: 'Medium', labels: ['infra'], assignees: ['Sam'] },
+      { id: 'MOB-138', title: 'Design onboarding flow empty states', points: 3, priority: 'Low', labels: ['design'], assignees: ['Casey'] },
+      { id: 'MOB-151', title: 'Add pagination to activity log', points: 2, priority: 'Low', labels: ['backend'], assignees: [] },
+      { id: 'MOB-149', title: 'Write unit tests for auth middleware', points: 3, priority: 'Medium', labels: ['tests','backend'], assignees: ['Jordan'] },
+    ]},
+    { name: 'In Progress', count: 3, tasks: [
+      { id: 'MOB-140', title: 'Refactor auth middleware', points: 8, priority: 'High', labels: ['backend'], assignees: ['Jordan','Alex'] },
+      { id: 'MOB-144', title: 'Fix login redirect bug', points: 2, priority: 'Urgent', labels: ['bug','frontend'], assignees: ['Alex'] },
+      { id: 'MOB-147', title: 'Build sprint board drag-and-drop', points: 5, priority: 'High', labels: ['frontend'], assignees: ['Priya'] },
+    ]},
+    { name: 'Review', count: 2, tasks: [
+      { id: 'MOB-135', title: 'Design onboarding flow', points: 5, priority: 'Medium', labels: ['design'], assignees: ['Casey','Priya'] },
+      { id: 'MOB-131', title: 'Org switcher dropdown states', points: 2, priority: 'Low', labels: ['frontend'], assignees: ['Morgan'] },
+    ]},
+    { name: 'Done', count: 5, tasks: [
+      { id: 'MOB-120', title: 'Scaffold project skeleton', points: 3, priority: 'Medium', labels: ['infra'], assignees: ['Sam'] },
+      { id: 'MOB-122', title: 'Set up design tokens', points: 2, priority: 'Low', labels: ['design'], assignees: ['Casey'] },
+      { id: 'MOB-125', title: 'Implement JWT auth', points: 8, priority: 'High', labels: ['backend'], assignees: ['Jordan'] },
+      { id: 'MOB-128', title: 'Sidebar navigation shell', points: 5, priority: 'Medium', labels: ['frontend'], assignees: ['Priya'] },
+      { id: 'MOB-130', title: 'Avatar upload component', points: 2, priority: 'Low', labels: ['frontend'], assignees: ['Morgan'] },
+    ]},
+  ];
+
+  backlogItems = [
+    { rank: 1, id: 'MOB-160', title: 'Support offline draft mode for tasks', points: 8, priority: 'High', labels: ['frontend'] },
+    { rank: 2, id: 'MOB-161', title: 'Add bulk task import from CSV', points: 5, priority: 'Medium', labels: ['backend'] },
+    { rank: 3, id: 'MOB-162', title: 'Improve empty state illustrations', points: 2, priority: 'Low', labels: ['design'] },
+    { rank: 4, id: 'MOB-163', title: 'Rate-limit invite endpoint', points: 3, priority: 'Urgent', labels: ['backend','bug'] },
+    { rank: 5, id: 'MOB-164', title: 'Keyboard shortcuts for board navigation', points: 3, priority: 'Medium', labels: ['frontend'] },
+    { rank: 6, id: 'MOB-165', title: 'Migrate activity log to event sourcing', points: 8, priority: 'Medium', labels: ['infra'] },
+    { rank: 7, id: 'MOB-166', title: 'Add dark mode toggle to settings', points: 2, priority: 'Low', labels: ['frontend','design'] },
+    { rank: 8, id: 'MOB-167', title: 'Fix flaky sprint-report test', points: 1, priority: 'High', labels: ['tests','bug'] },
+  ];
+
+  sidebarProjects = [
+    { name: 'Mobile App Revamp', active: true },
+    { name: 'Website Redesign', active: false },
+    { name: 'API Platform', active: false },
+  ];
+
+  members = [
+    { name: 'Alex', full: 'Alex Kim', email: 'alex@novalabs.dev', role: 'Admin', status: 'Active' },
+    { name: 'Priya', full: 'Priya Raman', email: 'priya@novalabs.dev', role: 'Member', status: 'Active' },
+    { name: 'Sam', full: 'Sam Torres', email: 'sam@novalabs.dev', role: 'Member', status: 'Active' },
+    { name: 'Jordan', full: 'Jordan Blake', email: 'jordan@novalabs.dev', role: 'Member', status: 'Active' },
+    { name: 'Casey', full: 'Casey Nguyen', email: 'casey@novalabs.dev', role: 'Viewer', status: 'Active' },
+    { name: 'Morgan', full: 'Morgan Lee', email: 'morgan@external.io', role: 'Member', status: 'Pending' },
+  ];
+
+  roles = [
+    { name: 'Admin', count: 2, desc: 'Full access to organization settings, billing, and members.' },
+    { name: 'Member', count: 8, desc: 'Can create and edit tasks, sprints, and boards.' },
+    { name: 'Viewer', count: 3, desc: 'Read-only access across all projects.' },
+  ];
+
+  permMatrix = (() => {
+    const resources = ['Projects', 'Sprints', 'Boards', 'Tasks', 'Members', 'Roles'];
+    const actions = ['View', 'Create', 'Edit', 'Delete'];
+    const on = { Projects:[1,1,1,0], Sprints:[1,1,1,1], Boards:[1,0,1,0], Tasks:[1,1,1,1], Members:[1,1,0,0], Roles:[1,0,0,0] };
+    return resources.map(r => ({ resource: r, cells: actions.map((a,i) => ({ action: a, checked: !!on[r][i] })) }));
+  })();
+  permActions = ['View', 'Create', 'Edit', 'Delete'];
+
+  orgs = [
+    { name: 'Nova Labs', role: 'Admin', projects: 3, members: 12 },
+    { name: 'Fieldstone Studio', role: 'Member', projects: 1, members: 5 },
+  ];
+
+  projectsList = [
+    { name: 'Mobile App Revamp', desc: 'iOS/Android client rebuild in React Native', tasks: 42, sprint: 'Sprint 14', progress: 62 },
+    { name: 'Website Redesign', desc: 'Marketing site + docs portal refresh', tasks: 18, sprint: 'Sprint 6', progress: 30 },
+    { name: 'API Platform', desc: 'Public REST + webhooks for partners', tasks: 27, sprint: 'No active sprint', progress: 0 },
+  ];
+
+  comments = [
+    { name: 'Priya', text: "I think the redirect loop only happens when the token refresh fails silently — can we log that path?", time: '2h ago' },
+    { name: 'Alex', text: 'Good catch. Added logging in the auth interceptor, pushed to the branch.', time: '1h ago' },
+    { name: 'Jordan', text: 'Tested locally, redirect now falls back to /login correctly. LGTM pending review.', time: '32m ago' },
+  ];
+
+  activity = [
+    { text: 'Alex changed status from In Progress to Review', time: '32m ago' },
+    { text: 'Jordan added a comment', time: '1h ago' },
+    { text: 'Priya added a comment', time: '2h ago' },
+    { text: 'Alex moved this task into Sprint 14', time: '3d ago' },
+    { text: 'Casey created this task', time: '5d ago' },
+  ];
+
+  enrichTask(t, dark) {
+    const pb = this.priorityBadge(t.priority);
+    return {
+      ...t,
+      priorityFg: pb.fg, priorityBg: pb.bg,
+      labelObjs: t.labels.map(l => { const c = this.labelChip(l); return { name: l, fg: c.fg, bg: c.bg }; }),
+      assigneeObjs: t.assignees.map(n => { const s = this.avatarStyle(n, dark); return { name: n, initials: this.AVATARS[n].initials, bg: s.background, color: s.color, border: s.border }; }),
+    };
+  }
+
+  renderVals() {
+    const boardColumnsLight = this.boardColumns.map(col => ({ ...col, tasks: col.tasks.map(t => this.enrichTask(t, false)) }));
+    const boardColumnsDark = this.boardColumns.map(col => ({ ...col, tasks: col.tasks.map(t => this.enrichTask(t, true)) }));
+    const backlogItems = this.backlogItems.map(t => this.enrichTask({ ...t, assignees: [] }, false));
+    const membersEnriched = this.members.map(m => { const s = this.avatarStyle(m.name, false); return { ...m, initials: this.AVATARS[m.name].initials, bg: s.background, color: s.color }; });
+    const commentsEnriched = this.comments.map(c => { const s = this.avatarStyle(c.name, false); return { ...c, initials: this.AVATARS[c.name].initials, bg: s.background, color: s.color }; });
+    return {
+      boardColumnsLight,
+      boardColumnsDark,
+      backlogItems,
+      sidebarProjects: this.sidebarProjects,
+      members: membersEnriched,
+      roles: this.roles,
+      permMatrix: this.permMatrix,
+      permActions: this.permActions,
+      orgs: this.orgs,
+      projectsList: this.projectsList,
+      comments: commentsEnriched,
+      activity: this.activity,
+    };
+  }
+}
+</script>
+</body>
+</html>

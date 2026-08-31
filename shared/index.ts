@@ -19,3 +19,4 @@ export * from "./schemas/comment.schema";
 export * from "./schemas/invitation.schema";
 export * from "./schemas/activity-log.schema";
 export * from "./schemas/refresh-token.schema";
+export * from "./schemas/password-reset-token.schema";

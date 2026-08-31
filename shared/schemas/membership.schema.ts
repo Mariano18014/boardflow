@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { MEMBERSHIP_STATUS } from "../types/enums";
+import { MEMBERSHIP_STATUS, type MembershipStatus } from "../types/enums";
+import { paginationQuerySchema } from "./pagination.schema";
 
 export const membershipSchema = z.object({
   id: z.string().uuid(),
@@ -17,5 +18,25 @@ export const updateMembershipRoleSchema = z.object({
   roleId: z.string().uuid(),
 });
 
+export const listOrganizationMembersQuerySchema = paginationQuerySchema;
+
 export type Membership = z.infer<typeof membershipSchema>;
 export type UpdateMembershipRoleInput = z.infer<typeof updateMembershipRoleSchema>;
+export type ListOrganizationMembersQuery = z.infer<typeof listOrganizationMembersQuerySchema>;
+
+export type OrganizationMemberListItem = {
+  type: "member" | "invitation";
+  id: string;
+  // The membership's own user, distinct from `id` (which is the membership id
+  // for members or the invitation id for invitations) — null for invitations,
+  // since nobody has accepted them into a real User yet. This is what the
+  // task assignee selector (HU-31) needs, since assignees are keyed by user.
+  userId: string | null;
+  fullName: string | null;
+  email: string;
+  avatarUrl: string | null;
+  roleId: string;
+  roleName: string;
+  status: MembershipStatus | "PENDING";
+  sortDate: Date;
+};

@@ -1,5 +1,7 @@
 import { z } from "zod";
-import { TASK_PRIORITY } from "../types/enums";
+import { TASK_PRIORITY, type TaskPriority } from "../types/enums";
+import { paginationQuerySchema } from "./pagination.schema";
+import type { AssigneeSummary } from "./task-assignee.schema";
 
 export const taskSchema = z.object({
   id: z.string().uuid(),
@@ -7,7 +9,7 @@ export const taskSchema = z.object({
   boardId: z.string().uuid().nullable(),
   projectId: z.string().uuid(),
   sprintId: z.string().uuid().nullable(),
-  title: z.string().min(1),
+  title: z.string().min(1).max(200),
   description: z.string().nullable(),
   position: z.number().int(),
   priority: z.enum(TASK_PRIORITY),
@@ -28,15 +30,18 @@ export const createTaskSchema = taskSchema.pick({
   estimatedPoints: true,
 });
 
-export const updateTaskSchema = taskSchema
-  .pick({
-    title: true,
-    description: true,
-    priority: true,
-    dueDate: true,
-    estimatedPoints: true,
-  })
-  .partial();
+// Deliberately loose: only the structural/format constraints that mirror the
+// database column limits live here (max title length). The semantic business
+// rules (title can't be blank, points must be positive, date must be valid)
+// are enforced in task-detail.service.ts's validateTitle/validateEstimatedPoints/
+// validateDueDate, per this HU's requested separation of concerns.
+export const updateTaskDetailsBodySchema = z.object({
+  title: z.string().max(200).optional(),
+  description: z.string().optional(),
+  priority: z.enum(TASK_PRIORITY).optional(),
+  estimatedPoints: z.number().int().optional(),
+  dueDate: z.string().optional(),
+});
 
 export const moveTaskSchema = z.object({
   columnId: z.string().uuid().nullable().optional(),
@@ -45,7 +50,69 @@ export const moveTaskSchema = z.object({
   position: z.number().int(),
 });
 
+export const listBacklogQuerySchema = paginationQuerySchema;
+
+export const createBacklogTaskBodySchema = z.object({
+  title: z.string().min(1).max(200),
+  description: z.string().optional(),
+  priority: z.enum(TASK_PRIORITY),
+  estimatedPoints: z.number().int().positive(),
+});
+
+export const createBacklogTaskSchema = createBacklogTaskBodySchema.extend({
+  organizationId: z.string().uuid(),
+  projectId: z.string().uuid(),
+});
+
+export const reorderBacklogTasksSchema = z.object({
+  taskIds: z.array(z.string().uuid()).min(1),
+});
+
+export const assignTaskToSprintSchema = z.object({
+  sprintId: z.string().uuid().nullable(),
+});
+
+export const moveTaskToColumnSchema = z.object({
+  columnId: z.string().uuid(),
+  position: z.number().int().nonnegative(),
+});
+
 export type Task = z.infer<typeof taskSchema>;
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
-export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
+export type UpdateTaskDetailsBody = z.infer<typeof updateTaskDetailsBodySchema>;
 export type MoveTaskInput = z.infer<typeof moveTaskSchema>;
+export type ListBacklogQuery = z.infer<typeof listBacklogQuerySchema>;
+export type CreateBacklogTaskBody = z.infer<typeof createBacklogTaskBodySchema>;
+export type CreateBacklogTaskInput = z.infer<typeof createBacklogTaskSchema>;
+export type ReorderBacklogTasksBody = z.infer<typeof reorderBacklogTasksSchema>;
+export type AssignTaskToSprintBody = z.infer<typeof assignTaskToSprintSchema>;
+export type MoveTaskToColumnBody = z.infer<typeof moveTaskToColumnSchema>;
+
+export type BacklogTaskItem = {
+  id: string;
+  title: string;
+  priority: TaskPriority;
+  estimatedPoints: number | null;
+  position: number;
+  createdAt: Date;
+  assignees: AssigneeSummary[];
+};
+
+// Full read-model for the task detail panel (HU-30). labels stay empty for
+// now (Epic 5 is deferred); assignees are real as of HU-31.
+export type TaskDetail = {
+  id: string;
+  title: string;
+  description: string | null;
+  priority: TaskPriority;
+  estimatedPoints: number | null;
+  dueDate: Date | null;
+  position: number;
+  sprintId: string | null;
+  columnId: string | null;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  assignees: AssigneeSummary[];
+  labels: unknown[];
+};

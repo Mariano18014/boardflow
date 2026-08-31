@@ -32,16 +32,17 @@ model User {
   updatedAt    DateTime   @updatedAt @map("updated_at")
   deletedAt    DateTime?  @map("deleted_at")
 
-  ownedOrganizations Organization[]     @relation("OrganizationOwner")
-  memberships        Membership[]       @relation("MembershipUser")
-  sentInvites        Membership[]       @relation("MembershipInvitedBy")
-  createdProjects    Project[]          @relation("ProjectCreatedBy")
-  createdTasks       Task[]             @relation("TaskCreatedBy")
-  taskAssignments    TaskAssignee[]
-  comments           Comment[]
-  invitationsSent    Invitation[]       @relation("InvitationInvitedBy")
-  activityLogs       ActivityLog[]      @relation("ActivityLogActor")
-  refreshTokens      RefreshToken[]
+  ownedOrganizations  Organization[]       @relation("OrganizationOwner")
+  memberships         Membership[]         @relation("MembershipUser")
+  sentInvites         Membership[]         @relation("MembershipInvitedBy")
+  createdProjects     Project[]            @relation("ProjectCreatedBy")
+  createdTasks        Task[]               @relation("TaskCreatedBy")
+  taskAssignments     TaskAssignee[]
+  comments            Comment[]
+  invitationsSent     Invitation[]         @relation("InvitationInvitedBy")
+  activityLogs        ActivityLog[]        @relation("ActivityLogActor")
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
 
   @@map("users")
 }
@@ -235,22 +236,22 @@ enum TaskPriority {
 }
 
 model Task {
-  id               String       @id @default(uuid())
-  columnId         String?      @map("column_id")
-  boardId          String?      @map("board_id")
-  projectId        String       @map("project_id")
-  sprintId         String?      @map("sprint_id")
-  title            String
-  description      String?
-  position         Int
-  priority         TaskPriority @default(MEDIUM)
-  dueDate          DateTime?    @map("due_date")
-  estimatedPoints  Int?         @map("estimated_points")
-  createdBy        String       @map("created_by")
-  isArchived       Boolean      @default(false) @map("is_archived")
-  createdAt        DateTime     @default(now()) @map("created_at")
-  updatedAt        DateTime     @updatedAt @map("updated_at")
-  deletedAt        DateTime?    @map("deleted_at")
+  id              String       @id @default(uuid())
+  columnId        String?      @map("column_id")
+  boardId         String?      @map("board_id")
+  projectId       String       @map("project_id")
+  sprintId        String?      @map("sprint_id")
+  title           String
+  description     String?
+  position        Int
+  priority        TaskPriority @default(MEDIUM)
+  dueDate         DateTime?    @map("due_date")
+  estimatedPoints Int?         @map("estimated_points")
+  createdBy       String       @map("created_by")
+  isArchived      Boolean      @default(false) @map("is_archived")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  deletedAt       DateTime?    @map("deleted_at")
 
   column    Column?        @relation(fields: [columnId], references: [id])
   board     Board?         @relation(fields: [boardId], references: [id])
@@ -370,4 +371,16 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [id])
 
   @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("password_reset_tokens")
 }
