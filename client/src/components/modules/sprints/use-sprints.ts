@@ -17,3 +17,11 @@ export function useActiveSprint(organizationId: string | undefined, projectId: s
     select: (sprints) => sprints[0],
   });
 }
+
+export function useCompletedSprints(organizationId: string | undefined, projectId: string | undefined) {
+  return useQuery({
+    queryKey: ["/api/projects", projectId, "sprints", { status: "COMPLETED" }],
+    queryFn: () => listSprints(organizationId as string, projectId as string, "COMPLETED"),
+    enabled: organizationId !== undefined && projectId !== undefined,
+  });
+}

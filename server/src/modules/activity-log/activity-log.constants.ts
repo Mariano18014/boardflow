@@ -4,3 +4,6 @@
 export const TASK_ENTITY_TYPE = "task";
 export const TASK_COMPLETED_ACTION = "task.completed";
 export const TASK_REOPENED_ACTION = "task.reopened";
+
+export const SPRINT_ENTITY_TYPE = "sprint";
+export const SPRINT_CLOSED_ACTION = "sprint.closed";

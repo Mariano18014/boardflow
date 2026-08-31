@@ -7,8 +7,8 @@ import {
   TASK_ENTITY_TYPE,
   TASK_REOPENED_ACTION,
 } from "../activity-log/activity-log.constants";
-import { findTasksBySprintId, sumEstimatedPointsForSprint } from "../tasks/tasks.repository";
-import { checkSprintIsActive, findSprintById } from "./sprints.service";
+import { findTasksBySprintId } from "../tasks/tasks.repository";
+import { calculateTotalCommittedPoints, checkSprintIsActive, findSprintById } from "./sprints.service";
 
 export type GetSprintBurndownInput = {
   organizationId: string;
@@ -53,10 +53,6 @@ export async function getSprintBurndown(
     idealLine,
     actualLine,
   };
-}
-
-async function calculateTotalCommittedPoints(sprintId: string): Promise<number> {
-  return sumEstimatedPointsForSprint(sprintId);
 }
 
 // One point per calendar day of the sprint's full planned range, decreasing

@@ -24,3 +24,10 @@ export async function findActivityLogsByEntityIds(
     orderBy: { createdAt: "asc" },
   });
 }
+
+export async function findActivityLogByEntityId(entityType: string, entityId: string, action: string) {
+  return prisma.activityLog.findFirst({
+    where: { entityType, entityId, action },
+    orderBy: { createdAt: "desc" },
+  });
+}

@@ -154,6 +154,16 @@ type UpdateTaskDetailsData = {
   dueDate?: string;
 };
 
+// Used by the sprint closure snapshot (HU-36), which needs each task's column
+// name at the moment of closing, not just its columnId.
+export async function findSprintTasksWithColumn(sprintId: string) {
+  return prisma.task.findMany({
+    where: { sprintId, isArchived: false, deletedAt: null },
+    include: { column: true },
+    orderBy: { position: "asc" },
+  });
+}
+
 export async function findSprintTasksNotInColumn(sprintId: string, excludedColumnId: string | null) {
   return prisma.task.findMany({
     where: {

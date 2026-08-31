@@ -1,4 +1,4 @@
-import type { Prisma, Sprint, Task } from "@prisma/client";
+import type { Column, Prisma, Sprint, Task } from "@prisma/client";
 import type { SprintStatus } from "@shared/types/enums";
 import type { CreateSprintInput } from "@shared/schemas/sprint.schema";
 import { ConflictError, NotFoundError, ValidationError } from "../../lib/errors";
@@ -10,8 +10,13 @@ import { findColumnByBoardIdAndName } from "../boards/columns/columns.repository
 import { calculateNextPositionInScope } from "../tasks/task-position.service";
 import {
   findSprintTasksNotInColumn,
+  findSprintTasksWithColumn,
+  sumEstimatedPointsForSprint,
   updateTaskReturnedToBacklog,
 } from "../tasks/tasks.repository";
+import { createActivityLog } from "../activity-log/activity-log.repository";
+import { SPRINT_CLOSED_ACTION, SPRINT_ENTITY_TYPE } from "../activity-log/activity-log.constants";
+import type { SprintClosureSnapshot, SprintSnapshotTask } from "./sprint-closure-snapshot.types";
 import {
   createSprint as saveSprintRecord,
   findActiveSprintByProjectId,
@@ -149,9 +154,91 @@ export async function closeSprint(input: CloseSprintInput, requesterId: string):
   checkSprintIsActive(sprint);
   const doneColumn = await findDoneColumn(input.projectId);
   const unfinishedTasks = await findUnfinishedSprintTasks(sprint.id, doneColumn?.id ?? null);
+  // Captured before returnTasksToBacklog runs, so the snapshot reflects each
+  // task's columnId exactly as it stood at the moment the sprint was closed —
+  // returnTasksToBacklog clears sprintId/boardId/columnId on the unfinished
+  // ones right after this.
+  await recordSprintClosureSnapshot(sprint, doneColumn, requesterId, input.organizationId);
   await returnTasksToBacklog(unfinishedTasks, input.projectId);
   const closedSprint = await updateSprintStatus(sprint, "COMPLETED");
   return closedSprint;
+}
+
+async function recordSprintClosureSnapshot(
+  sprint: Sprint,
+  doneColumn: Column | null,
+  actorId: string,
+  organizationId: string,
+): Promise<void> {
+  const tasks = await findSprintTasksWithColumn(sprint.id);
+  const totalCommittedPoints = await calculateTotalCommittedPoints(sprint.id);
+  const metadata = buildSprintSnapshotData(sprint, tasks, doneColumn?.id ?? null, totalCommittedPoints);
+  await saveActivityLogEntry(sprint.id, actorId, organizationId, metadata);
+}
+
+// Same "committed scope" definition as HU-35's burndown chart: every task
+// ever assigned to the sprint counts, regardless of its current column.
+export async function calculateTotalCommittedPoints(sprintId: string): Promise<number> {
+  return sumEstimatedPointsForSprint(sprintId);
+}
+
+function buildSprintSnapshotData(
+  sprint: Sprint,
+  tasks: Array<Task & { column: Column | null }>,
+  doneColumnId: string | null,
+  totalCommittedPoints: number,
+): SprintClosureSnapshot {
+  return {
+    sprintName: sprint.name,
+    goal: sprint.goal,
+    startDate: sprint.startDate.toISOString(),
+    endDate: sprint.endDate.toISOString(),
+    totalCommittedPoints,
+    completedPoints: calculateCompletedPointsFromSnapshot(tasks, doneColumnId),
+    tasks: tasks.map(mapTaskToSnapshotItem),
+  };
+}
+
+// Same "column Done" criterion already used by velocity.service.ts
+// (sumCompletedPointsForSprint): no Done column means nothing counts as
+// completed.
+function calculateCompletedPointsFromSnapshot(
+  tasks: Array<Task & { column: Column | null }>,
+  doneColumnId: string | null,
+): number {
+  if (doneColumnId === null) {
+    return 0;
+  }
+  return tasks
+    .filter((task) => task.columnId === doneColumnId)
+    .reduce((sum, task) => sum + (task.estimatedPoints ?? 0), 0);
+}
+
+function mapTaskToSnapshotItem(task: Task & { column: Column | null }): SprintSnapshotTask {
+  return {
+    taskId: task.id,
+    title: task.title,
+    priority: task.priority,
+    estimatedPoints: task.estimatedPoints,
+    columnId: task.columnId,
+    columnName: task.column?.name ?? null,
+  };
+}
+
+async function saveActivityLogEntry(
+  sprintId: string,
+  actorId: string,
+  organizationId: string,
+  metadata: SprintClosureSnapshot,
+): Promise<void> {
+  await createActivityLog({
+    organizationId,
+    actorId,
+    action: SPRINT_CLOSED_ACTION,
+    entityType: SPRINT_ENTITY_TYPE,
+    entityId: sprintId,
+    metadata,
+  });
 }
 
 // Returns null (instead of throwing) when the project has no board yet, or

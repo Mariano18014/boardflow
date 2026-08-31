@@ -8,6 +8,7 @@ import {
 } from "./sprints.controller";
 import { getProjectVelocityController } from "./velocity.controller";
 import { getSprintBurndownController } from "./burndown.controller";
+import { getSprintHistoryController } from "./sprint-history.controller";
 
 // mergeParams: true — this router is mounted at
 // /organizations/:organizationId/projects/:projectId/sprints and needs access
@@ -20,3 +21,4 @@ sprintsRoutes.get("/velocity", authMiddleware, getProjectVelocityController);
 sprintsRoutes.patch("/:sprintId/start", authMiddleware, startSprintController);
 sprintsRoutes.patch("/:sprintId/close", authMiddleware, closeSprintController);
 sprintsRoutes.get("/:sprintId/burndown", authMiddleware, getSprintBurndownController);
+sprintsRoutes.get("/:sprintId/history", authMiddleware, getSprintHistoryController);

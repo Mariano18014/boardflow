@@ -7,7 +7,7 @@ import { useHasPermission } from "@/components/modules/permissions/use-has-permi
 import { useBacklog } from "@/components/modules/tasks/use-backlog";
 import { useSprintTasks } from "@/components/modules/tasks/use-sprint-tasks";
 import { SprintPlanningBoard } from "@/components/modules/tasks/SprintPlanningBoard";
-import { useActiveSprint, usePlannedSprints } from "@/components/modules/sprints/use-sprints";
+import { useActiveSprint, useCompletedSprints, usePlannedSprints } from "@/components/modules/sprints/use-sprints";
 import { StartSprintButton } from "@/components/modules/sprints/StartSprintButton";
 import type { SprintSummary } from "@/components/modules/sprints/list-sprints.api";
 
@@ -24,6 +24,7 @@ export default function SprintPlanningPage() {
     projectId,
   );
   const { data: activeSprint } = useActiveSprint(project?.organizationId, projectId);
+  const { data: completedSprints } = useCompletedSprints(project?.organizationId, projectId);
   const [selectedSprintId, setSelectedSprintId] = useState<string | undefined>(undefined);
 
   function handleSprintStarted(sprint: SprintSummary) {
@@ -112,7 +113,36 @@ export default function SprintPlanningPage() {
             canEditTasks={canEditTasks}
           />
         )}
+
+        {completedSprints && completedSprints.length > 0 && projectId && (
+          <PreviousSprintsSection projectId={projectId} sprints={completedSprints} />
+        )}
       </div>
     </AppShell>
+  );
+}
+
+type PreviousSprintsSectionProps = {
+  projectId: string;
+  sprints: SprintSummary[];
+};
+
+function PreviousSprintsSection({ projectId, sprints }: PreviousSprintsSectionProps) {
+  return (
+    <div className="mt-10 border-t border-border pt-6">
+      <h2 className="font-heading text-lg font-bold mb-3">Sprints anteriores</h2>
+      <ul className="flex flex-col gap-2">
+        {sprints.map((sprint) => (
+          <li key={sprint.id}>
+            <Link
+              href={`/projects/${projectId}/sprints/${sprint.id}/history`}
+              className="text-sm text-primary underline-offset-4 hover:underline"
+            >
+              {sprint.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
