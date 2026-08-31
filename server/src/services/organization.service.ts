@@ -12,6 +12,7 @@ import { createMembership, findOrganizationsByUserId } from "../db/repositories/
 import { createRole, createRolePermissions } from "../modules/roles/roles.repository";
 import { findAllPermissions } from "../modules/permissions/permissions.repository";
 import { checkRequesterHasPermission } from "../modules/permissions/check-permission";
+import { logOrganizationUpdatedActivity } from "../modules/activity-log/activity-log.service";
 import { deleteFile, saveFile, validateImageFile } from "./file-storage.service";
 
 const OWNER_ROLE_NAME = "owner";
@@ -121,7 +122,24 @@ export async function updateOrganization(input: UpdateOrganizationRequest, reque
     name: input.name,
     logoUrl,
   });
+  await logOrganizationUpdated(input, requesterId);
   return updatedOrganization;
+}
+
+async function logOrganizationUpdated(input: UpdateOrganizationRequest, actorId: string) {
+  const changedFields = buildChangedFieldNames(input);
+  await logOrganizationUpdatedActivity(input.organizationId, actorId, { changedFields });
+}
+
+function buildChangedFieldNames(input: UpdateOrganizationRequest): string[] {
+  const changedFields: string[] = [];
+  if (input.name !== undefined) {
+    changedFields.push("name");
+  }
+  if (input.logoFile !== undefined) {
+    changedFields.push("logo");
+  }
+  return changedFields;
 }
 
 async function findOrganizationById(organizationId: string): Promise<Organization> {

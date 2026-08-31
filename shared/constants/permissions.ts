@@ -3,9 +3,11 @@
 // (c) la matriz de checkboxes del frontend (modules/roles).
 
 // HU-14 seeded 7 resources x 4 actions = 28 permissions. HU-36 added "labels"
-// as an 8th resource, and HU-38 adds "comments" as a 9th — still idempotent:
-// seedPermissions upserts by key, so re-running it only adds the 4 new
-// comments:* permissions without touching or duplicating the previous 32.
+// as an 8th resource, HU-38 added "comments" as a 9th, and HU-44 adds
+// "activity" as a 10th — still idempotent: seedPermissions upserts by key, so
+// re-running it only adds the 4 new activity:* permissions without touching or
+// duplicating the previous 36. Only activity:view is actually checked anywhere
+// today, but every resource seeds all 4 actions uniformly.
 // Resources like "invitations" are intentionally NOT included yet — add them
 // here (and re-run the seed) only when a later HU actually needs them.
 export const PERMISSION_RESOURCES = [
@@ -18,6 +20,7 @@ export const PERMISSION_RESOURCES = [
   "tasks",
   "labels",
   "comments",
+  "activity",
 ] as const;
 export type PermissionResource = (typeof PERMISSION_RESOURCES)[number];
 

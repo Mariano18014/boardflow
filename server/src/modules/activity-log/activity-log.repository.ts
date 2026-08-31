@@ -31,3 +31,18 @@ export async function findActivityLogByEntityId(entityType: string, entityId: st
     orderBy: { createdAt: "desc" },
   });
 }
+
+type Pagination = {
+  limit: number;
+  offset: number;
+};
+
+export async function findActivityLogEntriesByOrganizationId(organizationId: string, pagination: Pagination) {
+  return prisma.activityLog.findMany({
+    where: { organizationId },
+    orderBy: { createdAt: "desc" },
+    take: pagination.limit,
+    skip: pagination.offset,
+    include: { actor: true },
+  });
+}

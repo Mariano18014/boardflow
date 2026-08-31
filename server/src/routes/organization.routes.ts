@@ -11,6 +11,7 @@ import {
   removeMemberController,
 } from "../controllers/membership.controller";
 import { rolesRoutes } from "../modules/roles/roles.routes";
+import { activityLogRoutes } from "../modules/activity-log/activity-log.routes";
 import { boardsRoutes } from "../modules/boards/boards.routes";
 import { tasksRoutes } from "../modules/tasks/tasks.routes";
 import { sprintsRoutes } from "../modules/sprints/sprints.routes";
@@ -44,6 +45,7 @@ organizationRoutes.patch(
   updateOrganizationController,
 );
 organizationRoutes.use("/:organizationId/roles", rolesRoutes);
+organizationRoutes.use("/:organizationId/activity-log", activityLogRoutes);
 organizationRoutes.post("/:organizationId/invitations", authMiddleware, createInvitationController);
 organizationRoutes.get("/:organizationId/members", authMiddleware, listOrganizationMembersController);
 organizationRoutes.get(
