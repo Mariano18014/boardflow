@@ -11,9 +11,18 @@ type BoardsListProps = {
   organizationId: string;
   projectId: string;
   canEditBoards: boolean;
+  activeSprintId: string | undefined;
+  isLoadingActiveSprint: boolean;
 };
 
-export function BoardsList({ boards, organizationId, projectId, canEditBoards }: BoardsListProps) {
+export function BoardsList({
+  boards,
+  organizationId,
+  projectId,
+  canEditBoards,
+  activeSprintId,
+  isLoadingActiveSprint,
+}: BoardsListProps) {
   const { reorderBoards } = useReorderBoards(organizationId, projectId);
   const { toast } = useToast();
   const { orderedItems, sensors, handleDragEnd, applyOptimisticOrder } = useDragToReorder({
@@ -40,7 +49,13 @@ export function BoardsList({ boards, organizationId, projectId, canEditBoards }:
       <SortableContext items={orderedItems.map((board) => board.id)} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col gap-2">
           {orderedItems.map((board) => (
-            <BoardCard key={board.id} board={board} canDrag={canEditBoards} />
+            <BoardCard
+              key={board.id}
+              board={board}
+              canDrag={canEditBoards}
+              activeSprintId={activeSprintId}
+              isLoadingActiveSprint={isLoadingActiveSprint}
+            />
           ))}
         </div>
       </SortableContext>

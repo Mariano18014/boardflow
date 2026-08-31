@@ -27,15 +27,17 @@ import { useToast } from "@/hooks/use-toast";
 import { setFieldErrorsOnForm } from "@/components/modules/auth/apply-field-errors";
 import { createBoard } from "./create-board.api";
 import { BoardApiError } from "./board-api-error";
+import { resolveBoardNavigationTarget } from "./resolve-board-navigation-target";
 
 type CreateBoardDialogProps = {
   organizationId: string;
   projectId: string;
+  activeSprintId: string | undefined;
 };
 
 const DEFAULT_VALUES: CreateBoardBody = { name: "" };
 
-export function CreateBoardDialog({ organizationId, projectId }: CreateBoardDialogProps) {
+export function CreateBoardDialog({ organizationId, projectId, activeSprintId }: CreateBoardDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -48,11 +50,11 @@ export function CreateBoardDialog({ organizationId, projectId }: CreateBoardDial
 
   const createBoardMutation = useMutation({
     mutationFn: (input: CreateBoardBody) => createBoard(organizationId, projectId, input),
-    onSuccess: async (board) => {
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "boards"] });
       form.reset(DEFAULT_VALUES);
       setIsOpen(false);
-      navigate(`/boards/${board.id}`);
+      navigateToBoardIfActiveSprintExists();
     },
     onError: (error) => {
       applyCreateBoardErrorToForm(error, form, toast);
@@ -61,6 +63,17 @@ export function CreateBoardDialog({ organizationId, projectId }: CreateBoardDial
 
   function onSubmit(input: CreateBoardBody) {
     createBoardMutation.mutate(input);
+  }
+
+  // A newly created board has no content of its own to jump to (see
+  // resolveBoardNavigationTarget) — its content is the active sprint's board.
+  // With no active sprint, staying on the project page is correct: the new
+  // board still shows up there, same as any other board without one.
+  function navigateToBoardIfActiveSprintExists() {
+    const navigationTarget = resolveBoardNavigationTarget(projectId, activeSprintId);
+    if (navigationTarget) {
+      navigate(navigationTarget);
+    }
   }
 
   return (
