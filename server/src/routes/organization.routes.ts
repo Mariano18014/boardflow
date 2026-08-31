@@ -14,6 +14,7 @@ import { rolesRoutes } from "../modules/roles/roles.routes";
 import { boardsRoutes } from "../modules/boards/boards.routes";
 import { tasksRoutes } from "../modules/tasks/tasks.routes";
 import { sprintsRoutes } from "../modules/sprints/sprints.routes";
+import { labelsRoutes } from "../modules/labels/labels.routes";
 import {
   assignTaskToSprintController,
   getSprintTasksController,
@@ -67,6 +68,7 @@ organizationRoutes.get(
   listOrganizationProjectsController,
 );
 organizationRoutes.use("/:organizationId/projects/:projectId/boards", boardsRoutes);
+organizationRoutes.use("/:organizationId/projects/:projectId/labels", labelsRoutes);
 organizationRoutes.patch(
   "/:organizationId/projects/:projectId/archive",
   authMiddleware,

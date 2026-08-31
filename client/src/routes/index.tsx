@@ -16,6 +16,7 @@ import SprintPlanningPage from "@/pages/sprint-planning/SprintPlanningPage";
 import SprintBoardPage from "@/pages/sprint-board/SprintBoardPage";
 import SprintHistoryPage from "@/pages/sprint-history/SprintHistoryPage";
 import VelocityPage from "@/pages/velocity/VelocityPage";
+import ProjectLabelsPage from "@/pages/project-labels/ProjectLabelsPage";
 import MembersPage from "@/pages/members/MembersPage";
 import OrganizationSettingsPage from "@/pages/organizations/OrganizationSettingsPage";
 import RolesPage from "@/pages/roles/RolesPage";
@@ -59,6 +60,9 @@ export function AppRoutes() {
       </Route>
       <Route path="/projects/:projectId/velocity">
         <RequireOrganization component={VelocityPage} />
+      </Route>
+      <Route path="/projects/:projectId/labels">
+        <RequireOrganization component={ProjectLabelsPage} />
       </Route>
       <Route path="/boards/:boardId">
         <RequireOrganization component={BoardPage} />
