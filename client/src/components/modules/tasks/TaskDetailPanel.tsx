@@ -3,9 +3,11 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useOrganizationMembers } from "@/components/modules/members/use-organization-members";
+import { useLabels } from "@/components/modules/labels/use-labels";
 import { useTaskDetail } from "./use-task-detail";
 import { useUpdateTaskDetails } from "./use-update-task-details";
 import { useReplaceTaskAssignees } from "./use-replace-task-assignees";
+import { useReplaceTaskLabels } from "./use-replace-task-labels";
 import { buildEditableFieldsFromTask, buildTaskDetailChanges, type EditableTaskFields } from "./task-detail-changes.util";
 import { TaskTitleField } from "./TaskTitleField";
 import { TaskDescriptionField } from "./TaskDescriptionField";
@@ -13,6 +15,7 @@ import { TaskPriorityField } from "./TaskPriorityField";
 import { TaskEstimatedPointsField } from "./TaskEstimatedPointsField";
 import { TaskDueDateField } from "./TaskDueDateField";
 import { AssigneeSelect } from "./AssigneeSelect";
+import { LabelSelect } from "./LabelSelect";
 import { TaskApiError } from "./task-api-error";
 import type { TaskDetail } from "./get-task-detail.api";
 
@@ -27,8 +30,15 @@ type TaskDetailPanelProps = {
 export function TaskDetailPanel({ organizationId, projectId, taskId, canEditTasks, onClose }: TaskDetailPanelProps) {
   const { data: task, isLoading } = useTaskDetail(organizationId, projectId, taskId ?? undefined);
   const { data: members } = useOrganizationMembers(organizationId);
+  const { data: projectLabels } = useLabels(organizationId, projectId);
   const { updateTaskDetailsAsync, isPending } = useUpdateTaskDetails(organizationId, projectId, taskId ?? "");
   const { replaceTaskAssigneesAsync, isReplacingAssignees } = useReplaceTaskAssignees(
+    organizationId,
+    projectId,
+    taskId ?? "",
+    task?.sprintId ?? null,
+  );
+  const { replaceTaskLabelsAsync, isReplacingLabels } = useReplaceTaskLabels(
     organizationId,
     projectId,
     taskId ?? "",
@@ -37,10 +47,12 @@ export function TaskDetailPanel({ organizationId, projectId, taskId, canEditTask
   const { toast } = useToast();
   const [editedFields, setEditedFields] = useState<EditableTaskFields | null>(null);
   const [selectedAssigneeUserIds, setSelectedAssigneeUserIds] = useState<string[]>([]);
+  const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>([]);
 
   useEffect(() => {
     setEditedFields(task ? buildEditableFieldsFromTask(task) : null);
     setSelectedAssigneeUserIds(task ? task.assignees.map((assignee) => assignee.id) : []);
+    setSelectedLabelIds(task ? task.labels.map((label) => label.id) : []);
   }, [task]);
 
   function updateField<K extends keyof EditableTaskFields>(field: K, value: EditableTaskFields[K]) {
@@ -54,6 +66,7 @@ export function TaskDetailPanel({ organizationId, projectId, taskId, canEditTask
     try {
       await saveDetailChangesIfAny(task, editedFields);
       await saveAssigneesIfChanged(task, selectedAssigneeUserIds);
+      await saveLabelsIfChanged(task, selectedLabelIds);
       toast({ title: "Tarea actualizada", description: `Se guardaron los cambios de "${task.title}".` });
       onClose();
     } catch (error) {
@@ -78,7 +91,15 @@ export function TaskDetailPanel({ organizationId, projectId, taskId, canEditTask
     await replaceTaskAssigneesAsync(editedUserIds);
   }
 
-  const isSaving = isPending || isReplacingAssignees;
+  async function saveLabelsIfChanged(currentTask: TaskDetail, editedLabelIds: string[]) {
+    const originalLabelIds = currentTask.labels.map((label) => label.id);
+    if (!haveLabelSetsChanged(originalLabelIds, editedLabelIds)) {
+      return;
+    }
+    await replaceTaskLabelsAsync(editedLabelIds);
+  }
+
+  const isSaving = isPending || isReplacingAssignees || isReplacingLabels;
 
   return (
     <Dialog open={taskId !== null} onOpenChange={(open) => !open && onClose()}>
@@ -123,6 +144,12 @@ export function TaskDetailPanel({ organizationId, projectId, taskId, canEditTask
                 onChange={setSelectedAssigneeUserIds}
                 isReadOnly={!canEditTasks}
               />
+              <LabelSelect
+                labels={projectLabels ?? []}
+                selectedLabelIds={selectedLabelIds}
+                onChange={setSelectedLabelIds}
+                isReadOnly={!canEditTasks}
+              />
             </div>
             {canEditTasks && (
               <DialogFooter>
@@ -144,4 +171,12 @@ function haveAssigneeSetsChanged(original: string[], edited: string[]): boolean 
   }
   const originalUserIds = new Set(original);
   return edited.some((userId) => !originalUserIds.has(userId));
+}
+
+function haveLabelSetsChanged(original: string[], edited: string[]): boolean {
+  if (original.length !== edited.length) {
+    return true;
+  }
+  const originalLabelIds = new Set(original);
+  return edited.some((labelId) => !originalLabelIds.has(labelId));
 }

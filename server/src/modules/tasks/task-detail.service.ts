@@ -6,6 +6,7 @@ import { findProjectById } from "../../services/project.service";
 import { checkRequesterHasPermission } from "../permissions/check-permission";
 import { findTaskById } from "./task.service";
 import { findAssigneesByTaskId } from "./assignees/assignees.service";
+import { findLabelsByTaskId } from "./labels/labels.service";
 import { updateTaskDetails as saveTaskDetailChanges } from "./tasks.repository";
 
 export type GetTaskDetailInput = {
@@ -96,6 +97,7 @@ function validateDueDate(dueDate: string | undefined) {
 
 async function mapTaskToDetail(task: Task): Promise<TaskDetail> {
   const assignees = await findAssigneesByTaskId(task.id);
+  const labels = await findLabelsByTaskId(task.id);
   return {
     id: task.id,
     title: task.title,
@@ -110,6 +112,6 @@ async function mapTaskToDetail(task: Task): Promise<TaskDetail> {
     createdAt: task.createdAt,
     updatedAt: task.updatedAt,
     assignees,
-    labels: [],
+    labels,
   };
 }

@@ -14,6 +14,7 @@ import { findActiveBoardsByProjectId } from "../boards/boards.repository";
 import { ensureDefaultColumnsExist } from "../boards/columns/columns.service";
 import { findColumnsByBoardId } from "../boards/columns/columns.repository";
 import { findAssigneesByTaskId } from "./assignees/assignees.service";
+import { findLabelsByTaskId } from "./labels/labels.service";
 import {
   findColumnTasksForSprint,
   findMaxPositionInColumn,
@@ -101,6 +102,7 @@ async function mapColumnWithTasks(column: Column, tasks: Task[]): Promise<Sprint
 
 async function mapTaskToBoardItem(task: Task): Promise<SprintBoardTaskItem> {
   const assignees = await findAssigneesByTaskId(task.id);
+  const labels = await findLabelsByTaskId(task.id);
   return {
     id: task.id,
     title: task.title,
@@ -108,7 +110,7 @@ async function mapTaskToBoardItem(task: Task): Promise<SprintBoardTaskItem> {
     estimatedPoints: task.estimatedPoints,
     position: task.position,
     assignees,
-    labels: [],
+    labels,
   };
 }
 
