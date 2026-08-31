@@ -12,10 +12,15 @@ import {
   type ForgotPasswordInput,
   type ResetPasswordInput,
 } from "@shared/schemas/password-reset-token.schema";
+import {
+  refreshAccessTokenSchema,
+  type RefreshAccessTokenInput,
+} from "@shared/schemas/refresh-token.schema";
 import { ValidationError } from "../lib/errors";
 import {
   getCurrentUser,
   loginUser,
+  refreshAccessToken,
   registerUser,
   requestPasswordReset,
   resetPassword,
@@ -42,6 +47,20 @@ export async function loginController(req: Request, res: Response, next: NextFun
   try {
     const input = parseLoginRequestBody(req.body);
     const { user, accessToken, refreshToken } = await loginUser(input);
+    res.status(200).json({
+      user: formatUserForResponse(user),
+      accessToken,
+      refreshToken,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function refreshTokenController(req: Request, res: Response, next: NextFunction) {
+  try {
+    const input = parseRefreshTokenRequestBody(req.body);
+    const { user, accessToken, refreshToken } = await refreshAccessToken(input.refreshToken);
     res.status(200).json({
       user: formatUserForResponse(user),
       accessToken,
@@ -91,6 +110,14 @@ function parseRegisterRequestBody(body: unknown): RegisterUserInput {
 
 function parseLoginRequestBody(body: unknown): LoginUserInput {
   const result = loginUserSchema.safeParse(body);
+  if (!result.success) {
+    throw new ValidationError(result.error.flatten().fieldErrors);
+  }
+  return result.data;
+}
+
+function parseRefreshTokenRequestBody(body: unknown): RefreshAccessTokenInput {
+  const result = refreshAccessTokenSchema.safeParse(body);
   if (!result.success) {
     throw new ValidationError(result.error.flatten().fieldErrors);
   }

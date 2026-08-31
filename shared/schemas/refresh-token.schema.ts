@@ -9,3 +9,9 @@ export const refreshTokenSchema = z.object({
 });
 
 export type RefreshToken = z.infer<typeof refreshTokenSchema>;
+
+export const refreshAccessTokenSchema = z.object({
+  refreshToken: z.string().min(1, "El refresh token es requerido."),
+});
+
+export type RefreshAccessTokenInput = z.infer<typeof refreshAccessTokenSchema>;

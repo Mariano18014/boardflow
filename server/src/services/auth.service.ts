@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import type { User } from "@prisma/client";
+import type { RefreshToken, User } from "@prisma/client";
 import type { LoginUserInput, RegisterUserInput } from "@shared/schemas/user.schema";
 import type { ResetPasswordInput } from "@shared/schemas/password-reset-token.schema";
 import { env } from "../config/env";
@@ -7,7 +7,11 @@ import { ConflictError, UnauthorizedError } from "../lib/errors";
 import { parseDurationToMs } from "../lib/duration";
 import { signAccessToken } from "../lib/jwt";
 import { generateRandomToken, hashToken } from "../lib/token";
-import { createRefreshToken } from "../db/repositories/refresh-token.repository";
+import {
+  createRefreshToken,
+  findRefreshTokenByHash,
+  revokeRefreshToken,
+} from "../db/repositories/refresh-token.repository";
 import {
   createPasswordResetToken,
   findPasswordResetTokenByHash,
@@ -91,6 +95,29 @@ async function generateRefreshToken(userId: string) {
   const expiresAt = new Date(Date.now() + parseDurationToMs(env.JWT_REFRESH_EXPIRES_IN));
   await createRefreshToken({ userId, tokenHash, expiresAt });
   return token;
+}
+
+export async function refreshAccessToken(refreshTokenValue: string) {
+  const refreshToken = await validateRefreshToken(refreshTokenValue);
+  await revokeUsedRefreshToken(refreshToken.id);
+  const user = await getCurrentUser(refreshToken.userId);
+  const tokens = await generateAuthTokens(user);
+  return { user, ...tokens };
+}
+
+async function validateRefreshToken(refreshTokenValue: string): Promise<RefreshToken> {
+  const tokenHash = hashToken(refreshTokenValue);
+  const refreshToken = await findRefreshTokenByHash(tokenHash);
+  const isTokenUsable =
+    refreshToken && !refreshToken.revokedAt && refreshToken.expiresAt > new Date();
+  if (!isTokenUsable) {
+    throw new UnauthorizedError("La sesión expiró. Iniciá sesión nuevamente.");
+  }
+  return refreshToken;
+}
+
+async function revokeUsedRefreshToken(id: string) {
+  await revokeRefreshToken(id);
 }
 
 export async function getCurrentUser(userId: string) {
