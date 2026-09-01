@@ -6,6 +6,7 @@ import { checkRequesterHasPermission } from "../../permissions/check-permission"
 import { findActiveMembershipsByUserIds } from "../../../db/repositories/membership.repository";
 import { findUserById } from "../../../db/repositories/user.repository";
 import { createTaskAssignedNotification } from "../../notifications/notifications.service";
+import { notifyTaskContextChanged } from "../../realtime/notify.service";
 import { findTaskById } from "../task.service";
 import {
   findAssigneeRecordsByTaskId,
@@ -38,6 +39,7 @@ export async function replaceTaskAssignees(
     input.organizationId,
     requesterId,
   );
+  await notifyTaskContextChanged(task);
   return updatedAssignees;
 }
 

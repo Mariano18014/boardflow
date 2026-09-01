@@ -4,6 +4,7 @@ import { ValidationError } from "../../../lib/errors";
 import { findProjectById } from "../../../services/project.service";
 import { checkRequesterHasPermission } from "../../permissions/check-permission";
 import { findLabelsByIdsAndProjectId } from "../../labels/labels.repository";
+import { notifyTaskContextChanged } from "../../realtime/notify.service";
 import { findTaskById } from "../task.service";
 import {
   findLabelRecordsByTaskId,
@@ -32,6 +33,7 @@ export async function replaceTaskLabels(
   const task = await findTaskById(input.taskId, input.projectId);
   await checkAllLabelIdsBelongToProject(input.labelIds, input.projectId);
   const updatedLabels = await replaceLabelRecordsForTask(task.id, input.labelIds);
+  await notifyTaskContextChanged(task);
   return updatedLabels;
 }
 

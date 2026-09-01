@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useLocation, useParams } from "wouter";
 import { AppShell } from "@/components/layout/AppShell";
+import { queryClient } from "@/lib/queryClient";
 import { useProject } from "@/components/modules/projects/use-project";
 import { useHasPermission } from "@/components/modules/permissions/use-has-permission";
 import { useSprintBoard } from "@/components/modules/tasks/use-sprint-board";
 import { SprintBoardView } from "@/components/modules/tasks/SprintBoardView";
 import { TaskDetailPanel } from "@/components/modules/tasks/TaskDetailPanel";
+import { useSprintBoardRealtimeSync } from "@/modules/realtime/use-sprint-board-realtime-sync";
 
 export default function SprintBoardPage() {
   const { projectId, sprintId } = useParams<{ projectId: string; sprintId: string }>();
@@ -20,6 +22,7 @@ export default function SprintBoardPage() {
     projectId,
     sprintId,
   );
+  useSprintBoardRealtimeSync(sprintId, () => refetchSprintBoard(projectId, sprintId));
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   function handleSprintClosed() {
@@ -60,4 +63,8 @@ export default function SprintBoardPage() {
       )}
     </AppShell>
   );
+}
+
+function refetchSprintBoard(projectId: string, sprintId: string) {
+  queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "sprints", sprintId, "board"] });
 }

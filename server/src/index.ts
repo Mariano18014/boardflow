@@ -1,6 +1,7 @@
 import { createServer } from "http";
 import { env } from "./config/env";
 import { createApp } from "./app";
+import { initializeRealtimeServer } from "./modules/realtime/realtime-server";
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -15,6 +16,7 @@ export function log(message: string, source = "express") {
 
 const app = createApp();
 const httpServer = createServer(app);
+initializeRealtimeServer(httpServer);
 
 (async () => {
   // importantly only setup vite in development and after

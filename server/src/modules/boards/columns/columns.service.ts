@@ -2,6 +2,7 @@ import type { Column } from "@prisma/client";
 import { ConflictError, NotFoundError, ValidationError } from "../../../lib/errors";
 import { findProjectById } from "../../../services/project.service";
 import { checkRequesterHasPermission } from "../../permissions/check-permission";
+import { notifySprintBoardChangedForProject } from "../../realtime/notify.service";
 import {
   countTasksInColumn,
   createColumn,
@@ -56,6 +57,7 @@ export async function updateColumnWipLimit(
   const column = await findColumnScopedToProject(input.columnId, input.projectId);
   validateWipLimitValue(input.wipLimit);
   const updatedColumn = await saveColumnWipLimitOnColumn(column, input.wipLimit);
+  await notifySprintBoardChangedForProject(input.projectId);
   return updatedColumn;
 }
 

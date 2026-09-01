@@ -4,6 +4,7 @@ import type { TaskDetail } from "@shared/schemas/task.schema";
 import { ValidationError } from "../../lib/errors";
 import { findProjectById } from "../../services/project.service";
 import { checkRequesterHasPermission } from "../permissions/check-permission";
+import { notifyTaskContextChanged } from "../realtime/notify.service";
 import { findTaskById } from "./task.service";
 import { findAssigneesByTaskId } from "./assignees/assignees.service";
 import { findLabelsByTaskId } from "./labels/labels.service";
@@ -50,6 +51,7 @@ export async function updateTaskDetails(
   const allowedChanges = filterEditableFields(input.changes);
   validateTaskDetailChanges(allowedChanges);
   const updatedTask = await saveTaskDetailChanges(task.id, allowedChanges);
+  await notifyTaskContextChanged(task);
   return await mapTaskToDetail(updatedTask);
 }
 

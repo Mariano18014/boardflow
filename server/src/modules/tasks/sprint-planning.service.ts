@@ -4,6 +4,7 @@ import { ConflictError, NotFoundError } from "../../lib/errors";
 import { findProjectById } from "../../services/project.service";
 import { findSprintById } from "../sprints/sprints.service";
 import { checkRequesterHasPermission } from "../permissions/check-permission";
+import { notifyBacklogChanged, notifySprintBoardChanged } from "../realtime/notify.service";
 import { calculateNextPositionInScope } from "./task-position.service";
 import { mapTaskToBacklogItem } from "./task-item.mapper";
 import {
@@ -47,13 +48,24 @@ export async function assignTaskToSprint(
   await checkRequesterHasPermission(input.organizationId, requesterId, "tasks:edit");
   const task = await findTaskById(input.taskId, input.projectId);
   await checkTaskCurrentSprintIsPlanned(task, input.projectId);
-  if (input.sprintId !== null) {
-    const targetSprint = await findSprintById(input.sprintId, input.projectId);
+  const targetSprint = input.sprintId !== null ? await findSprintById(input.sprintId, input.projectId) : null;
+  if (targetSprint !== null) {
     checkSprintIsPlanned(targetSprint);
   }
   const nextPosition = await calculateNextPositionInScope(input.projectId, input.sprintId);
   const updatedTask = await updateTaskSprintAssignment(task, input.sprintId, nextPosition);
+  notifyAssignmentChange(input.projectId, targetSprint);
   return await mapTaskToBacklogItem(updatedTask);
+}
+
+// The task always leaves or enters the backlog, so backlog:changed always
+// fires; board:changed only fires on top of that if the target sprint (if
+// any) also happens to be the project's active one.
+function notifyAssignmentChange(projectId: string, targetSprint: Sprint | null) {
+  notifyBacklogChanged(projectId);
+  if (targetSprint !== null && targetSprint.status === "ACTIVE") {
+    notifySprintBoardChanged(targetSprint.id);
+  }
 }
 
 // A task can only move (to the backlog, or to another sprint) while its
