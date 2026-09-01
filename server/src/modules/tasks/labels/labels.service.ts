@@ -25,10 +25,7 @@ export async function replaceTaskLabels(
   requesterId: string,
 ): Promise<LabelSummary[]> {
   await checkRequesterHasPermission(input.organizationId, requesterId, "tasks:edit");
-  // findTaskById only confirms the task belongs to projectId — it says
-  // nothing about projectId belonging to organizationId, so this extra check
-  // (same as every other module in this codebase, see assignees.service.ts)
-  // is what actually prevents cross-organization access.
+
   await findProjectById(input.projectId, input.organizationId);
   const task = await findTaskById(input.taskId, input.projectId);
   await checkAllLabelIdsBelongToProject(input.labelIds, input.projectId);
@@ -52,16 +49,12 @@ async function checkAllLabelIdsBelongToProject(labelIds: string[], projectId: st
 }
 
 async function replaceLabelRecordsForTask(taskId: string, labelIds: string[]): Promise<LabelSummary[]> {
-  // Deduplicated before hitting the database: taskId+labelId is a unique
-  // constraint, so a repeated id in the payload would otherwise crash the
-  // createMany call instead of just being a harmless no-op.
+
   const uniqueLabelIds = Array.from(new Set(labelIds));
   const records = await saveReplacedLabelRecords(taskId, uniqueLabelIds);
   return records.map(mapLabelRecordToSummary);
 }
 
-// Shared by the backlog, sprint-board and task-detail services so none of
-// them duplicate "go fetch a task's labels".
 export async function findLabelsByTaskId(taskId: string): Promise<LabelSummary[]> {
   const records = await findLabelRecordsByTaskId(taskId);
   return records.map(mapLabelRecordToSummary);

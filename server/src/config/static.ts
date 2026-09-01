@@ -15,7 +15,6 @@ export function serveStatic(app: Express) {
       setHeaders: (res, filePath) => {
         const normalized = filePath.replace(/\\/g, "/");
 
-        // Ensure HTML + SW are always fresh after deploy
         if (
           normalized.endsWith("/index.html") ||
           normalized.endsWith("/service-worker.js") ||
@@ -26,7 +25,6 @@ export function serveStatic(app: Express) {
           return;
         }
 
-        // Hashed assets can be cached aggressively
         if (normalized.includes("/assets/")) {
           res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
           return;
@@ -37,7 +35,6 @@ export function serveStatic(app: Express) {
     }),
   );
 
-  // fall through to index.html if the file doesn't exist
   app.use((_req, res) => {
     res.setHeader("Cache-Control", "no-store");
     res.sendFile(path.resolve(distPath, "index.html"));

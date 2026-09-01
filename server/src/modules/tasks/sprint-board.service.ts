@@ -32,10 +32,7 @@ export type GetSprintBoardInput = {
 
 export async function getSprintBoard(input: GetSprintBoardInput, requesterId: string): Promise<SprintBoard> {
   await checkRequesterHasPermission(input.organizationId, requesterId, "boards:view");
-  // findSprintById only confirms the sprint belongs to projectId — it says
-  // nothing about projectId belonging to organizationId, so this extra check
-  // (same as every other module in this codebase) is what actually prevents
-  // cross-organization access.
+
   await findProjectById(input.projectId, input.organizationId);
   const sprint = await findSprintById(input.sprintId, input.projectId);
   checkSprintIsActive(sprint);

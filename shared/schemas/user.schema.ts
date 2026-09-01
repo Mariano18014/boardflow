@@ -28,16 +28,8 @@ export const loginUserSchema = z.object({
   password: z.string().min(1),
 });
 
-// The multipart PATCH /users/me body only ever carries the text field
-// `fullName` — the avatar travels as a separate uploaded file (see
-// users.service.ts), never as a JSON `avatarUrl` string, so this schema
-// intentionally only covers `fullName`. Same pattern as updateOrganizationSchema.
 export const updateUserSchema = userSchema.pick({ fullName: true }).partial();
 
-// Same minimum length rule as registerUserSchema.password — password strength
-// requirements live in exactly one place. `refreshToken` identifies which
-// session made the request, so it can be excluded when other sessions get
-// revoked (see auth.service.ts's revokeOtherActiveSessions).
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "La contraseña actual es obligatoria."),
   newPassword: z.string().min(8),

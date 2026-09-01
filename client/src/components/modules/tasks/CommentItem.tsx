@@ -29,9 +29,6 @@ export function CommentItem({ organizationId, projectId, taskId, comment }: Comm
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
 
-  // The author can always edit/delete their own comment; comments:edit and
-  // comments:delete let a moderator role act on someone else's, but that is
-  // not granted to a regular member by default.
   const isAuthor = session?.user.id === comment.author.id;
   const canEdit = isAuthor || hasPermission("comments:edit");
   const canDelete = isAuthor || hasPermission("comments:delete");

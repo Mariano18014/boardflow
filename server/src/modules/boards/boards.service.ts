@@ -74,8 +74,7 @@ function checkAllBoardIdsBelongToProject(boardIds: string[], activeBoards: Board
 }
 
 function checkBoardIdsCountMatchesActiveBoards(boardIds: string[], activeBoards: Board[]) {
-  // Compares unique ids, not raw length, so a duplicated id in the payload
-  // can't slip through by coincidentally matching the active board count.
+
   const uniqueBoardIdsCount = new Set(boardIds).size;
   if (uniqueBoardIdsCount !== activeBoards.length) {
     throw new ConflictError(

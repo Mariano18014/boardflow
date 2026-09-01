@@ -19,9 +19,7 @@ const httpServer = createServer(app);
 initializeRealtimeServer(httpServer);
 
 (async () => {
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
+
   if (env.NODE_ENV === "production") {
     const { serveStatic } = await import("./config/static");
     serveStatic(app);

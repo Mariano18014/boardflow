@@ -5,8 +5,6 @@ type SprintHistoryTaskCardProps = {
   task: SprintHistoryTask;
 };
 
-// Read-only by design: this renders a frozen snapshot taken at close time, not
-// the live task, so there's nothing here to drag, click, or edit.
 export function SprintHistoryTaskCard({ task }: SprintHistoryTaskCardProps) {
   return (
     <div className="rounded-md border border-border bg-surface px-4 py-3">

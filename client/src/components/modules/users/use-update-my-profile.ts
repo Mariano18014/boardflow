@@ -3,10 +3,6 @@ import { useToast } from "@/hooks/use-toast";
 import { updateMyProfile as sendUpdateMyProfileRequest, type UpdateMyProfileRequest } from "./update-my-profile.api";
 import { UserApiError } from "./user-api-error";
 
-// onError is deliberately NOT set here: the name form wants field-level errors
-// while the avatar uploader wants a plain toast, so each caller supplies its
-// own onError via the mutate() call instead of sharing one behavior for both.
-// Same split as useUpdateOrganization (HU-12).
 export function useUpdateMyProfile() {
   const queryClient = useQueryClient();
   const { toast } = useToast();

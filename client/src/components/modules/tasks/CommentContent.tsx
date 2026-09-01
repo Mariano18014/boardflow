@@ -4,9 +4,6 @@ type CommentContentProps = {
   content: string;
 };
 
-// Separated from CommentItem so the mention-token parsing (turning
-// @[Display Name](userId) into a chip) doesn't get mixed into the rest of a
-// comment's rendering.
 export function CommentContent({ content }: CommentContentProps) {
   const segments = splitContentByMentions(content);
 

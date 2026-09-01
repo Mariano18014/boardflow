@@ -38,10 +38,6 @@ async function postCreateProjectRequest(
   });
 }
 
-// The access token is short-lived (15m) and this is a mutation that can easily
-// happen after it expired (e.g. right after setting up the organization), so
-// we transparently refresh the session once with the stored refresh token
-// before giving up with a 401.
 async function retryCreateProjectAfterSessionRefresh(
   organizationId: string,
   input: CreateProjectBody,

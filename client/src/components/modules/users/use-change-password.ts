@@ -7,9 +7,6 @@ type ChangeOwnPasswordInput = {
   newPassword: string;
 };
 
-// The form only deals with the two passwords — the current session's
-// refreshToken (needed so the server keeps this session alive while revoking
-// every other one) is read from the session store here, not exposed to the form.
 export function useChangePassword() {
   const mutation = useMutation({
     mutationFn: (input: ChangeOwnPasswordInput) =>

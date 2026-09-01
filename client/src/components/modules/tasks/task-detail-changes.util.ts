@@ -19,9 +19,6 @@ export function buildEditableFieldsFromTask(task: TaskDetail): EditableTaskField
   };
 }
 
-// Pure function: compares the edited fields against the original task and
-// returns only what actually changed, so the PATCH request only carries the
-// fields the user touched.
 export function buildTaskDetailChanges(original: TaskDetail, edited: EditableTaskFields): UpdateTaskDetailsBody {
   const changes: UpdateTaskDetailsBody = {};
   if (edited.title !== original.title) {

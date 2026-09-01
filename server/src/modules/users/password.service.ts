@@ -31,8 +31,6 @@ async function checkCurrentPasswordMatches(plainPassword: string, storedHash: st
   }
 }
 
-// Compared in plain text, before hashing — bcrypt salts every hash
-// differently, so comparing hashes could never tell them apart anyway.
 async function checkNewPasswordIsDifferent(newPassword: string, currentPassword: string): Promise<void> {
   if (newPassword === currentPassword) {
     throw new ValidationError({

@@ -4,11 +4,6 @@ import type { AuthenticatedSocket, AuthenticatedSocketData } from "./realtime.ty
 
 type SocketAuthNextFunction = (err?: Error) => void;
 
-// Reuses the same verifyAccessToken used by auth.middleware.ts for HTTP
-// requests — the only difference is where the token comes from (the
-// handshake's auth payload instead of an Authorization header). Also looks up
-// the user's fullName/avatarUrl here, once per connection, so presence
-// (HU-41) doesn't need a second round trip when a socket joins a room.
 export async function authenticateSocketConnection(socket: AuthenticatedSocket, next: SocketAuthNextFunction) {
   try {
     const token = extractTokenFromHandshake(socket);

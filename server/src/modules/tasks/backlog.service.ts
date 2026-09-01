@@ -113,8 +113,7 @@ function checkAllTaskIdsBelongToBacklog(taskIds: string[], backlogTasks: Task[])
 }
 
 function checkTaskIdsCountMatchesBacklogTasks(taskIds: string[], backlogTasks: Task[]) {
-  // Compares unique ids, not raw length, so a duplicated id in the payload
-  // can't slip through by coincidentally matching the active backlog count.
+
   const uniqueTaskIdsCount = new Set(taskIds).size;
   if (uniqueTaskIdsCount !== backlogTasks.length) {
     throw new ConflictError(

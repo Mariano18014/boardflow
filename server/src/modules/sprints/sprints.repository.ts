@@ -35,9 +35,6 @@ export async function findSprintByIdAndProjectId(sprintId: string, projectId: st
   return prisma.sprint.findFirst({ where: { id: sprintId, projectId } });
 }
 
-// Unlike findSprintByIdAndProjectId, this doesn't require already knowing the
-// sprint's project — used by the realtime module, which only receives a
-// sprintId over the socket and has to resolve its project from there.
 export async function findSprintByIdOnly(sprintId: string) {
   return prisma.sprint.findUnique({ where: { id: sprintId } });
 }

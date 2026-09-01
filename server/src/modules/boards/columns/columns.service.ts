@@ -12,11 +12,8 @@ import {
   updateColumnWipLimit as saveColumnWipLimit,
 } from "./columns.repository";
 
-// The fixed set of status columns every board gets seeded with the first time
-// its board is opened (HU-28). Not user-configurable in this HU.
 const DEFAULT_COLUMN_NAMES = ["To Do", "In Progress", "Review", "Done"];
 
-// Idempotent: only seeds the default columns the first time a board has none.
 export async function ensureDefaultColumnsExist(boardId: string) {
   const boardHasColumns = await checkBoardHasColumns(boardId);
   if (boardHasColumns) {
@@ -48,11 +45,7 @@ export async function updateColumnWipLimit(
   requesterId: string,
 ): Promise<Column> {
   await checkRequesterHasPermission(input.organizationId, requesterId, "boards:edit");
-  // findColumnByIdAndProjectId only confirms the column belongs to projectId —
-  // it says nothing about projectId belonging to organizationId, so this
-  // extra check (same as every other module in this codebase, see
-  // move-task-column.service.ts) is what actually prevents cross-organization
-  // access.
+
   await findProjectById(input.projectId, input.organizationId);
   const column = await findColumnScopedToProject(input.columnId, input.projectId);
   validateWipLimitValue(input.wipLimit);
@@ -69,11 +62,6 @@ async function findColumnScopedToProject(columnId: string, projectId: string): P
   return column;
 }
 
-// Deliberately does NOT compare the new limit against the column's current
-// task count: a project can define wipLimit: 3 on a column that already has 6
-// tasks, and saving is still allowed. The limit only blocks FUTURE moves into
-// the column (see checkDestinationColumnHasCapacity below) — it never forces
-// an immediate correction of the existing state.
 function validateWipLimitValue(wipLimit: number | null) {
   if (wipLimit === null) {
     return;
@@ -89,8 +77,6 @@ async function saveColumnWipLimitOnColumn(column: Column, wipLimit: number | nul
   return saveColumnWipLimit(column.id, wipLimit);
 }
 
-// Used by moveTaskToColumn (tasks module, HU-29) before moving a task INTO
-// this column — reordering within the same column never calls this.
 export async function checkDestinationColumnHasCapacity(columnId: string) {
   const column = await findColumnById(columnId);
   if (!column || column.wipLimit === null) {

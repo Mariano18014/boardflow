@@ -13,10 +13,6 @@ type AddCommentFormProps = {
   taskId: string;
 };
 
-// Unlike the rest of the detail panel (title, description, assignees, labels
-// — all held in local state and only sent on "Guardar cambios"), a comment is
-// published immediately on submit. It has its own mutation and its own
-// "Publicar" button instead of joining handleSave's batch of changes.
 export function AddCommentForm({ organizationId, projectId, taskId }: AddCommentFormProps) {
   const { createComment, isCreatingComment } = useCreateComment(organizationId, projectId, taskId);
   const { toast } = useToast();

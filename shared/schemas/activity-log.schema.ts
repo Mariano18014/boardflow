@@ -17,8 +17,6 @@ export const listActivityLogQuerySchema = paginationQuerySchema;
 export type ActivityLog = z.infer<typeof activityLogSchema>;
 export type ListActivityLogQuery = z.infer<typeof listActivityLogQuerySchema>;
 
-// Lean actor summary embedded into an activity log entry response — same
-// shape/reasoning as CommentAuthor in comment.schema.ts.
 export type ActivityLogActor = {
   id: string;
   fullName: string;

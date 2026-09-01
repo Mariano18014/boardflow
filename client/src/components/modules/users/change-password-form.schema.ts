@@ -1,9 +1,6 @@
 import { z } from "zod";
 import { changePasswordSchema } from "@shared/schemas/user.schema";
 
-// Same shared schema used by the request body (see change-password.api.ts),
-// minus `refreshToken` (not user input — the form never touches it) plus a
-// client-only confirmation field.
 export const changePasswordFormSchema = changePasswordSchema
   .omit({ refreshToken: true })
   .extend({

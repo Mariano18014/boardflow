@@ -30,9 +30,6 @@ export async function findMembershipForUser(organizationId: string, userId: stri
   });
 }
 
-// Bulk variant of findMembershipForUser, for callers that need to check that
-// every id in a list (e.g. task assignees) belongs to an active membership,
-// without looping a single-user lookup per id.
 export async function findActiveMembershipsByUserIds(organizationId: string, userIds: string[]) {
   return prisma.membership.findMany({
     where: { organizationId, userId: { in: userIds }, status: "ACTIVE" },

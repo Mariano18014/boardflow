@@ -178,9 +178,6 @@ export function TaskDetailPanel({ organizationId, projectId, taskId, canEditTask
                   taskId={task.id}
                   comments={comments ?? []}
                 />
-                {/* Publishing a comment is independent and immediate — it has
-                    its own mutation and button, unlike the rest of this panel
-                    which only saves on "Guardar cambios". */}
                 {canCreateComments && (
                   <AddCommentForm organizationId={organizationId} projectId={projectId} taskId={task.id} />
                 )}

@@ -9,8 +9,6 @@ export type TaskMove = {
   destinationIndex: number;
 };
 
-// Where in the board a drag ended: either over another task (insert at that
-// task's index) or over an empty column area (append at the end).
 export function resolveDropTarget(
   over: Over,
   columns: SprintBoardColumn[],
@@ -29,8 +27,6 @@ export function resolveDropTarget(
   return undefined;
 }
 
-// Pure function: computes what the board's columns look like after moving one
-// task, for the optimistic UI update. Does not touch the network.
 export function moveTaskAcrossColumns(columns: SprintBoardColumn[], move: TaskMove): SprintBoardColumn[] {
   if (move.sourceColumnId === move.destinationColumnId) {
     return reorderTaskWithinColumn(columns, move);

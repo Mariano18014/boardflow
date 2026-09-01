@@ -12,10 +12,6 @@ export function initializeRealtimeServer(httpServer: HttpServer): SocketIoServer
   return realtimeServer;
 }
 
-// Notify functions call this to reach the same server instance the
-// connection handlers joined sockets to rooms on. It's only ever undefined
-// if a notify function runs before initializeRealtimeServer, which the
-// server's own startup order (see index.ts) never allows.
 export function getRealtimeServer(): SocketIoServer {
   if (realtimeServer === null) {
     throw new Error("Realtime server was not initialized yet.");

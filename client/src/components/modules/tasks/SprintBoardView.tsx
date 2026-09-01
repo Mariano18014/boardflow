@@ -43,8 +43,7 @@ export function SprintBoardView({
   const [columns, setColumns] = useState(board.columns);
   const { moveTaskToColumn } = useMoveTaskToColumn(organizationId, projectId, sprintId);
   const { toast } = useToast();
-  // Same reasoning as use-drag-to-reorder.ts: a small activation distance lets
-  // a plain click (opening a task's detail panel) pass through untouched.
+
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   useEffect(() => {

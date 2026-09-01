@@ -8,9 +8,6 @@ export type SnapshotColumnGroup = {
 
 const NO_COLUMN_LABEL = "Sin columna";
 
-// Groups by first appearance in the snapshot (the snapshot doesn't carry
-// column position, only column name at close time) — good enough for a
-// read-only view of frozen data.
 export function groupSnapshotTasksByColumn(tasks: SprintHistoryTask[]): SnapshotColumnGroup[] {
   const groups: SnapshotColumnGroup[] = [];
   for (const task of tasks) {

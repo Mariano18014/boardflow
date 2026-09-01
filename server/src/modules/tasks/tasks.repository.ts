@@ -82,10 +82,6 @@ export async function findTasksBySprintId(sprintId: string) {
   });
 }
 
-// No columnId filter, intentionally: a sprint's committed scope is fixed once
-// it starts (HU-26 only allows moving tasks into a sprint while it's
-// PLANNED), so every task ever assigned to it counts toward the total,
-// regardless of which column it currently sits in.
 export async function sumEstimatedPointsForSprint(sprintId: string): Promise<number> {
   const result = await prisma.task.aggregate({
     where: { sprintId, isArchived: false, deletedAt: null },
@@ -105,9 +101,7 @@ export async function findMaxPositionInSprint(sprintId: string): Promise<number 
 export async function updateTaskSprintAssignment(taskId: string, sprintId: string | null, position: number) {
   return prisma.task.update({
     where: { id: taskId },
-    // boardId and columnId are intentionally left untouched here — they only
-    // get assigned once the sprint starts (HU-27) and the task shows up on the
-    // sprint board (HU-28), not during Sprint Planning.
+
     data: { sprintId, position },
   });
 }
@@ -154,8 +148,6 @@ type UpdateTaskDetailsData = {
   dueDate?: string;
 };
 
-// Used by the sprint closure snapshot (HU-36), which needs each task's column
-// name at the moment of closing, not just its columnId.
 export async function findSprintTasksWithColumn(sprintId: string) {
   return prisma.task.findMany({
     where: { sprintId, isArchived: false, deletedAt: null },
@@ -170,8 +162,7 @@ export async function findSprintTasksNotInColumn(sprintId: string, excludedColum
       sprintId,
       isArchived: false,
       deletedAt: null,
-      // No excluded column (the board was never opened) means nothing is
-      // filtered out — every sprint task counts as unfinished.
+
       columnId: excludedColumnId === null ? undefined : { not: excludedColumnId },
     },
   });
@@ -207,8 +198,7 @@ export async function updateTaskDetails(taskId: string, changes: UpdateTaskDetai
       description: changes.description,
       priority: changes.priority,
       estimatedPoints: changes.estimatedPoints,
-      // undefined here means "field not sent, don't touch it" (Prisma skips
-      // undefined keys); only convert to a real Date when a value was sent.
+
       dueDate: changes.dueDate === undefined ? undefined : new Date(changes.dueDate),
     },
   });

@@ -16,8 +16,6 @@ export function createApp() {
     }),
   );
 
-  // Uploaded files (e.g. organization logos) live on local disk under
-  // ./uploads and are served back as plain static assets.
   app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
   app.use("/api/auth/login", authRateLimiter);

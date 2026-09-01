@@ -86,10 +86,6 @@ async function saveMembershipInDatabase(userId: string, organizationId: string, 
   });
 }
 
-// The "member" role has no permissions assigned yet — the granular permission
-// matrix (assigning specific resource:action permissions to non-owner roles)
-// ships in Epica 2 (HU-13/HU-14). For now it only exists so organizations have
-// a non-owner role available to invite people into.
 async function createDefaultMemberRole(organizationId: string) {
   return createRole({
     organizationId,
@@ -177,8 +173,6 @@ async function saveOrganizationChanges(
   organization: Organization,
   changes: OrganizationChanges,
 ): Promise<Organization> {
-  // The slug is intentionally NOT recomputed here even though `name` can change.
-  // It's immutable once the organization is created, by design, so existing
-  // links/references to this org (e.g. invitation URLs, bookmarks) never break.
+
   return updateOrganizationRecord(organization.id, changes);
 }

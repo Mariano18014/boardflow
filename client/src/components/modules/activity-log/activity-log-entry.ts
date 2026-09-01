@@ -7,8 +7,6 @@ export type ActivityLogEntry = {
   entityId: string;
   createdAt: string;
   summary: string;
-  // Same shape as AssigneeSummary (id, fullName, avatarUrl) — reused directly
-  // so ActivityLogEntryItem can render it with the existing AssigneeAvatar
-  // component (same pattern as CommentItem's author).
+
   actor: AssigneeSummary;
 };

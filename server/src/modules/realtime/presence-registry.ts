@@ -7,9 +7,6 @@ export type PresenceEntry = {
   avatarUrl: string | null;
 };
 
-// In-memory only, per HU-41: presence is inherently ephemeral, so there's
-// nothing to persist — if the server restarts, every client reconnects and
-// re-joins, which rebuilds this Map from scratch.
 const presenceBySprintId = new Map<string, PresenceEntry[]>();
 
 export function addSocketToPresenceRegistry(sprintId: string, socket: AuthenticatedSocket): void {

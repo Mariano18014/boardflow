@@ -34,9 +34,6 @@ function buildPresentUsersList(sprintId: string): PresentUser[] {
   return uniqueEntries.map(mapEntryToPresentUser);
 }
 
-// The same user can hold the board open in two tabs/devices at once (two
-// sockets, one userId) — keeps only the first entry seen per userId so they
-// still show up exactly once in the presence list.
 function deduplicateByUserId(entries: PresenceEntry[]): PresenceEntry[] {
   const seenUserIds = new Set<string>();
   const uniqueEntries: PresenceEntry[] = [];

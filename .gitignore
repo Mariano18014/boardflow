@@ -14,6 +14,7 @@ legacy/
 
 # Estado/artefactos locales de herramientas de agente (no es codigo del proyecto)
 .agent/
+.claude/
 
 # Secrets / local env
 .env

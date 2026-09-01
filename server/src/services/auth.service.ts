@@ -121,9 +121,6 @@ async function revokeUsedRefreshToken(id: string) {
   await revokeRefreshToken(id);
 }
 
-// Resolves the RefreshToken row behind the value the client is currently
-// holding, so a caller (e.g. HU-43's password change) can identify "this
-// session" without the access token needing to carry a session/jti claim.
 export async function findCurrentSessionTokenId(refreshTokenValue: string): Promise<string> {
   const tokenHash = hashToken(refreshTokenValue);
   const refreshToken = await findRefreshTokenByHash(tokenHash);

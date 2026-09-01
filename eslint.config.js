@@ -1,8 +1,8 @@
-const parser = require("@typescript-eslint/parser");
-const tsPlugin = require("@typescript-eslint/eslint-plugin");
-const reactPlugin = require("eslint-plugin-react");
+import parser from "@typescript-eslint/parser";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
+import reactPlugin from "eslint-plugin-react";
 
-module.exports = [
+export default [
     {
         ignores: ["dist/*", "node_modules/*"],
     },

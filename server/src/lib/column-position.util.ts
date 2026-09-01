@@ -1,7 +1,5 @@
 import type { Prisma } from "@prisma/client";
 
-// Shifts every task after the position a task just vacated one slot back,
-// closing the gap so the column's positions stay a contiguous 0..n-1 sequence.
 export async function shiftTasksBackAfterPosition(
   transaction: Prisma.TransactionClient,
   columnId: string,
@@ -13,8 +11,6 @@ export async function shiftTasksBackAfterPosition(
   });
 }
 
-// Shifts every task at or after the insertion point one slot forward, opening
-// a slot for the task being inserted there.
 export async function shiftTasksForwardFromPosition(
   transaction: Prisma.TransactionClient,
   columnId: string,
@@ -26,8 +22,6 @@ export async function shiftTasksForwardFromPosition(
   });
 }
 
-// Recalculates positions for the tasks strictly between a task's old and new
-// position when it reorders within the same column.
 export async function shiftTasksForReorderWithinColumn(
   transaction: Prisma.TransactionClient,
   columnId: string,
