@@ -3,6 +3,7 @@ import { CSS } from "@dnd-kit/utilities";
 import type { BacklogTask } from "./list-backlog.api";
 import { PriorityBadge } from "./PriorityBadge";
 import { AssigneeAvatarStack } from "./AssigneeAvatarStack";
+import { LabelChipList } from "./LabelChipList";
 
 type BacklogTaskRowProps = {
   task: BacklogTask;
@@ -43,6 +44,7 @@ export function BacklogTaskRow({ task, canDrag, onOpenDetail }: BacklogTaskRowPr
           </button>
         )}
         <span className="truncate text-sm font-medium">{task.title}</span>
+        <LabelChipList labels={task.labels} />
       </div>
       <div className="flex flex-none items-center gap-2">
         {task.estimatedPoints !== null && (

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { paginationQuerySchema } from "./pagination.schema";
 
 export const activityLogSchema = z.object({
   id: z.string().uuid(),
@@ -11,4 +12,25 @@ export const activityLogSchema = z.object({
   createdAt: z.date(),
 });
 
+export const listActivityLogQuerySchema = paginationQuerySchema;
+
 export type ActivityLog = z.infer<typeof activityLogSchema>;
+export type ListActivityLogQuery = z.infer<typeof listActivityLogQuerySchema>;
+
+// Lean actor summary embedded into an activity log entry response — same
+// shape/reasoning as CommentAuthor in comment.schema.ts.
+export type ActivityLogActor = {
+  id: string;
+  fullName: string;
+  avatarUrl: string | null;
+};
+
+export type ActivityLogEntryWithSummary = {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  createdAt: Date;
+  summary: string;
+  actor: ActivityLogActor;
+};

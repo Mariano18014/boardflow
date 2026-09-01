@@ -74,6 +74,13 @@ export default function ProjectPage() {
             >
               Ir a Sprint Planning
             </Link>
+
+            <Link
+              href={`/projects/${project.id}/labels`}
+              className="mt-2 block text-sm text-primary underline-offset-4 hover:underline"
+            >
+              Gestionar labels
+            </Link>
           </>
         )}
       </div>

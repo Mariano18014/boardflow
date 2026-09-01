@@ -4,8 +4,10 @@ import type { TaskDetail } from "@shared/schemas/task.schema";
 import { ValidationError } from "../../lib/errors";
 import { findProjectById } from "../../services/project.service";
 import { checkRequesterHasPermission } from "../permissions/check-permission";
+import { notifyTaskContextChanged } from "../realtime/notify.service";
 import { findTaskById } from "./task.service";
 import { findAssigneesByTaskId } from "./assignees/assignees.service";
+import { findLabelsByTaskId } from "./labels/labels.service";
 import { updateTaskDetails as saveTaskDetailChanges } from "./tasks.repository";
 
 export type GetTaskDetailInput = {
@@ -49,6 +51,7 @@ export async function updateTaskDetails(
   const allowedChanges = filterEditableFields(input.changes);
   validateTaskDetailChanges(allowedChanges);
   const updatedTask = await saveTaskDetailChanges(task.id, allowedChanges);
+  await notifyTaskContextChanged(task);
   return await mapTaskToDetail(updatedTask);
 }
 
@@ -96,6 +99,7 @@ function validateDueDate(dueDate: string | undefined) {
 
 async function mapTaskToDetail(task: Task): Promise<TaskDetail> {
   const assignees = await findAssigneesByTaskId(task.id);
+  const labels = await findLabelsByTaskId(task.id);
   return {
     id: task.id,
     title: task.title,
@@ -110,6 +114,6 @@ async function mapTaskToDetail(task: Task): Promise<TaskDetail> {
     createdAt: task.createdAt,
     updatedAt: task.updatedAt,
     assignees,
-    labels: [],
+    labels,
   };
 }

@@ -49,6 +49,18 @@ export default function OrganizationSettingsPage() {
             </Link>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-heading text-lg">Actividad</CardTitle>
+            <CardDescription>Auditá los cambios recientes en esta organización.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/settings/activity" className="text-sm text-primary underline-offset-4 hover:underline">
+              Ver actividad
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     </AppShell>
   );

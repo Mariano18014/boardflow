@@ -10,8 +10,13 @@ import {
   updateMembershipRole as saveMembershipRole,
 } from "../db/repositories/membership.repository";
 import { findPendingInvitationsByOrganizationId } from "../db/repositories/invitation.repository";
+import { findUserById } from "../db/repositories/user.repository";
 import { findRoleById } from "../modules/roles/roles.repository";
 import { checkRequesterHasPermission } from "../modules/permissions/check-permission";
+import {
+  logMemberRemovedActivity,
+  logMemberRoleChangedActivity,
+} from "../modules/activity-log/activity-log.service";
 
 const OWNER_ROLE_NAME = "owner";
 
@@ -114,7 +119,23 @@ export async function changeMemberRole(input: ChangeMemberRoleInput, requesterId
   await checkRoleBelongsToOrganization(input.newRoleId, input.organizationId);
   await checkRoleChangeDoesNotRemoveLastOwner(targetMembership, input.newRoleId);
   const updatedMembership = await updateMembershipRole(targetMembership, input.newRoleId);
+  await logMemberRoleChanged(targetMembership, updatedMembership, input.organizationId, requesterId);
   return updatedMembership;
+}
+
+async function logMemberRoleChanged(
+  previousMembership: MembershipWithRole,
+  updatedMembership: MembershipWithRole,
+  organizationId: string,
+  actorId: string,
+) {
+  const targetUser = await findUserById(previousMembership.userId);
+  await logMemberRoleChangedActivity(organizationId, actorId, previousMembership.id, {
+    targetUserId: previousMembership.userId,
+    targetUserName: targetUser?.fullName ?? "",
+    previousRoleName: previousMembership.role.name,
+    newRoleName: updatedMembership.role.name,
+  });
 }
 
 export async function removeMemberFromOrganization(input: RemoveMemberInput, requesterId: string) {
@@ -123,7 +144,16 @@ export async function removeMemberFromOrganization(input: RemoveMemberInput, req
   await checkNotRemovingSelf(targetMembership, requesterId);
   await checkNotRemovingLastOwner(targetMembership);
   const suspendedMembership = await suspendMembership(targetMembership);
+  await logMemberRemoved(targetMembership, input.organizationId, requesterId);
   return suspendedMembership;
+}
+
+async function logMemberRemoved(membership: MembershipWithRole, organizationId: string, actorId: string) {
+  const targetUser = await findUserById(membership.userId);
+  await logMemberRemovedActivity(organizationId, actorId, membership.id, {
+    targetUserId: membership.userId,
+    targetUserEmail: targetUser?.email ?? "",
+  });
 }
 
 async function findMembershipById(

@@ -1,6 +1,7 @@
 import { Switch, Route } from "wouter";
 import { RequireNoOrganization } from "@/components/modules/organizations/RequireNoOrganization";
 import { RequireOrganization } from "@/components/modules/organizations/RequireOrganization";
+import { RequireAuth } from "@/components/modules/auth/RequireAuth";
 import LandingPage from "@/pages/landing/LandingPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
@@ -16,9 +17,12 @@ import SprintPlanningPage from "@/pages/sprint-planning/SprintPlanningPage";
 import SprintBoardPage from "@/pages/sprint-board/SprintBoardPage";
 import SprintHistoryPage from "@/pages/sprint-history/SprintHistoryPage";
 import VelocityPage from "@/pages/velocity/VelocityPage";
+import ProjectLabelsPage from "@/pages/project-labels/ProjectLabelsPage";
 import MembersPage from "@/pages/members/MembersPage";
 import OrganizationSettingsPage from "@/pages/organizations/OrganizationSettingsPage";
+import OrganizationActivityPage from "@/pages/organizations/OrganizationActivityPage";
 import RolesPage from "@/pages/roles/RolesPage";
+import ProfilePage from "@/pages/profile/ProfilePage";
 import InvitationPage from "@/pages/invitations/InvitationPage";
 import NotFoundPage from "@/pages/not-found/NotFoundPage";
 
@@ -60,17 +64,26 @@ export function AppRoutes() {
       <Route path="/projects/:projectId/velocity">
         <RequireOrganization component={VelocityPage} />
       </Route>
+      <Route path="/projects/:projectId/labels">
+        <RequireOrganization component={ProjectLabelsPage} />
+      </Route>
       <Route path="/boards/:boardId">
         <RequireOrganization component={BoardPage} />
       </Route>
       <Route path="/members">
         <RequireOrganization component={MembersPage} />
       </Route>
+      <Route path="/profile">
+        <RequireAuth component={ProfilePage} />
+      </Route>
       <Route path="/settings">
         <RequireOrganization component={OrganizationSettingsPage} />
       </Route>
       <Route path="/settings/roles">
         <RequireOrganization component={RolesPage} />
+      </Route>
+      <Route path="/settings/activity">
+        <RequireOrganization component={OrganizationActivityPage} />
       </Route>
       <Route component={NotFoundPage} />
     </Switch>

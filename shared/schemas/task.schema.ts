@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TASK_PRIORITY, type TaskPriority } from "../types/enums";
 import { paginationQuerySchema } from "./pagination.schema";
 import type { AssigneeSummary } from "./task-assignee.schema";
+import type { LabelSummary } from "./task-label.schema";
 
 export const taskSchema = z.object({
   id: z.string().uuid(),
@@ -96,10 +97,11 @@ export type BacklogTaskItem = {
   position: number;
   createdAt: Date;
   assignees: AssigneeSummary[];
+  labels: LabelSummary[];
 };
 
-// Full read-model for the task detail panel (HU-30). labels stay empty for
-// now (Epic 5 is deferred); assignees are real as of HU-31.
+// Full read-model for the task detail panel (HU-30). assignees are real as of
+// HU-31; labels are real as of HU-37.
 export type TaskDetail = {
   id: string;
   title: string;
@@ -114,5 +116,5 @@ export type TaskDetail = {
   createdAt: Date;
   updatedAt: Date;
   assignees: AssigneeSummary[];
-  labels: unknown[];
+  labels: LabelSummary[];
 };

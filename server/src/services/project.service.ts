@@ -4,6 +4,11 @@ import { ConflictError, ForbiddenError, NotFoundError } from "../lib/errors";
 import { findMembershipForUser } from "../db/repositories/membership.repository";
 import { checkRequesterHasPermission } from "../modules/permissions/check-permission";
 import {
+  logProjectArchivedActivity,
+  logProjectCreatedActivity,
+  logProjectRestoredActivity,
+} from "../modules/activity-log/activity-log.service";
+import {
   createProject as saveProjectRecord,
   findProjectByKey,
   findProjectById as findProjectRecordById,
@@ -21,7 +26,15 @@ export async function createProject(input: CreateProjectInput, requesterId: stri
   await checkRequesterHasPermission(input.organizationId, requesterId, "projects:create");
   const key = await generateUniqueProjectKey(input.name, input.organizationId);
   const project = await saveProjectInDatabase(input, key, requesterId);
+  await logProjectCreated(project, requesterId);
   return project;
+}
+
+async function logProjectCreated(project: Project, actorId: string) {
+  await logProjectCreatedActivity(project.organizationId, actorId, project.id, {
+    name: project.name,
+    key: project.key,
+  });
 }
 
 async function validateUserIsMember(organizationId: string, userId: string) {
@@ -145,14 +158,26 @@ export async function archiveProject(input: ArchiveProjectInput, requesterId: st
   await checkRequesterHasPermission(input.organizationId, requesterId, "projects:delete");
   const project = await findProjectById(input.projectId, input.organizationId);
   await checkProjectIsNotAlreadyArchived(project);
-  return updateProjectArchivedStatus(project, true);
+  const archivedProject = await updateProjectArchivedStatus(project, true);
+  await logProjectArchived(archivedProject, requesterId);
+  return archivedProject;
+}
+
+async function logProjectArchived(project: Project, actorId: string) {
+  await logProjectArchivedActivity(project.organizationId, actorId, project.id, { name: project.name });
 }
 
 export async function restoreProject(input: RestoreProjectInput, requesterId: string) {
   await checkRequesterHasPermission(input.organizationId, requesterId, "projects:edit");
   const project = await findProjectById(input.projectId, input.organizationId);
   await checkProjectIsCurrentlyArchived(project);
-  return updateProjectArchivedStatus(project, false);
+  const restoredProject = await updateProjectArchivedStatus(project, false);
+  await logProjectRestored(restoredProject, requesterId);
+  return restoredProject;
+}
+
+async function logProjectRestored(project: Project, actorId: string) {
+  await logProjectRestoredActivity(project.organizationId, actorId, project.id, { name: project.name });
 }
 
 // Shared by every module that needs to look up a project scoped to its

@@ -7,6 +7,8 @@ import { generateRandomToken } from "../lib/token";
 import { createMembership, findActiveMembershipByEmail } from "../db/repositories/membership.repository";
 import { checkRequesterHasPermission } from "../modules/permissions/check-permission";
 import { findUserById } from "../db/repositories/user.repository";
+import { findRoleById } from "../modules/roles/roles.repository";
+import { logMemberInvitedActivity } from "../modules/activity-log/activity-log.service";
 import {
   createInvitation as saveInvitationRecord,
   findInvitationByToken as findInvitationRecordByToken,
@@ -35,7 +37,17 @@ export async function inviteMemberToOrganization(
   await checkNoDuplicatePendingInvitation(organizationId, input.email);
   const invitation = await createInvitationRecord(input, organizationId, inviterId);
   await sendInvitationEmail(invitation);
+  await logMemberInvited(invitation, organizationId, inviterId);
   return invitation;
+}
+
+async function logMemberInvited(invitation: Invitation, organizationId: string, actorId: string) {
+  const role = await findRoleById(invitation.roleId);
+  await logMemberInvitedActivity(organizationId, actorId, invitation.id, {
+    email: invitation.email,
+    roleId: invitation.roleId,
+    roleName: role?.name ?? "",
+  });
 }
 
 async function checkEmailIsNotAlreadyMember(organizationId: string, email: string) {

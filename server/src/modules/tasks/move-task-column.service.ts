@@ -11,6 +11,7 @@ import {
 import { countTasksInColumn, findColumnById } from "../boards/columns/columns.repository";
 import { checkDestinationColumnHasCapacity } from "../boards/columns/columns.service";
 import { findDoneColumn } from "../sprints/sprints.service";
+import { notifySprintBoardChanged } from "../realtime/notify.service";
 import {
   TASK_COMPLETED_ACTION,
   TASK_ENTITY_TYPE,
@@ -50,6 +51,8 @@ export async function moveTaskToColumn(input: MoveTaskToColumnInput, requesterId
   // columnId here (fetched before the update above), which is exactly what's
   // needed to tell whether this move entered or left Done.
   await logColumnChangeIfEntersOrLeavesDone(task, input.columnId, requesterId, input.organizationId);
+  // checkTaskBelongsToActiveSprint already confirmed task.sprintId isn't null.
+  notifySprintBoardChanged(task.sprintId as string);
   return findTaskById(input.taskId, input.projectId);
 }
 

@@ -6,10 +6,12 @@ import { CloseSprintButton } from "@/components/modules/sprints/CloseSprintButto
 import type { SprintSummary } from "@/components/modules/sprints/list-sprints.api";
 import type { SprintBoard, SprintBoardColumn } from "./get-sprint-board.api";
 import { BoardStatusColumn } from "./BoardStatusColumn";
+import { PresenceStack } from "./PresenceStack";
 import { useMoveTaskToColumn } from "./use-move-task-to-column";
 import { moveTaskAcrossColumns, resolveDropTarget, type TaskMove } from "./board-columns.util";
 import { countUnfinishedTasks } from "./count-unfinished-tasks.util";
 import { TaskApiError } from "./task-api-error";
+import type { PresentUser } from "@/modules/realtime/use-sprint-board-presence";
 
 type SprintBoardViewProps = {
   organizationId: string;
@@ -19,6 +21,8 @@ type SprintBoardViewProps = {
   canEditTasks: boolean;
   canEditSprints: boolean;
   canEditBoards: boolean;
+  presentUsers: PresentUser[];
+  currentUserId: string;
   onOpenTaskDetail: (taskId: string) => void;
   onSprintClosed: (sprint: SprintSummary) => void;
 };
@@ -31,6 +35,8 @@ export function SprintBoardView({
   canEditTasks,
   canEditSprints,
   canEditBoards,
+  presentUsers,
+  currentUserId,
   onOpenTaskDetail,
   onSprintClosed,
 }: SprintBoardViewProps) {
@@ -106,6 +112,7 @@ export function SprintBoardView({
           {board.sprint.goal && <p className="mt-1 text-sm text-muted-foreground">{board.sprint.goal}</p>}
         </div>
         <div className="flex items-center gap-3">
+          <PresenceStack presentUsers={presentUsers} currentUserId={currentUserId} />
           <Link
             href={`/projects/${projectId}/velocity`}
             className="text-sm text-primary underline-offset-4 hover:underline"

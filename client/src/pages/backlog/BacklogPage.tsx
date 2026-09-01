@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link, useParams } from "wouter";
+import { Link, useParams, useSearch } from "wouter";
 import { AppShell } from "@/components/layout/AppShell";
+import { queryClient } from "@/lib/queryClient";
 import { useProject } from "@/components/modules/projects/use-project";
 import { useHasPermission } from "@/components/modules/permissions/use-has-permission";
 import { useBacklog } from "@/components/modules/tasks/use-backlog";
@@ -8,6 +9,7 @@ import { BacklogList } from "@/components/modules/tasks/BacklogList";
 import { CreateBacklogTaskDialog } from "@/components/modules/tasks/CreateBacklogTaskDialog";
 import { CreateSprintDialog } from "@/components/modules/sprints/CreateSprintDialog";
 import { TaskDetailPanel } from "@/components/modules/tasks/TaskDetailPanel";
+import { useBacklogRealtimeSync } from "@/modules/realtime/use-backlog-realtime-sync";
 
 export default function BacklogPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -17,7 +19,13 @@ export default function BacklogPage() {
   const canEditTasks = hasPermission("tasks:edit");
   const canCreateSprints = hasPermission("sprints:create");
   const { data: tasks, isLoading, isError } = useBacklog(project?.organizationId, projectId);
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  useBacklogRealtimeSync(projectId, () => refetchBacklog(projectId));
+  const search = useSearch();
+  // Lets a notification (e.g. "task_assigned" from HU-45) deep-link straight
+  // into a task by navigating to /projects/:projectId/backlog?taskId=... —
+  // TaskDetailPanel fetches the task by id on its own, so this works even for
+  // a task that isn't actually in this project's backlog list.
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(() => extractTaskIdFromSearch(search));
 
   return (
     <AppShell title="Backlog">
@@ -72,4 +80,12 @@ export default function BacklogPage() {
       )}
     </AppShell>
   );
+}
+
+function extractTaskIdFromSearch(search: string): string | null {
+  return new URLSearchParams(search).get("taskId");
+}
+
+function refetchBacklog(projectId: string) {
+  queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "backlog"] });
 }

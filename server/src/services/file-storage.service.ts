@@ -2,6 +2,7 @@ import crypto from "crypto";
 import fs from "fs/promises";
 import path from "path";
 import { env } from "../config/env";
+import { ValidationError } from "../lib/errors";
 
 // Local-disk storage — this VM does not run serverless, so files live under
 // ./uploads on the server's own filesystem. Swapping this for a provider like
@@ -13,6 +14,29 @@ export type StorableFile = {
   originalName: string;
   buffer: Buffer;
 };
+
+// Shared by every image upload in the app (organization logos, user avatars,
+// ...) so the type/size rule lives in exactly one place instead of being
+// re-checked per feature.
+const ALLOWED_IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/svg+xml"];
+const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
+
+export function validateImageFile(file: Express.Multer.File, fieldName: string): void {
+  checkImageFileType(file, fieldName);
+  checkImageFileSize(file, fieldName);
+}
+
+function checkImageFileType(file: Express.Multer.File, fieldName: string): void {
+  if (!ALLOWED_IMAGE_MIME_TYPES.includes(file.mimetype)) {
+    throw new ValidationError({ [fieldName]: ["El archivo debe ser JPG, PNG o SVG."] });
+  }
+}
+
+function checkImageFileSize(file: Express.Multer.File, fieldName: string): void {
+  if (file.size > MAX_IMAGE_SIZE_BYTES) {
+    throw new ValidationError({ [fieldName]: ["El archivo no puede superar los 2MB."] });
+  }
+}
 
 export async function saveFile(subfolder: string, file: StorableFile): Promise<string> {
   const directory = path.join(UPLOADS_ROOT_DIR, subfolder);

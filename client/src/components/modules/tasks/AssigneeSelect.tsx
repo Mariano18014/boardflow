@@ -1,4 +1,5 @@
 import { Label } from "@/components/ui/label";
+import { findActiveMembersWithUser } from "@/components/modules/members/active-members.util";
 import { AssigneeSelectRow } from "./AssigneeSelectRow";
 import type { OrganizationMember } from "@/components/modules/members/list-organization-members.api";
 
@@ -40,11 +41,5 @@ export function AssigneeSelect({ members, selectedUserIds, onChange, isReadOnly 
         ))}
       </div>
     </div>
-  );
-}
-
-function findActiveMembersWithUser(members: OrganizationMember[]): OrganizationMember[] {
-  return members.filter(
-    (member) => member.type === "member" && member.status === "ACTIVE" && member.userId !== null,
   );
 }

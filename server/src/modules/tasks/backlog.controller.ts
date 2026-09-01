@@ -107,5 +107,6 @@ function formatBacklogTaskForResponse(task: BacklogTaskItem) {
     position: task.position,
     createdAt: task.createdAt,
     assignees: task.assignees,
+    labels: task.labels,
   };
 }

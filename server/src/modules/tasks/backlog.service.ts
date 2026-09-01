@@ -3,6 +3,7 @@ import type { BacklogTaskItem, CreateBacklogTaskInput } from "@shared/schemas/ta
 import { ConflictError, ValidationError } from "../../lib/errors";
 import { checkProjectIsNotArchived, findProjectById } from "../../services/project.service";
 import { checkRequesterHasPermission } from "../permissions/check-permission";
+import { notifyBacklogChanged } from "../realtime/notify.service";
 import { calculateNextPosition } from "../../lib/next-position.util";
 import { mapTaskToBacklogItem } from "./task-item.mapper";
 import {
@@ -43,6 +44,7 @@ export async function createBacklogTask(
   await checkProjectIsNotArchived(project);
   const nextPosition = await calculateNextBacklogPosition(input.projectId);
   const task = await saveTaskInDatabase(input, nextPosition, requesterId);
+  notifyBacklogChanged(input.projectId);
   return await mapTaskToBacklogItem(task);
 }
 
@@ -90,6 +92,7 @@ export async function reorderBacklogTasks(
   checkAllTaskIdsBelongToBacklog(input.taskIds, backlogTasks);
   checkTaskIdsCountMatchesBacklogTasks(input.taskIds, backlogTasks);
   const reorderedTasks = await updateTaskPositionsInTransaction(input.taskIds);
+  notifyBacklogChanged(input.projectId);
   return Promise.all(reorderedTasks.map(mapTaskToBacklogItem));
 }
 
