@@ -1,16 +1,27 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useMentionAutocomplete } from "./use-mention-autocomplete";
+import { MentionAutocomplete } from "./MentionAutocomplete";
 
 type CommentEditFormProps = {
+  organizationId: string;
   initialContent: string;
   isSaving: boolean;
   onSave: (content: string) => void;
   onCancel: () => void;
 };
 
-export function CommentEditForm({ initialContent, isSaving, onSave, onCancel }: CommentEditFormProps) {
+export function CommentEditForm({
+  organizationId,
+  initialContent,
+  isSaving,
+  onSave,
+  onCancel,
+}: CommentEditFormProps) {
   const [content, setContent] = useState(initialContent);
+  const { textareaRef, activeMentionQuery, handleContentChange, handleSelectMention } =
+    useMentionAutocomplete(content, setContent);
 
   function handleSave() {
     if (content.trim().length === 0) {
@@ -21,7 +32,14 @@ export function CommentEditForm({ initialContent, isSaving, onSave, onCancel }: 
 
   return (
     <div className="flex flex-col gap-2">
-      <Textarea value={content} onChange={(event) => setContent(event.target.value)} rows={3} autoFocus />
+      <Textarea ref={textareaRef} value={content} onChange={handleContentChange} rows={3} autoFocus />
+      {activeMentionQuery !== null && (
+        <MentionAutocomplete
+          organizationId={organizationId}
+          query={activeMentionQuery}
+          onSelectMember={handleSelectMention}
+        />
+      )}
       <div className="flex justify-end gap-2">
         <Button size="sm" variant="outline" onClick={onCancel} disabled={isSaving}>
           Cancelar

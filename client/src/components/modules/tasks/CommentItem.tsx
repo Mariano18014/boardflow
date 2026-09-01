@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuthSession } from "@/components/modules/auth/use-auth-session";
 import { useHasPermission } from "@/components/modules/permissions/use-has-permission";
 import { AssigneeAvatar } from "./AssigneeAvatar";
+import { CommentContent } from "./CommentContent";
 import { CommentEditForm } from "./CommentEditForm";
 import { formatCommentDate } from "./format-comment-date.util";
 import { useEditComment } from "./use-edit-comment";
@@ -92,13 +93,14 @@ export function CommentItem({ organizationId, projectId, taskId, comment }: Comm
 
         {isEditing ? (
           <CommentEditForm
+            organizationId={organizationId}
             initialContent={comment.content}
             isSaving={isEditingComment}
             onSave={saveEdit}
             onCancel={cancelEditing}
           />
         ) : (
-          <p className="whitespace-pre-wrap text-sm text-foreground">{comment.content}</p>
+          <CommentContent content={comment.content} />
         )}
 
         {!isEditing && (canEdit || canDelete) && (

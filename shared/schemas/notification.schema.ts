@@ -28,6 +28,19 @@ export type TaskAssignedNotificationPayload = {
   assignedByName: string;
 };
 
+export const COMMENT_MENTION_NOTIFICATION_TYPE = "comment_mention";
+
+export type CommentMentionNotificationPayload = {
+  commentId: string;
+  taskId: string;
+  taskTitle: string;
+  projectId: string;
+  organizationId: string;
+  mentionedByUserId: string;
+  mentionedByName: string;
+  commentExcerpt: string;
+};
+
 export type NotificationResponse = {
   id: string;
   type: string;

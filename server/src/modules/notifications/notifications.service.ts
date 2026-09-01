@@ -1,6 +1,8 @@
 import type { Notification } from "@prisma/client";
 import {
+  COMMENT_MENTION_NOTIFICATION_TYPE,
   TASK_ASSIGNED_NOTIFICATION_TYPE,
+  type CommentMentionNotificationPayload,
   type TaskAssignedNotificationPayload,
 } from "@shared/schemas/notification.schema";
 import { NotFoundError } from "../../lib/errors";
@@ -16,6 +18,13 @@ export async function createTaskAssignedNotification(
   payload: TaskAssignedNotificationPayload,
 ): Promise<void> {
   await createNotification({ userId, type: TASK_ASSIGNED_NOTIFICATION_TYPE, payload });
+}
+
+export async function createCommentMentionNotification(
+  userId: string,
+  payload: CommentMentionNotificationPayload,
+): Promise<void> {
+  await createNotification({ userId, type: COMMENT_MENTION_NOTIFICATION_TYPE, payload });
 }
 
 type Pagination = {

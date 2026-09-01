@@ -1,5 +1,6 @@
 import type { Comment, User } from "@prisma/client";
 import type { CommentAuthor, CommentWithAuthor } from "@shared/schemas/comment.schema";
+import { extractMentionedUserIds } from "@shared/utils/mention.util";
 import { ConflictError, ForbiddenError, NotFoundError } from "../../../lib/errors";
 import { findProjectById } from "../../../services/project.service";
 import { checkRequesterHasPermission } from "../../permissions/check-permission";
@@ -11,6 +12,7 @@ import {
   softDeleteComment as softDeleteCommentRecord,
   updateCommentContent,
 } from "./comments.repository";
+import { notifyMentionedUsers } from "./mentions.service";
 
 type CommentRecordWithAuthor = Comment & { author: User };
 
@@ -33,6 +35,7 @@ export async function createComment(
   await findProjectById(input.projectId, input.organizationId);
   const task = await findTaskById(input.taskId, input.projectId);
   const comment = await saveCommentInDatabase(input, task.id, authorId);
+  await notifyMentionedUsers(input.content, comment, task, input.organizationId, authorId, []);
   return comment;
 }
 
@@ -85,11 +88,21 @@ export async function editComment(
   requesterId: string,
 ): Promise<CommentWithAuthor> {
   await findProjectById(input.projectId, input.organizationId);
-  await findTaskById(input.taskId, input.projectId);
+  const task = await findTaskById(input.taskId, input.projectId);
   const comment = await findCommentById(input.commentId, input.taskId);
   checkCommentIsNotDeleted(comment);
   await checkRequesterCanModifyComment(comment, requesterId, input.organizationId, "comments:edit");
-  return saveCommentEdit(comment, input.content);
+  const previousMentionedIds = extractMentionedUserIds(comment.content);
+  const updatedComment = await saveCommentEdit(comment, input.content);
+  await notifyMentionedUsers(
+    input.content,
+    updatedComment,
+    task,
+    input.organizationId,
+    requesterId,
+    previousMentionedIds,
+  );
+  return updatedComment;
 }
 
 export type DeleteCommentInput = {

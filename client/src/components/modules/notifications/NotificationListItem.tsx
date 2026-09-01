@@ -3,7 +3,7 @@ import { es } from "date-fns/locale";
 import { useLocation } from "wouter";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useMarkNotificationRead } from "./use-mark-notification-read";
-import type { NotificationEntry, TaskAssignedPayload } from "./notification-entry";
+import type { CommentMentionPayload, NotificationEntry, TaskAssignedPayload } from "./notification-entry";
 
 type NotificationListItemProps = {
   notification: NotificationEntry;
@@ -38,12 +38,20 @@ function buildNotificationText(notification: NotificationEntry): string {
     const payload = notification.payload as unknown as TaskAssignedPayload;
     return `${payload.assignedByName} te asignó la tarea "${payload.taskTitle}".`;
   }
+  if (notification.type === "comment_mention") {
+    const payload = notification.payload as unknown as CommentMentionPayload;
+    return `${payload.mentionedByName} te mencionó en un comentario: "${payload.commentExcerpt}"`;
+  }
   return "Tenés una notificación nueva.";
 }
 
 function navigateToNotificationTarget(notification: NotificationEntry, navigate: (path: string) => void) {
   if (notification.type === "task_assigned") {
     const payload = notification.payload as unknown as TaskAssignedPayload;
+    navigate(`/projects/${payload.projectId}/backlog?taskId=${payload.taskId}`);
+  }
+  if (notification.type === "comment_mention") {
+    const payload = notification.payload as unknown as CommentMentionPayload;
     navigate(`/projects/${payload.projectId}/backlog?taskId=${payload.taskId}`);
   }
 }

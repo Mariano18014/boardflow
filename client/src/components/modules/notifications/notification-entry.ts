@@ -14,3 +14,14 @@ export type TaskAssignedPayload = {
   assignedByUserId: string;
   assignedByName: string;
 };
+
+export type CommentMentionPayload = {
+  commentId: string;
+  taskId: string;
+  taskTitle: string;
+  projectId: string;
+  organizationId: string;
+  mentionedByUserId: string;
+  mentionedByName: string;
+  commentExcerpt: string;
+};
