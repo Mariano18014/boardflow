@@ -5,10 +5,6 @@ const JOIN_SPRINT_BOARD_EVENT = "join:sprint-board";
 const LEAVE_SPRINT_BOARD_EVENT = "leave:sprint-board";
 const BOARD_CHANGED_EVENT = "board:changed";
 
-// Joins the sprint-board:{sprintId} room while a Sprint Board screen is
-// mounted, and calls onBoardChanged both when the server signals a change and
-// right after a reconnect (so a client that was briefly offline still ends up
-// with a fresh board instead of a stale one).
 export function useSprintBoardRealtimeSync(sprintId: string | undefined, onBoardChanged: () => void) {
   const onBoardChangedRef = useRef(onBoardChanged);
 

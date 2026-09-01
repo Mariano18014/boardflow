@@ -14,9 +14,7 @@ export default function ProjectPage() {
   const canCreateBoards = hasPermission("boards:create");
   const canEditBoards = hasPermission("boards:edit");
   const { data: boards } = useBoards(project?.organizationId, project?.id);
-  // Boards have no content of their own (see resolveBoardNavigationTarget) —
-  // clicking one goes to the active sprint's board, so its id is resolved
-  // once here and passed down to every board-related component.
+
   const { data: activeSprint, isLoading: isLoadingActiveSprint } = useActiveSprint(
     project?.organizationId,
     project?.id,

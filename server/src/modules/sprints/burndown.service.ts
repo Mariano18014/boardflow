@@ -37,10 +37,7 @@ export async function getSprintBurndown(
   requesterId: string,
 ): Promise<SprintBurndown> {
   await checkRequesterHasPermission(input.organizationId, requesterId, "sprints:view");
-  // findSprintById only confirms the sprint belongs to projectId — it says
-  // nothing about projectId belonging to organizationId, so this extra check
-  // (same as every other module in this codebase) is what actually prevents
-  // cross-organization access.
+
   await findProjectById(input.projectId, input.organizationId);
   const sprint = await findSprintById(input.sprintId, input.projectId);
   checkSprintIsActive(sprint);
@@ -55,9 +52,6 @@ export async function getSprintBurndown(
   };
 }
 
-// One point per calendar day of the sprint's full planned range, decreasing
-// linearly from totalPoints (startDate) to 0 (endDate) — a straight line,
-// unaffected by anything that actually happened during the sprint.
 function buildIdealBurndownLine(sprint: Sprint, totalPoints: number): BurndownPoint[] {
   const calendarDays = buildCalendarDayRange(sprint.startDate, sprint.endDate);
   const totalIntervals = calendarDays.length - 1;
@@ -75,9 +69,6 @@ function calculateIdealRemainingPoints(totalPoints: number, totalIntervals: numb
   return roundBurndownPoints(totalPoints - pointsBurnedPerDay * dayIndex);
 }
 
-// One point per calendar day from startDate up to today (or endDate if the
-// sprint is already over, whichever comes first) — what actually happened,
-// based on task.completed/task.reopened events recorded in HU-35's part A.
 async function buildActualBurndownLine(sprint: Sprint, totalPoints: number): Promise<BurndownPoint[]> {
   const calendarDays = buildCalendarDayRange(sprint.startDate, calculateActualLineEndDate(sprint.endDate));
   const completionEvents = await findCompletionEventsForSprint(sprint.id);
@@ -122,9 +113,6 @@ function extractPointsFromMetadata(metadata: unknown): number {
   return typeof points === "number" ? points : 0;
 }
 
-// Processes completed/reopened events in chronological order (the repository
-// already returns them sorted by createdAt), netting out same-day
-// completions and reopenings into a single per-day delta.
 function calculateNetCompletedPointsByDay(
   completionEvents: CompletionEvent[],
   calendarDays: Date[],

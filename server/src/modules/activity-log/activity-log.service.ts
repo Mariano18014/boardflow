@@ -20,9 +20,6 @@ import {
   TASK_REOPENED_ACTION,
 } from "./activity-log.constants";
 
-// Generic write path for the whole app — every log*Activity function below
-// (and every other module that logs an event, e.g. tasks/sprints from HU-35)
-// ultimately calls this instead of importing the repository directly.
 export async function createActivityLogEntry(
   organizationId: string,
   actorId: string,

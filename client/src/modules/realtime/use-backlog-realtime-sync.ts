@@ -5,10 +5,6 @@ const JOIN_BACKLOG_EVENT = "join:backlog";
 const LEAVE_BACKLOG_EVENT = "leave:backlog";
 const BACKLOG_CHANGED_EVENT = "backlog:changed";
 
-// Joins the backlog:{projectId} room while a Backlog screen is mounted, and
-// calls onBacklogChanged both when the server signals a change and right
-// after a reconnect (so a client that was briefly offline still ends up with
-// fresh data instead of a stale backlog).
 export function useBacklogRealtimeSync(projectId: string | undefined, onBacklogChanged: () => void) {
   const onBacklogChangedRef = useRef(onBacklogChanged);
 

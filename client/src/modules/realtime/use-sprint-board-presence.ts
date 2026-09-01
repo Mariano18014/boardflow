@@ -9,9 +9,6 @@ export type PresentUser = {
   avatarUrl: string | null;
 };
 
-// Only listens for presence:updated — joining/leaving the sprint-board:{sprintId}
-// room is already owned by useSprintBoardRealtimeSync (HU-40); this hook is a
-// separate concern that happens to read from the same room.
 export function useSprintBoardPresence(sprintId: string | undefined): PresentUser[] {
   const [presentUsers, setPresentUsers] = useState<PresentUser[]>([]);
 

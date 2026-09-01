@@ -29,8 +29,6 @@ export async function getProjectVelocity(
   return velocityData;
 }
 
-// findSprintsByProjectId already orders by startDate ascending, which is
-// exactly the chronological order this endpoint needs for charting.
 async function findCompletedSprints(projectId: string): Promise<Sprint[]> {
   return findSprintsByProjectId(projectId, "COMPLETED");
 }
@@ -39,8 +37,7 @@ async function calculateCompletedPointsPerSprint(
   sprints: Sprint[],
   projectId: string,
 ): Promise<SprintVelocity[]> {
-  // Looked up once for the whole project instead of once per sprint: the
-  // Done column doesn't change between sprints, only which tasks sit in it.
+
   const doneColumn = await findDoneColumn(projectId);
   const velocityData: SprintVelocity[] = [];
   for (const sprint of sprints) {
@@ -56,9 +53,6 @@ async function calculateCompletedPointsPerSprint(
   return velocityData;
 }
 
-// No Done column (board never opened/seeded for this project) means there's
-// no way to know which tasks finished — every sprint reports 0 rather than
-// failing the whole endpoint.
 async function sumCompletedPointsForSprint(sprintId: string, doneColumnId: string | null): Promise<number> {
   if (doneColumnId === null) {
     return 0;

@@ -16,9 +16,6 @@ export const organizationSchema = z.object({
 
 export const createOrganizationSchema = organizationSchema.pick({ name: true });
 
-// The multipart PATCH body only ever carries the text field `name` — the logo
-// travels as a separate uploaded file (see organization.service.ts), never as
-// a JSON `logoUrl` string, so this schema intentionally only covers `name`.
 export const updateOrganizationSchema = organizationSchema.pick({ name: true }).partial();
 
 export type Organization = z.infer<typeof organizationSchema>;

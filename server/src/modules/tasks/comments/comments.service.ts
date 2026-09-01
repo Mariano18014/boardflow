@@ -28,10 +28,7 @@ export async function createComment(
   authorId: string,
 ): Promise<CommentWithAuthor> {
   await checkRequesterHasPermission(input.organizationId, authorId, "comments:create");
-  // findTaskById only confirms the task belongs to projectId — it says
-  // nothing about projectId belonging to organizationId, so this extra check
-  // (same as every other module in this codebase) is what actually prevents
-  // cross-organization access.
+
   await findProjectById(input.projectId, input.organizationId);
   const task = await findTaskById(input.taskId, input.projectId);
   const comment = await saveCommentInDatabase(input, task.id, authorId);
@@ -135,11 +132,6 @@ function checkCommentIsNotDeleted(comment: CommentRecordWithAuthor): void {
   }
 }
 
-// The author can always modify their own comment; anyone else needs the
-// comments:edit / comments:delete permission granted to their role. We wrap
-// checkRequesterHasPermission in try/catch instead of changing its behavior
-// (it throws rather than returning a boolean) so a non-author without the
-// permission gets this endpoint's own clear message, not a generic one.
 async function checkRequesterCanModifyComment(
   comment: CommentRecordWithAuthor,
   requesterId: string,

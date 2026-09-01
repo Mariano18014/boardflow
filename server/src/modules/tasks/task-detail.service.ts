@@ -23,9 +23,6 @@ export async function getTaskDetail(input: GetTaskDetailInput, requesterId: stri
   return await mapTaskToDetail(task);
 }
 
-// Only the fields this HU is allowed to touch. sprintId/columnId/position are
-// intentionally absent — HU-26 and HU-29 own those exclusively, so even if a
-// caller puts them on this object they're never read here.
 export type TaskDetailChanges = {
   title?: string;
   description?: string;
@@ -55,9 +52,6 @@ export async function updateTaskDetails(
   return await mapTaskToDetail(updatedTask);
 }
 
-// Explicitly picks only the editable fields, so anything else that might ride
-// along on the input object (sprintId, columnId, position) is dropped here
-// rather than trusted to just "not be present".
 function filterEditableFields(changes: TaskDetailChanges): TaskDetailChanges {
   return {
     title: changes.title,

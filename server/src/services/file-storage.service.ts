@@ -4,10 +4,6 @@ import path from "path";
 import { env } from "../config/env";
 import { ValidationError } from "../lib/errors";
 
-// Local-disk storage — this VM does not run serverless, so files live under
-// ./uploads on the server's own filesystem. Swapping this for a provider like
-// S3 or Cloudinary later only requires rewriting this file: no caller outside
-// of it needs to change.
 const UPLOADS_ROOT_DIR = path.resolve(process.cwd(), "uploads");
 
 export type StorableFile = {
@@ -15,9 +11,6 @@ export type StorableFile = {
   buffer: Buffer;
 };
 
-// Shared by every image upload in the app (organization logos, user avatars,
-// ...) so the type/size rule lives in exactly one place instead of being
-// re-checked per feature.
 const ALLOWED_IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/svg+xml"];
 const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
 

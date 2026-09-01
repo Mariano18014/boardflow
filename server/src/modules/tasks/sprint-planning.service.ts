@@ -58,9 +58,6 @@ export async function assignTaskToSprint(
   return await mapTaskToBacklogItem(updatedTask);
 }
 
-// The task always leaves or enters the backlog, so backlog:changed always
-// fires; board:changed only fires on top of that if the target sprint (if
-// any) also happens to be the project's active one.
 function notifyAssignmentChange(projectId: string, targetSprint: Sprint | null) {
   notifyBacklogChanged(projectId);
   if (targetSprint !== null && targetSprint.status === "ACTIVE") {
@@ -68,9 +65,6 @@ function notifyAssignmentChange(projectId: string, targetSprint: Sprint | null) 
   }
 }
 
-// A task can only move (to the backlog, or to another sprint) while its
-// current sprint is still PLANNED — once that sprint starts or finishes, its
-// scope is locked and Sprint Planning no longer applies to it.
 async function checkTaskCurrentSprintIsPlanned(task: Task, projectId: string) {
   if (task.sprintId === null) {
     return;

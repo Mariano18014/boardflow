@@ -1,6 +1,4 @@
-// Enums del dominio BoardFlow — deben reflejar 1:1 los enums de server/prisma/schema.prisma
-// Se definen a mano (en vez de importar @prisma/client) para que el cliente los use sin
-// depender del paquete de Prisma, que es server-only.
+
 
 export const USER_STATUS = ["ACTIVE", "PENDING_VERIFICATION", "SUSPENDED"] as const;
 export type UserStatus = (typeof USER_STATUS)[number];

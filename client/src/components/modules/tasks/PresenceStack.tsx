@@ -10,8 +10,6 @@ type PresenceStackProps = {
 const MAX_VISIBLE_PRESENCE_AVATARS = 4;
 const OVERFLOW_THRESHOLD = 5;
 
-// Who else currently has this sprint board open — the requester's own entry
-// is excluded, since seeing yourself in your own presence stack isn't useful.
 export function PresenceStack({ presentUsers, currentUserId }: PresenceStackProps) {
   const otherPresentUsers = excludeCurrentUser(presentUsers, currentUserId);
   if (otherPresentUsers.length === 0) {

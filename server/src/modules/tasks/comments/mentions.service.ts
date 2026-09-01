@@ -24,18 +24,11 @@ export async function notifyMentionedUsers(
   await createCommentMentionNotifications(validMentionedIds, comment, task, organizationId, actorId);
 }
 
-// A mention is only "new" if it wasn't already notified before (see
-// alreadyNotifiedIds, populated from the comment's previous content on edit)
-// and isn't the author mentioning themselves.
 function filterNewMentions(mentionedIds: string[], alreadyNotifiedIds: string[], actorId: string): string[] {
   const alreadyNotified = new Set(alreadyNotifiedIds);
   return mentionedIds.filter((userId) => !alreadyNotified.has(userId) && userId !== actorId);
 }
 
-// Same active-membership validation as assignees.service.ts's
-// checkAllUserIdsAreActiveMembers, but filtering down to the valid subset
-// instead of rejecting the request — a mention of someone who isn't an active
-// member is silently skipped, not an error worth failing the comment over.
 async function checkMentionedUsersAreActiveMembers(
   userIds: string[],
   organizationId: string,

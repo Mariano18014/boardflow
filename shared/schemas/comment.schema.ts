@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { paginationQuerySchema } from "./pagination.schema";
 
-// A comment is a discussion message, not a document — 2000 chars is plenty.
 const COMMENT_CONTENT_MAX_LENGTH = 2000;
 
 export const commentSchema = z.object({
@@ -22,7 +21,6 @@ export const createCommentSchema = createCommentBodySchema.extend({
   taskId: z.string().uuid(),
 });
 
-// Same content rule as creation (HU-39 edit endpoint).
 export const updateCommentSchema = createCommentBodySchema;
 
 export const listCommentsQuerySchema = paginationQuerySchema;
@@ -33,9 +31,6 @@ export type CreateCommentInput = z.infer<typeof createCommentSchema>;
 export type UpdateCommentInput = z.infer<typeof updateCommentSchema>;
 export type ListCommentsQuery = z.infer<typeof listCommentsQuerySchema>;
 
-// Lean author summary embedded into a comment response — kept as its own
-// type (rather than reusing AssigneeSummary) because "comment author" and
-// "task assignee" are different domain concepts that happen to share a shape.
 export type CommentAuthor = {
   id: string;
   fullName: string;

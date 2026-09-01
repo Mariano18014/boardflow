@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
 type Theme = "light" | "dark" | "system";
 type TextScale = "small" | "normal" | "large" | "x-large";
@@ -37,7 +37,6 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
         localStorage.setItem("appearance-reduced-motion", reducedMotion.toString());
         localStorage.setItem("appearance-high-contrast", highContrast.toString());
 
-        // Apply Theme
         const root = window.document.documentElement;
         root.classList.remove("light", "dark");
         if (theme === "system") {
@@ -47,17 +46,14 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
             root.classList.add(theme);
         }
 
-        // Apply Text Scale
         root.setAttribute("data-text-scale", textScale);
 
-        // Apply Reduced Motion
         if (reducedMotion) {
             root.classList.add("reduced-motion");
         } else {
             root.classList.remove("reduced-motion");
         }
 
-        // Apply High Contrast
         if (highContrast) {
             root.classList.add("high-contrast");
         } else {
@@ -81,12 +77,4 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
             {children}
         </AppearanceContext.Provider>
     );
-}
-
-export const useAppearance = () => {
-    const context = useContext(AppearanceContext);
-    if (context === undefined) {
-        throw new Error("useAppearance must be used within an AppearanceProvider");
-    }
-    return context;
 }

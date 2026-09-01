@@ -65,10 +65,6 @@ export function CreateBoardDialog({ organizationId, projectId, activeSprintId }:
     createBoardMutation.mutate(input);
   }
 
-  // A newly created board has no content of its own to jump to (see
-  // resolveBoardNavigationTarget) — its content is the active sprint's board.
-  // With no active sprint, staying on the project page is correct: the new
-  // board still shows up there, same as any other board without one.
   function navigateToBoardIfActiveSprintExists() {
     const navigationTarget = resolveBoardNavigationTarget(projectId, activeSprintId);
     if (navigationTarget) {

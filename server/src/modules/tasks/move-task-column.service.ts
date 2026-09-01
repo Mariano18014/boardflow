@@ -30,10 +30,7 @@ export type MoveTaskToColumnInput = {
 
 export async function moveTaskToColumn(input: MoveTaskToColumnInput, requesterId: string): Promise<Task> {
   await checkRequesterHasPermission(input.organizationId, requesterId, "tasks:edit");
-  // findTaskById only confirms the task belongs to projectId — it says nothing
-  // about projectId belonging to organizationId, so this extra check (same as
-  // every other module in this codebase, see sprint-board.service.ts) is what
-  // actually prevents cross-organization access.
+
   await findProjectById(input.projectId, input.organizationId);
   const task = await findTaskById(input.taskId, input.projectId);
   checkTaskBelongsToActiveSprint(task);
@@ -47,11 +44,9 @@ export async function moveTaskToColumn(input: MoveTaskToColumnInput, requesterId
   } else {
     await moveBetweenColumns(task, input.columnId, input.position);
   }
-  // Logged after the move actually succeeds — task still holds its OLD
-  // columnId here (fetched before the update above), which is exactly what's
-  // needed to tell whether this move entered or left Done.
+
   await logColumnChangeIfEntersOrLeavesDone(task, input.columnId, requesterId, input.organizationId);
-  // checkTaskBelongsToActiveSprint already confirmed task.sprintId isn't null.
+
   notifySprintBoardChanged(task.sprintId as string);
   return findTaskById(input.taskId, input.projectId);
 }
@@ -110,10 +105,6 @@ async function shiftDestinationColumnPositions(
   await shiftTasksForwardFromPosition(transaction, columnId, insertPosition);
 }
 
-// HU-28 always writes boardId and columnId together (see
-// updateTaskColumnAssignment in tasks.repository.ts), and
-// checkColumnBelongsToSameBoard already confirmed task.boardId matches a real
-// column, so task.columnId can't be null by the time this runs.
 function getCurrentColumnId(task: Task): string {
   return task.columnId as string;
 }
@@ -140,10 +131,6 @@ function clampPosition(requestedPosition: number, maxValidPosition: number): num
   return requestedPosition;
 }
 
-// task.columnId here is the column the task was in BEFORE this move (the
-// caller passes the task fetched prior to the update); newColumnId is where
-// it's headed. Reordering within the same column always has
-// task.columnId === newColumnId, so neither branch fires — no event logged.
 async function logColumnChangeIfEntersOrLeavesDone(
   task: Task,
   newColumnId: string,

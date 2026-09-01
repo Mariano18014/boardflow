@@ -4,8 +4,6 @@ type LabelChipProps = {
   label: LabelSummary;
 };
 
-// A colored pill showing a label's name, using its own color as a tinted
-// background so it stays readable regardless of the label's chosen hue.
 export function LabelChip({ label }: LabelChipProps) {
   return (
     <span

@@ -21,6 +21,3 @@ router.use("/permissions", permissionsRoutes);
 router.use("/users", usersRoutes);
 router.use("/notifications", notificationsRoutes);
 
-// A medida que se implementen los demas modulos (boards, sprints, ...)
-// cada uno monta su propio router aqui, ej:
-// router.use("/boards", boardRoutes);

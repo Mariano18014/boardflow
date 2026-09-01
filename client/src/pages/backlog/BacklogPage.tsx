@@ -21,10 +21,7 @@ export default function BacklogPage() {
   const { data: tasks, isLoading, isError } = useBacklog(project?.organizationId, projectId);
   useBacklogRealtimeSync(projectId, () => refetchBacklog(projectId));
   const search = useSearch();
-  // Lets a notification (e.g. "task_assigned" from HU-45) deep-link straight
-  // into a task by navigating to /projects/:projectId/backlog?taskId=... —
-  // TaskDetailPanel fetches the task by id on its own, so this works even for
-  // a task that isn't actually in this project's backlog list.
+
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(() => extractTaskIdFromSearch(search));
 
   return (

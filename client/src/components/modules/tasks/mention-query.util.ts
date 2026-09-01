@@ -1,9 +1,5 @@
 import { buildMentionToken } from "@shared/utils/mention.util";
 
-// Finds the "@query" the user is currently typing right before the cursor,
-// e.g. "cc @pri" with the cursor at the end returns "pri". Returns null once
-// the mention is no longer "in progress" (a space, a newline, or the start of
-// a completed token breaks it).
 export function findActiveMentionQuery(content: string, cursorPosition: number): string | null {
   const textBeforeCursor = content.slice(0, cursorPosition);
   const atIndex = textBeforeCursor.lastIndexOf("@");
@@ -23,8 +19,6 @@ export type InsertMentionResult = {
   cursorPosition: number;
 };
 
-// Replaces the in-progress "@query" (found via findActiveMentionQuery) with
-// the full mention token, leaving the cursor right after it.
 export function insertMentionToken(
   content: string,
   cursorPosition: number,

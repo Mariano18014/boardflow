@@ -16,27 +16,6 @@ export function buildAuthorizationHeaders(): Record<string, string> {
   return { Authorization: `Bearer ${session.accessToken}` };
 }
 
-export async function apiRequest(
-  method: string,
-  url: string,
-  data?: unknown | undefined,
-): Promise<Response> {
-  const headers: Record<string, string> = { ...buildAuthorizationHeaders() };
-  if (data) {
-    headers["Content-Type"] = "application/json";
-  }
-
-  const res = await fetch(url, {
-    method,
-    headers,
-    credentials: "include",
-    body: data ? JSON.stringify(data) : undefined,
-  });
-
-  await throwIfResNotOk(res);
-  return res;
-}
-
 type UnauthorizedBehavior = "returnNull" | "throw";
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;

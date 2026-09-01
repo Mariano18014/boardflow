@@ -60,25 +60,17 @@ async function checkAllUserIdsAreActiveMembers(userIds: string[], organizationId
 }
 
 async function replaceAssigneeRecordsForTask(taskId: string, userIds: string[]): Promise<AssigneeSummary[]> {
-  // Deduplicated before hitting the database: taskId+userId is a unique
-  // constraint, so a repeated id in the payload would otherwise crash the
-  // createMany call instead of just being a harmless no-op.
+
   const uniqueUserIds = Array.from(new Set(userIds));
   const records = await saveReplacedAssigneeRecords(taskId, uniqueUserIds);
   return records.map(mapAssigneeRecordToSummary);
 }
 
-// Shared by the backlog, sprint-board and task-detail services so none of
-// them duplicate "go fetch a task's assignees".
 export async function findAssigneesByTaskId(taskId: string): Promise<AssigneeSummary[]> {
   const records = await findAssigneeRecordsByTaskId(taskId);
   return records.map(mapAssigneeRecordToSummary);
 }
 
-// Notifies only the users who are actually new to this task (present in the
-// new set but not the previous one) — never someone already assigned, never
-// someone who got unassigned, and never the requester if they assigned
-// themselves.
 async function notifyNewlyAssignedUsers(
   previousAssigneeIds: string[],
   newAssigneeIds: string[],

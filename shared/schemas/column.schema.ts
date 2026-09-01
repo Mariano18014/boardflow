@@ -17,11 +17,6 @@ export const updateColumnSchema = columnSchema
   .pick({ name: true, position: true, wipLimit: true, color: true })
   .partial();
 
-// Deliberately loose (int-or-null, not "positive"): the semantic rule that a
-// non-null limit must be a positive integer is enforced in
-// columns.service.ts's validateWipLimitValue, mirroring how
-// updateTaskDetailsBodySchema in task.schema.ts leaves estimatedPoints'
-// positivity check to task-detail.service.ts.
 export const updateColumnWipLimitBodySchema = z.object({
   wipLimit: z.number().int().nullable(),
 });

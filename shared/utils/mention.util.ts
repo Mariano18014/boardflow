@@ -1,7 +1,5 @@
-// Mention token format used inside Comment.content: @[Display Name](userId).
-// The userId inside the parentheses is the only source of truth for who is
-// mentioned — the display name is never parsed to look someone up (it's
-// ambiguous, since two members can share a name).
+
+
 const MENTION_TOKEN_PATTERN = /@\[([^\]]+)\]\(([^)]+)\)/g;
 
 export type MentionToken = {
@@ -32,8 +30,6 @@ export type MentionContentSegment =
   | { type: "text"; text: string }
   | { type: "mention"; displayName: string; userId: string };
 
-// Used to render a comment's content with mention tokens shown as chips
-// instead of the raw @[Display Name](userId) text.
 export function splitContentByMentions(content: string): MentionContentSegment[] {
   const matches = Array.from(content.matchAll(MENTION_TOKEN_PATTERN));
   if (matches.length === 0) {

@@ -180,9 +180,6 @@ async function logProjectRestored(project: Project, actorId: string) {
   await logProjectRestoredActivity(project.organizationId, actorId, project.id, { name: project.name });
 }
 
-// Shared by every module that needs to look up a project scoped to its
-// organization (boards, tasks, ...) so the 404-if-missing check isn't
-// duplicated across services.
 export async function findProjectById(projectId: string, organizationId: string): Promise<Project> {
   const project = await findProjectByIdAndOrganizationId(projectId, organizationId);
   if (!project) {
@@ -191,9 +188,6 @@ export async function findProjectById(projectId: string, organizationId: string)
   return project;
 }
 
-// Shared by every module that creates child records (boards, tasks, sprints,
-// ...) under a project, since none of them make sense once the project is
-// archived.
 export async function checkProjectIsNotArchived(project: Project) {
   if (project.isArchived) {
     throw new ConflictError("No se pueden agregar elementos a un proyecto archivado.");

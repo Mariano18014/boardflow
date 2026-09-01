@@ -13,9 +13,6 @@ export type GetSprintHistoryInput = {
   sprintId: string;
 };
 
-// A discriminated union instead of "snapshot | null": a closed sprint with no
-// snapshot (closed before this mechanism existed) is a valid, expected case —
-// not the same as the sprint/project not existing, which throws instead.
 export type SprintHistoryResult =
   | { available: true; snapshot: SprintClosureSnapshot }
   | { available: false };
@@ -25,9 +22,7 @@ export async function getSprintHistory(
   requesterId: string,
 ): Promise<SprintHistoryResult> {
   await checkRequesterHasPermission(input.organizationId, requesterId, "sprints:view");
-  // findSprintById only confirms the sprint belongs to projectId — same
-  // reasoning as every other module in this codebase for why this extra check
-  // is what actually prevents cross-organization access.
+
   await findProjectById(input.projectId, input.organizationId);
   const sprint = await findSprintById(input.sprintId, input.projectId);
   checkSprintIsCompleted(sprint);

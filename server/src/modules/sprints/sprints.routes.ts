@@ -10,9 +10,6 @@ import { getProjectVelocityController } from "./velocity.controller";
 import { getSprintBurndownController } from "./burndown.controller";
 import { getSprintHistoryController } from "./sprint-history.controller";
 
-// mergeParams: true — this router is mounted at
-// /organizations/:organizationId/projects/:projectId/sprints and needs access
-// to the parent route's :organizationId and :projectId params.
 export const sprintsRoutes = Router({ mergeParams: true });
 
 sprintsRoutes.post("/", authMiddleware, createSprintController);

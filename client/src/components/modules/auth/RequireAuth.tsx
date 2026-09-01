@@ -6,8 +6,6 @@ type RequireAuthProps = {
   component: ComponentType;
 };
 
-// Unlike RequireOrganization, this guard only checks for a valid session — it
-// is for screens like "my profile" that are not scoped to any organization.
 export function RequireAuth({ component: Component }: RequireAuthProps) {
   const session = useAuthSession();
   const [, navigate] = useLocation();

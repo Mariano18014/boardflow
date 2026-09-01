@@ -31,11 +31,6 @@ export const createTaskSchema = taskSchema.pick({
   estimatedPoints: true,
 });
 
-// Deliberately loose: only the structural/format constraints that mirror the
-// database column limits live here (max title length). The semantic business
-// rules (title can't be blank, points must be positive, date must be valid)
-// are enforced in task-detail.service.ts's validateTitle/validateEstimatedPoints/
-// validateDueDate, per this HU's requested separation of concerns.
 export const updateTaskDetailsBodySchema = z.object({
   title: z.string().max(200).optional(),
   description: z.string().optional(),
@@ -100,8 +95,6 @@ export type BacklogTaskItem = {
   labels: LabelSummary[];
 };
 
-// Full read-model for the task detail panel (HU-30). assignees are real as of
-// HU-31; labels are real as of HU-37.
 export type TaskDetail = {
   id: string;
   title: string;

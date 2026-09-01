@@ -6,9 +6,6 @@ import {
 } from "./update-organization.api";
 import { OrganizationApiError } from "./organization-api-error";
 
-// onError is deliberately NOT set here: the name form wants field-level errors
-// while the logo uploader wants a plain toast, so each caller supplies its own
-// onError via the mutate() call instead of sharing one behavior for both.
 export function useUpdateOrganization(organizationId: string) {
   const queryClient = useQueryClient();
   const { toast } = useToast();

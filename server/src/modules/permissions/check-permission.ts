@@ -4,9 +4,6 @@ import { findRoleById, findRolePermissionByKey } from "../roles/roles.repository
 
 const OWNER_ROLE_NAME = "owner";
 
-// Shared authorization check for every write action across modules: the Owner
-// system role has implicit full access (HU-14); anyone else needs the specific
-// permissionKey assigned to their role via RolePermission.
 export async function checkRequesterHasPermission(
   organizationId: string,
   requesterId: string,
